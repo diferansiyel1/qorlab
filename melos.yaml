@@ -1,0 +1,10 @@
+name: qorlab
+repository: https://github.com/hasanfehmiozel/qorlab
+
+packages:
+  - apps/*
+  - packages/**
+
+command:
+  bootstrap:
+    usePubspecOverrides: true

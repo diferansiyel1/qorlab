@@ -1,0 +1,81 @@
+name: Antigravity Cross-Platform CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -----------------------------------------------------------------
+  # PHASE 1: CODE INTEGRITY (AI & Logic Check)
+  # Bu aşama geçilmeden Build aşamasına asla geçilmez.
+  # -----------------------------------------------------------------
+  integrity-check:
+    name: 🛡️ Logic & Architecture Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      # AI'ın bozup bozmadığını kontrol eden en kritik adım
+      - name: 🕵️ Static Analysis (Strict)
+        run: flutter analyze --no-fatal-infos
+
+      # Fizik motoru ve hesaplama testleri
+      - name: 🧪 Unit Tests
+        run: flutter test packages/core/physics_engine
+
+  # -----------------------------------------------------------------
+  # PHASE 2: ANDROID BUILD
+  # -----------------------------------------------------------------
+  build-android:
+    needs: integrity-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - run: flutter pub get
+      - run: flutter build appbundle --release
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
+
+  # -----------------------------------------------------------------
+  # PHASE 3: iOS BUILD (MacOS Runner)
+  # Not: Bu aşamanın çalışması için Apple Developer Hesabı sertifikalarının
+  # GitHub Secrets'a eklenmesi gerekir.
+  # -----------------------------------------------------------------
+  build-ios:
+    needs: integrity-check
+    runs-on: macos-latest # iOS için zorunlu
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      # iOS Build (İmzasız - Test amaçlı)
+      # App Store dağıtımı için 'fastlane' entegrasyonu gereklidir.
+      - name: 🍎 Build iOS (No Code Sign)
+        run: flutter build ios --release --no-codesign
+
+      # Not: Codesign olmadan .ipa üretilmez, sadece .app üretilir.
+      # Otomasyon için Fastlane match kullanımı önerilir.

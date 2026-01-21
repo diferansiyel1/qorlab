@@ -1,0 +1,78 @@
+[
+  {
+    "id": "chem_001",
+    "name": "Sodium Chloride",
+    "formula": "NaCl",
+    "molecularWeight": 58.44,
+    "casNumber": "7647-14-5"
+  },
+  {
+    "id": "chem_002",
+    "name": "Glucose",
+    "formula": "C6H12O6",
+    "molecularWeight": 180.16,
+    "casNumber": "50-99-7"
+  },
+  {
+    "id": "chem_003",
+    "name": "Ethanol",
+    "formula": "C2H5OH",
+    "molecularWeight": 46.07,
+    "density": 0.789,
+    "casNumber": "64-17-5"
+  },
+  {
+    "id": "chem_004",
+    "name": "Hydrochloric Acid",
+    "formula": "HCl",
+    "molecularWeight": 36.46,
+    "density": 1.18,
+    "casNumber": "7647-01-0"
+  },
+  {
+    "id": "chem_005",
+    "name": "Sodium Hydroxide",
+    "formula": "NaOH",
+    "molecularWeight": 39.997,
+    "casNumber": "1310-73-2"
+  },
+  {
+    "id": "chem_006",
+    "name": "Sulfuric Acid",
+    "formula": "H2SO4",
+    "molecularWeight": 98.079,
+    "density": 1.84,
+    "casNumber": "7664-93-9"
+  },
+  {
+    "id": "chem_007",
+    "name": "Water",
+    "formula": "H2O",
+    "molecularWeight": 18.015,
+    "density": 1.0,
+    "casNumber": "7732-18-5"
+  },
+  {
+    "id": "chem_008",
+    "name": "Methanol",
+    "formula": "CH3OH",
+    "molecularWeight": 32.04,
+    "density": 0.792,
+    "casNumber": "67-56-1"
+  },
+  {
+    "id": "chem_009",
+    "name": "Acetone",
+    "formula": "C3H6O",
+    "molecularWeight": 58.08,
+    "density": 0.784,
+    "casNumber": "67-64-1"
+  },
+   {
+    "id": "chem_010",
+    "name": "PBS (1X)",
+    "formula": "Buffer",
+    "molecularWeight": 0.0,
+    "description": "Phosphate Buffered Saline"
+  }
+]

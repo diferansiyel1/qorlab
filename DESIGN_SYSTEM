@@ -1,0 +1,102 @@
+# QORLAB - UI/UX DESIGN SYSTEM & SPECIFICATIONS
+
+**Version:** 1.0
+**Design Philosophy:** "Functionality First, High Contrast, Glove-Friendly."
+**Target Environment:** Wet labs, Animal facilities (Low light, high stress, multitasking).
+
+---
+
+## 1. CORE VISUAL IDENTITY
+
+### 1.1 Color Palette (Scientific & High Contrast)
+The app must support **True Dark Mode** natively (essential for fluorescence microscopy rooms).
+
+* **Primary (Brand):** `Deep Lab Blue` (#0A84FF) - Used for primary actions (Save, Start).
+* **Secondary (Action):** `Teal Science` (#30D158) - Used for running timers, successful logs.
+* **Alert (Danger):** `Biohazard Red` (#FF453A) - Used for safety warnings, stop buttons, toxicity alerts.
+* **Background (Dark):** `OLED Black` (#000000) - Battery saving and low light reduction.
+* **Background (Light):** `Sterile White` (#F2F2F7) - High readability in bright offices.
+* **Surface Cards:** High contrast cards with distinct borders (1px solid #3A3A3C in dark mode).
+
+### 1.2 Typography
+* **Headings:** Sans-serif, Bold (Inter or Roboto).
+* **Data & Numbers:** **Monospace** (JetBrains Mono or Roboto Mono).
+    * *Rationale:* Tabular alignment is critical for comparing molarity or doses. 
+    * *Size:* Minimum 18sp for data values.
+
+---
+
+## 2. INTERACTION MODELS (THE "GLOVE" STANDARD)
+
+### 2.1 The "Thumb Zone" Rule
+* **Requirement:** In "Lab Mode", 100% of interactions must be achievable with a single thumb.
+* **Zone:** The bottom 40% of the screen is for Buttons and Inputs. The top 60% is for Display/Read-only.
+* **Touch Targets:**
+    * **Minimum Size:** 56x56dp (Standard is 48dp, we need larger for gloves).
+    * **Padding:** Minimum 16dp between clickable elements to prevent accidental clicks.
+
+### 2.2 Input Methods
+* **Custom Numpad:** Do NOT use the system keyboard for calculations.
+    * Build a custom in-app numeric keypad.
+    * Keys: `0-9`, `.`, `DELETE`, `NEXT`.
+    * Reason: System keyboards are too small and cover the context.
+* **Slider/Stepper:** For small adjustments (e.g., pH 7.2 -> 7.4), use giant `+` / `-` stepper buttons instead of typing.
+
+### 2.3 Haptic Feedback (Tactile Confirmation)
+* **Events:** Every button press, timer completion, and warning alert MUST trigger haptic feedback.
+* **Rationale:** Users often cannot look at the screen while pipetting; they need to "feel" the click.
+
+---
+
+## 3. SCREEN-SPECIFIC SPECIFICATIONS
+
+### 3.1 Dashboard (Modular Home)
+* **Layout:** Grid-based masonry layout (Pinterest style but rigid).
+* **Customization:** Long-press to enter "Edit Mode". Users can drag & drop modules (e.g., "Rat Dose Calc", "Timer", "Notes").
+* **Status Bar:** Top strip showing "Offline/Online" status subtly.
+
+### 3.2 "Lab Mode" (Active Experiment View)
+This is the distinct mode when an experiment is running.
+
+* **Visual State:** The top navigation bar and bottom tab bar disappear. Full immersive mode.
+* **Layout:**
+    * **Top 50%:** "The Stream". A chronological log of voice notes, photos, and auto-logged data (Twitter/Timeline style).
+    * **Bottom 50%:** "Control Deck".
+        * Giant Mic Button (Center).
+        * Photo Button (Left).
+        * Quick Data Input (Right).
+* **Wake Lock:** Screen stays ON permanently in this mode.
+
+### 3.3 Smart Multi-Timer (The Vertical Gantt)
+* **Structure:** Vertical Stack List.
+* **Visual Logic:**
+    * **Active Step:** Expanded card, bright color progress bar filling left-to-right. Remaining time shown in huge font (64sp).
+    * **Upcoming Step:** Collapsed card, grayed out, showing "Next: Washing (10m)".
+    * **Completed Step:** Collapsed, Green Checkmark icon.
+* **Parallelism:** If two timers run simultaneously, they stack vertically, both highlighted.
+
+### 3.4 In-Vivo Calculator (Safety First)
+* **Input:** Weight Input Field (Auto-focus).
+* **Output:** Dynamic Cards that change color based on safety.
+    * *Safe:* "0.2 mL" (Green Background).
+    * *Warning:* "0.6 mL" (Yellow Background - High Volume).
+    * *Danger:* "1.2 mL" (Red Background - Exceeds Ethical Limit).
+
+---
+
+## 4. FEEDBACK & ALERTS
+
+### 4.1 Toasts & Snackbars
+* **Position:** Top of the screen (Bottom is covered by hand/thumb).
+* **Duration:** Longer than standard (4 seconds) to allow reading while working.
+
+### 4.2 Voice Interaction Visuals
+* **Listening State:** When the mic is active, display a "Waveform" animation at the bottom to confirm audio is being received.
+* **Processing State:** Show "Transcribing..." text.
+
+---
+
+## 5. ASSET GUIDELINES FOR AI AGENTS
+
+* **Icons:** Use `Lucide` or `Material Symbols Rounded`. Avoid thin strokes; use filled or thick strokes for visibility.
+* **Charts:** Use `fl_chart` for line graphs. Lines must be thick (3px minimum) with distinct colored dots for data points.

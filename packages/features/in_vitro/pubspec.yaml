@@ -1,0 +1,28 @@
+name: in_vitro
+description: In-Vitro chemistry tools including chemical inventory and calculators.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.3.6
+  decimal: ^2.3.3
+  math_engine:
+    path: ../../core/math_engine
+  ui_kit:
+    path: ../ui_kit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  assets:
+    - assets/chemicals.json
+
