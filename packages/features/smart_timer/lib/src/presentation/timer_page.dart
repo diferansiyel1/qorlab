@@ -4,6 +4,8 @@ import 'package:ui_kit/ui_kit.dart';
 import 'package:smart_timer/src/application/timer_controller.dart';
 import 'package:smart_timer/src/domain/timer_entry.dart';
 import 'package:smart_timer/src/presentation/widgets/progress_bar.dart';
+import 'package:smart_timer/src/domain/timer_logger.dart';
+
 
 class TimerPage extends ConsumerWidget {
   const TimerPage({super.key});
@@ -32,6 +34,13 @@ class TimerPage extends ConsumerWidget {
                         onPause: () => controller.pauseTimer(timer.id),
                         onResume: () => controller.startTimer(timer.id),
                         onStop: () => controller.stopTimer(timer.id),
+                        onLog: () {
+                          ref.read(timerLoggerProvider).logTimerFinished(
+                            label: timer.label, 
+                            duration: timer.duration
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Timer logged to experiment')));
+                        },
                       );
                     },
                   ),

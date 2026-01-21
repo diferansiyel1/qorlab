@@ -15,9 +15,8 @@ extension GetLogEntryCollection on Isar {
 
 const LogEntrySchema = CollectionSchema(
   name: r'LogEntry',
-  id: 0,
+  id: -8268688274231935295,
   properties: {
-
     r'content': PropertySchema(
       id: 0,
       name: r'content',
@@ -28,18 +27,23 @@ const LogEntrySchema = CollectionSchema(
       name: r'experimentId',
       type: IsarType.long,
     ),
-    r'photoPath': PropertySchema(
+    r'metadata': PropertySchema(
       id: 2,
+      name: r'metadata',
+      type: IsarType.string,
+    ),
+    r'photoPath': PropertySchema(
+      id: 3,
       name: r'photoPath',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'type': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'type',
       type: IsarType.string,
     )
@@ -51,7 +55,7 @@ const LogEntrySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'timestamp': IndexSchema(
-      id: 0,
+      id: 1852253767416892198,
       name: r'timestamp',
       unique: false,
       replace: false,
@@ -64,7 +68,7 @@ const LogEntrySchema = CollectionSchema(
       ],
     ),
     r'experimentId': IndexSchema(
-      id: 0,
+      id: -2596400929068244875,
       name: r'experimentId',
       unique: false,
       replace: false,
@@ -76,7 +80,6 @@ const LogEntrySchema = CollectionSchema(
         )
       ],
     )
-
   },
   links: {},
   embeddedSchemas: {},
@@ -93,6 +96,12 @@ int _logEntryEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.content.length * 3;
+  {
+    final value = object.metadata;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.photoPath;
     if (value != null) {
@@ -111,9 +120,10 @@ void _logEntrySerialize(
 ) {
   writer.writeString(offsets[0], object.content);
   writer.writeLong(offsets[1], object.experimentId);
-  writer.writeString(offsets[2], object.photoPath);
-  writer.writeDateTime(offsets[3], object.timestamp);
-  writer.writeString(offsets[4], object.type);
+  writer.writeString(offsets[2], object.metadata);
+  writer.writeString(offsets[3], object.photoPath);
+  writer.writeDateTime(offsets[4], object.timestamp);
+  writer.writeString(offsets[5], object.type);
 }
 
 LogEntry _logEntryDeserialize(
@@ -126,9 +136,10 @@ LogEntry _logEntryDeserialize(
   object.content = reader.readString(offsets[0]);
   object.experimentId = reader.readLong(offsets[1]);
   object.id = id;
-  object.photoPath = reader.readStringOrNull(offsets[2]);
-  object.timestamp = reader.readDateTime(offsets[3]);
-  object.type = reader.readString(offsets[4]);
+  object.metadata = reader.readStringOrNull(offsets[2]);
+  object.photoPath = reader.readStringOrNull(offsets[3]);
+  object.timestamp = reader.readDateTime(offsets[4]);
+  object.type = reader.readString(offsets[5]);
   return object;
 }
 
@@ -146,8 +157,10 @@ P _logEntryDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
+      return (reader.readDateTime(offset)) as P;
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -675,6 +688,152 @@ extension LogEntryQueryFilter
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'metadata',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'metadata',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'metadata',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'metadata',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'metadata',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'metadata',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'metadata',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> photoPathIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1037,6 +1196,18 @@ extension LogEntryQuerySortBy on QueryBuilder<LogEntry, LogEntry, QSortBy> {
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByMetadata() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metadata', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByMetadataDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metadata', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByPhotoPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.asc);
@@ -1112,6 +1283,18 @@ extension LogEntryQuerySortThenBy
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByMetadata() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metadata', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByMetadataDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'metadata', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByPhotoPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.asc);
@@ -1164,6 +1347,13 @@ extension LogEntryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByMetadata(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'metadata', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByPhotoPath(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1202,6 +1392,12 @@ extension LogEntryQueryProperty
   QueryBuilder<LogEntry, int, QQueryOperations> experimentIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'experimentId');
+    });
+  }
+
+  QueryBuilder<LogEntry, String?, QQueryOperations> metadataProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'metadata');
     });
   }
 

@@ -15,9 +15,8 @@ extension GetExperimentCollection on Isar {
 
 const ExperimentSchema = CollectionSchema(
   name: r'Experiment',
-  id: 0,
+  id: -1056400091193200971,
   properties: {
-
     r'createdAt': PropertySchema(
       id: 0,
       name: r'createdAt',

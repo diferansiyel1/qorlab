@@ -12,7 +12,15 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.4.9
   google_fonts: ^6.1.0
-  intl: ^0.19.0
+  intl: any
+  speech_to_text: ^7.3.0
+  permission_handler: ^11.3.0
+  csv: ^6.0.0
+  share_plus: ^10.1.4
+  path_provider: ^2.1.2
+  cross_file: ^0.3.4
+
+
   
   # Local Packages
   ui_kit:

@@ -14,8 +14,8 @@ dependencies:
   decimal: ^2.3.3
   math_engine:
     path: ../../core/math_engine
-  ui_kit:
-    path: ../ui_kit
+  localization:
+    path: ../../core/localization
 
 dev_dependencies:
   flutter_test:

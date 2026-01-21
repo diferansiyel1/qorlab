@@ -8,6 +8,7 @@ class TimerProgressBar extends StatelessWidget {
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onStop;
+  final VoidCallback onLog;
 
   const TimerProgressBar({
     super.key,
@@ -15,6 +16,7 @@ class TimerProgressBar extends StatelessWidget {
     required this.onPause,
     required this.onResume,
     required this.onStop,
+    required this.onLog,
   });
 
   @override
@@ -26,7 +28,7 @@ class TimerProgressBar extends StatelessWidget {
     
     final colorScheme = Theme.of(context).colorScheme;
     
-    Color progressColor = AppColors.deepLabBlue;
+    Color progressColor = Theme.of(context).primaryColor;
     if (timer.status == TimerStatus.completed) {
       progressColor = AppColors.tealScience;
     } else if (timer.status == TimerStatus.paused) {
@@ -63,6 +65,13 @@ class TimerProgressBar extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                if (timer.status == TimerStatus.completed || timer.status == TimerStatus.paused)
+                  IconButton(
+                    icon: const Icon(Icons.history_edu),
+                    onPressed: onLog,
+                    tooltip: 'Log to Experiment',
+                    color: AppColors.tealScience,
+                  ),
                 if (timer.status == TimerStatus.running)
                   IconButton(
                     icon: const Icon(Icons.pause),

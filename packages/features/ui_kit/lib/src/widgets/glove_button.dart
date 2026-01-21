@@ -27,34 +27,37 @@ class GloveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = ElevatedButton.styleFrom(
-      minimumSize: const Size(56, 56), // 56dp Glove Requirement
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      backgroundColor: backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    );
-
-    if (isPrimary) {
-      return ElevatedButton(
-        style: style,
-        onPressed: onPressed == null ? null : _handlePress,
-        child: _buildContent(),
-      );
-    } else {
-      return OutlinedButton(
-        style: OutlinedButton.styleFrom(
-           minimumSize: const Size(56, 56),
-           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-           shape: RoundedRectangleBorder(
-             borderRadius: BorderRadius.circular(16),
-           ),
+    // Premium Scientific Style
+    // We use an AnimatedContainer to handle the "pressed" state manually or via gesture detector
+    // But for simplicity with efficiently wrapping the existing code, we will make a custom painter or just use advanced box decoration
+    
+    // Actually, sticking to the plan:
+    return Container(
+       decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+             BoxShadow(
+                color: (backgroundColor ?? Theme.of(context).primaryColor).withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+             ),
+          ],
+       ),
+       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(56, 56),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
+          foregroundColor: Colors.black87, // High contrast on Teal
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0, // Handled by Container
         ),
         onPressed: onPressed == null ? null : _handlePress,
         child: _buildContent(),
-      );
-    }
+      ),
+    );
   }
 
   Widget _buildContent() {

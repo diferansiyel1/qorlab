@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/inventory_repository.dart';
-import '../../domain/chemical.dart';
+import 'package:in_vitro/src/data/inventory_repository.dart';
+import 'package:in_vitro/src/domain/chemical.dart';
 
 class InventoryPage extends ConsumerStatefulWidget {
   const InventoryPage({super.key});

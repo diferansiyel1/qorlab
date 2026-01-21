@@ -18,4 +18,7 @@ class LogEntry {
 
   // Type of log: "voice", "text", "photo", "data"
   late String type;
+
+  // Flexible metadata for "in-vivo" logs etc. (stored as JSON string)
+  String? metadata;
 }

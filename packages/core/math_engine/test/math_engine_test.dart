@@ -19,12 +19,57 @@ void main() {
       expect(volume, equals(Decimal.parse('1.25')));
     });
 
-    test('calculateInjectionVolume throws on negative weight', () {
+    test('calculateInjectionVolume throws on negative/zero inputs', () {
+      // Weight
       expect(
         () => DoseCalculator.calculateInjectionVolume(
           weightInKg: Decimal.parse('-1'),
           dosageInMgPerKg: Decimal.parse('10'),
           concentrationInMgPerMl: Decimal.parse('10'),
+        ),
+        throwsArgumentError,
+      );
+       expect(
+        () => DoseCalculator.calculateInjectionVolume(
+          weightInKg: Decimal.zero,
+          dosageInMgPerKg: Decimal.parse('10'),
+          concentrationInMgPerMl: Decimal.parse('10'),
+        ),
+        throwsArgumentError,
+      );
+
+      // Dosage
+      expect(
+        () => DoseCalculator.calculateInjectionVolume(
+          weightInKg: Decimal.parse('1'),
+          dosageInMgPerKg: Decimal.parse('-10'),
+          concentrationInMgPerMl: Decimal.parse('10'),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => DoseCalculator.calculateInjectionVolume(
+          weightInKg: Decimal.parse('1'),
+          dosageInMgPerKg: Decimal.zero,
+          concentrationInMgPerMl: Decimal.parse('10'),
+        ),
+        throwsArgumentError,
+      );
+
+      // Concentration
+      expect(
+        () => DoseCalculator.calculateInjectionVolume(
+          weightInKg: Decimal.parse('1'),
+          dosageInMgPerKg: Decimal.parse('10'),
+          concentrationInMgPerMl: Decimal.parse('-10'),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => DoseCalculator.calculateInjectionVolume(
+          weightInKg: Decimal.parse('1'),
+          dosageInMgPerKg: Decimal.parse('10'),
+          concentrationInMgPerMl: Decimal.zero,
         ),
         throwsArgumentError,
       );
@@ -47,6 +92,38 @@ void main() {
       expect(molarity, equals(Decimal.one));
     });
 
+    test('calculateMolarity throws on invalid inputs', () {
+        // Mass negative
+        expect(
+            () => SolutionCalculator.calculateMolarity(
+            massInGrams: Decimal.parse('-1'),
+            molecularWeight: Decimal.parse('10'),
+            volumeInLiters: Decimal.parse('1'),
+            ),
+            throwsArgumentError,
+        );
+
+        // MW negative/zero
+        expect(
+            () => SolutionCalculator.calculateMolarity(
+            massInGrams: Decimal.parse('1'),
+            molecularWeight: Decimal.zero,
+            volumeInLiters: Decimal.parse('1'),
+            ),
+            throwsArgumentError,
+        );
+
+        // Volume negative/zero
+        expect(
+            () => SolutionCalculator.calculateMolarity(
+            massInGrams: Decimal.parse('1'),
+            molecularWeight: Decimal.parse('10'),
+            volumeInLiters: Decimal.zero,
+            ),
+            throwsArgumentError,
+        );
+    });
+
     test('calculateDilutionV2 returns correct volume', () {
       final c1 = Decimal.parse('10'); // 10M Stock
       final v1 = Decimal.parse('1'); // 10mL taking
@@ -64,13 +141,40 @@ void main() {
 
     test('calculateDilutionV2 throws argument error if C2 > C1', () {
       expect(
-            () => SolutionCalculator.calculateDilutionV2(
+        () => SolutionCalculator.calculateDilutionV2(
           c1: Decimal.parse('1'),
           v1: Decimal.parse('1'),
           c2: Decimal.parse('10'),
         ),
         throwsArgumentError,
       );
+    });
+
+    test('calculateDilutionV2 throws on negative/zero inputs', () {
+        expect(
+            () => SolutionCalculator.calculateDilutionV2(
+            c1: Decimal.zero,
+            v1: Decimal.parse('1'),
+            c2: Decimal.parse('0.1'),
+            ),
+            throwsArgumentError,
+        );
+         expect(
+            () => SolutionCalculator.calculateDilutionV2(
+            c1: Decimal.parse('1'),
+            v1: Decimal.zero,
+            c2: Decimal.parse('0.1'),
+            ),
+            throwsArgumentError,
+        );
+         expect(
+            () => SolutionCalculator.calculateDilutionV2(
+            c1: Decimal.parse('1'),
+            v1: Decimal.parse('1'),
+            c2: Decimal.zero,
+            ),
+            throwsArgumentError,
+        );
     });
   });
 
@@ -80,9 +184,19 @@ void main() {
       expect(UnitConverter.mgToG(mg), equals(Decimal.parse('0.5')));
     });
 
+    test('gToMg converts correctly', () {
+      final g = Decimal.parse('0.5');
+      expect(UnitConverter.gToMg(g), equals(Decimal.parse('500')));
+    });
+
     test('mlToL converts correctly', () {
       final ml = Decimal.parse('2500');
       expect(UnitConverter.mlToL(ml), equals(Decimal.parse('2.5')));
+    });
+
+    test('lToMl converts correctly', () {
+      final l = Decimal.parse('2.5');
+      expect(UnitConverter.lToMl(l), equals(Decimal.parse('2500')));
     });
   });
 }

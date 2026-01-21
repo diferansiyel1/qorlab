@@ -1,10 +1,14 @@
+import 'package:localization/localization.dart';
 import 'package:decimal/decimal.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui_kit/ui_kit.dart';
 import '../application/dose_safety_controller.dart';
 import '../data/species_repository.dart';
 import '../domain/animal_profile.dart';
+import 'package:in_vivo/src/domain/dose_logger.dart';
+
 
 class DoseCalculatorPage extends ConsumerStatefulWidget {
   const DoseCalculatorPage({super.key});
@@ -25,16 +29,16 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
     final doseState = ref.watch(doseSafetyProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Safety Calculator')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.safetyCalculator)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Species Selector
+             // Species Selector
             DropdownButtonFormField<AnimalProfile>(
               value: species,
-              decoration: const InputDecoration(labelText: 'Species', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.species, border: const OutlineInputBorder()),
               items: SpeciesRepository.profiles.map((p) {
                 return DropdownMenuItem(value: p, child: Text(p.speciesName));
               }).toList(),
@@ -47,7 +51,7 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
             // Route Selector
             DropdownButtonFormField<String>(
               value: _selectedRoute,
-              decoration: const InputDecoration(labelText: 'Route', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.route, border: const OutlineInputBorder()),
               items: species.maxVolumePerKgMl.keys.map((r) {
                 return DropdownMenuItem(value: r, child: Text(r));
               }).toList(),
@@ -60,25 +64,25 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
              // Inputs
             TextField(
               controller: _weightController,
-              decoration: const InputDecoration(labelText: 'Weight (g)', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.weight} (g)', border: const OutlineInputBorder()),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
              TextField(
               controller: _doseController,
-              decoration: const InputDecoration(labelText: 'Dose (mg/kg)', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.dose} (mg/kg)', border: const OutlineInputBorder()),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
              TextField(
               controller: _concentrationController,
-              decoration: const InputDecoration(labelText: 'Concentration (mg/ml)', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.concentration} (mg/ml)', border: const OutlineInputBorder()),
               keyboardType: TextInputType.number,
             ),
             
             const SizedBox(height: 24),
             
-            // Safety Banner
+             // Safety Banner
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -95,7 +99,7 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      doseState.message,
+                      doseState.message, // Message comes from controller (still hardcoded English/logic there, TODO refactor controller for fully localized messages or pass message code)
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: doseState.isSafe ? AppColors.tealScience : AppColors.biohazardRed,
@@ -108,9 +112,17 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
             
              const SizedBox(height: 24),
             GloveButton(
-              label: 'CALCULATE',
+              label: AppLocalizations.of(context)!.calculate,
               icon: Icons.calculate,
               onPressed: _calculate,
+            ),
+            const SizedBox(height: 16),
+            GloveButton(
+              label: AppLocalizations.of(context)!.saveToLog,
+              icon: Icons.save,
+              // Disable if not safe or no calculation done (volume is 0)
+              onPressed: (doseState.isSafe && doseState.volumeMl > Decimal.zero) ? _saveToLog : null,
+              backgroundColor: (doseState.isSafe && doseState.volumeMl > Decimal.zero) ? AppColors.tealScience : Colors.grey,
             ),
           ],
         ),
@@ -132,7 +144,29 @@ class _DoseCalculatorPageState extends ConsumerState<DoseCalculatorPage> {
         concentrationMgMl: conc,
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid Numbers")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.invalidNumbers)));
     }
+  }
+
+  void _saveToLog() {
+    final doseState = ref.read(doseSafetyProvider);
+    final species = ref.read(selectedSpeciesProvider);
+    
+    // We assume numbers are valid if calculated, but safe to parse again or store in state
+    final weight = Decimal.tryParse(_weightController.text) ?? Decimal.zero;
+    final dose = Decimal.tryParse(_doseController.text) ?? Decimal.zero;
+    final conc = Decimal.tryParse(_concentrationController.text) ?? Decimal.zero;
+
+    ref.read(doseLoggerProvider).logDose(
+      species: species.speciesName,
+      route: _selectedRoute,
+      weightG: weight,
+      doseMgPerKg: dose,
+      concentrationMgMl: conc,
+      volumeMl: doseState.volumeMl,
+      isSafe: doseState.isSafe,
+    );
+    
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savedToExperimentLog)));
   }
 }
