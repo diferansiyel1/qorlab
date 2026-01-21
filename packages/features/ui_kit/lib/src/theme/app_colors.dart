@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 
-/// Scientific Color Palette for QorLab.
-class AppColors {
-  // 1.1 Color Palette
-  static const Color deepLabBlue = Color(0xFF0A84FF); // Primary (Brand)
-  static const Color tealScience = Color(0xFF30D158); // Secondary (Action)
-  static const Color biohazardRed = Color(0xFFFF453A); // Alert (Danger)
+abstract class AppColors {
+  // Base
+  static const Color background = Color(0xFF050505); // Deep almost black
+  static const Color surface = Color(0xFF141414);    // Slightly lighter for cards (fallback)
+  
+  // Glassmorphism
+  static const Color glassBackground = Color(0x1AFFFFFF); // 10% White
+  static const Color glassBorder = Color(0x33FFFFFF);     // 20% White
+  static const Color glassSelection = Color(0x66FFFFFF);  // 40% White (Selection)
 
-  // Backgrounds
-  static const Color oledBlack = Color(0xFF000000); // Dark Mode Background
-  static const Color sterileWhite = Color(0xFFF2F2F7); // Light Mode Background
-  static const Color surfaceDark = Color(0xFF1C1C1E); // Dark Mode Surface
-  static const Color surfaceLight = Color(0xFFFFFFFF); // Light Mode Surface
+  // Status & Accents (High Contrast Neon)
+  static const Color primary = Color(0xFF2E86AB);       // Clinical Blue
+  static const Color accent = Color(0xFFF18F01);        // Amber attention
+  static const Color success = Color(0xFF06D6A0);       // Neon Green
+  static const Color alert = Color(0xFFEF476F);         // Neon Red
+  static const Color textMain = Color(0xFFEAEAEA);      // Off-white text
+  static const Color textMuted = Color(0xFF888888);     // Muted text
 
-  // Borders
-  static const Color borderDark = Color(0xFF3A3A3C);
-  static const Color borderLight = Color(0xFFC6C6C8);
+  // Gradients
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF2E86AB), Color(0xFF1B4F72)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }

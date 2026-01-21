@@ -21,7 +21,7 @@ class NumericKeypad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.surfaceLight,
+      color: AppColors.background,
       padding: const EdgeInsets.only(top: 8, bottom: 24, left: 8, right: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -98,7 +98,7 @@ class NumericKeypad extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 label,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.deepLabBlue),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
           ),
@@ -112,7 +112,7 @@ class NumericKeypad extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Material(
-          color: AppColors.surfaceLight,
+          color: AppColors.surface,
           elevation: 2,
           borderRadius: BorderRadius.circular(8),
           child: InkWell(
@@ -121,7 +121,7 @@ class NumericKeypad extends StatelessWidget {
             child: Container(
               height: 60,
               alignment: Alignment.center,
-              child: Icon(icon, color: AppColors.deepLabBlue),
+              child: Icon(icon, color: AppColors.primary),
             ),
           ),
         ),

@@ -1,0 +1,13 @@
+name: randomization_engine
+description: Logic for subject randomization (Simple, Block, Stratified).
+version: 0.0.1
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

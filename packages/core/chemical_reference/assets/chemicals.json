@@ -1,0 +1,34 @@
+[
+    {
+        "id": "chem_001",
+        "name": "Ketamine Hydrochloride",
+        "molecular_weight": 274.18,
+        "solubility_water_mg_ml": 200,
+        "solubility_ethanol_mg_ml": 60,
+        "common_dose_rat_mg_kg": 80
+    },
+    {
+        "id": "chem_002",
+        "name": "Xylazine",
+        "molecular_weight": 220.33,
+        "solubility_water_mg_ml": 50,
+        "solubility_ethanol_mg_ml": 100,
+        "common_dose_rat_mg_kg": 10
+    },
+    {
+        "id": "chem_003",
+        "name": "Metformin",
+        "molecular_weight": 129.16,
+        "solubility_water_mg_ml": 100,
+        "solubility_ethanol_mg_ml": 10,
+        "common_dose_rat_mg_kg": 300
+    },
+    {
+        "id": "chem_004",
+        "name": "Cisplatin",
+        "molecular_weight": 300.05,
+        "solubility_water_mg_ml": 1,
+        "solubility_ethanol_mg_ml": 0,
+        "common_dose_rat_mg_kg": 5
+    }
+]

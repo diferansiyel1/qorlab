@@ -33,7 +33,7 @@ class GloveButton extends StatelessWidget {
 
     // Determine colors based on isPrimary and overrides
     final Color effectiveBgColor = backgroundColor ?? 
-        (isPrimary ? colorScheme.primary : AppColors.surfaceDark);
+        (isPrimary ? colorScheme.primary : AppColors.surface);
     
     final Color effectiveFgColor = backgroundColor != null 
         // If custom background, assume it's a "color" button and use white/black appropriately

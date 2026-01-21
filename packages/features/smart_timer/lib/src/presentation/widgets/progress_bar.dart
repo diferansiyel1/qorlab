@@ -30,7 +30,7 @@ class TimerProgressBar extends StatelessWidget {
     
     Color progressColor = Theme.of(context).primaryColor;
     if (timer.status == TimerStatus.completed) {
-      progressColor = AppColors.tealScience;
+      progressColor = AppColors.primary;
     } else if (timer.status == TimerStatus.paused) {
       progressColor = Colors.grey;
     }
@@ -70,7 +70,7 @@ class TimerProgressBar extends StatelessWidget {
                     icon: const Icon(Icons.history_edu),
                     onPressed: onLog,
                     tooltip: 'Log to Experiment',
-                    color: AppColors.tealScience,
+                    color: AppColors.primary,
                   ),
                 if (timer.status == TimerStatus.running)
                   IconButton(

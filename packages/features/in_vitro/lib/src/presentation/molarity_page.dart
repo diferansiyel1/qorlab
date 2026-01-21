@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:in_vitro/src/application/molarity_controller.dart';
-import 'package:in_vitro/src/domain/chemical.dart';
+import 'package:chemical_reference/chemical_reference.dart';
 
 import 'inventory_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -115,7 +115,7 @@ class _MolarityCalculatorPageState extends ConsumerState<MolarityCalculatorPage>
                         });
                         // Auto-set focus to Volume after picking chemical since MW is set
                          _setActive(_volumeController);
-                        ref.read(molarityControllerProvider.notifier).setMolecularWeight(chemical.molecularWeight);
+                        ref.read(molarityControllerProvider.notifier).setMolecularWeight(Decimal.parse(chemical.molecularWeight.toString()));
                       }
                     },
                   ),
@@ -149,9 +149,8 @@ class _MolarityCalculatorPageState extends ConsumerState<MolarityCalculatorPage>
                    
                    const SizedBox(height: 32),
                    
-                   // Result Card
-                   Card(
-                     color: AppColors.surfaceLight,
+                     Card(
+                       color: AppColors.surface,
                      elevation: 2,
                      child: Padding(
                        padding: const EdgeInsets.all(24.0),
@@ -164,7 +163,7 @@ class _MolarityCalculatorPageState extends ConsumerState<MolarityCalculatorPage>
                              style: GoogleFonts.robotoMono(
                                fontSize: 32,
                                fontWeight: FontWeight.bold,
-                               color: AppColors.deepLabBlue,
+                               color: AppColors.primary,
                              ),
                            ),
                          ],
@@ -176,7 +175,7 @@ class _MolarityCalculatorPageState extends ConsumerState<MolarityCalculatorPage>
                    GloveButton(
                      label: AppLocalizations.of(context)!.logThis,
                      icon: Icons.history_edu,
-                     backgroundColor: AppColors.tealScience,
+                     backgroundColor: AppColors.primary,
                      onPressed: (state.massG != null) ? () {
                         // Log using the logger port
                         ref.read(molarityLoggerProvider).logResult(
@@ -240,9 +239,9 @@ class _ScienceInput extends StatelessWidget {
             labelText: label,
             border: const OutlineInputBorder(),
             filled: isActive,
-            fillColor: isActive ? AppColors.tealScience.withOpacity(0.1) : null,
+            fillColor: isActive ? AppColors.primary.withOpacity(0.1) : null,
             focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.tealScience, width: 2),
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
             ),
           ),
         ),

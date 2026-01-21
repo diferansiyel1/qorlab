@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_vitro/src/data/inventory_repository.dart';
-import 'package:in_vitro/src/domain/chemical.dart';
+import 'package:chemical_reference/chemical_reference.dart';
 
 class InventoryPage extends ConsumerStatefulWidget {
   const InventoryPage({super.key});
@@ -44,8 +44,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
             child: chemicalsAsync.when(
               data: (chemicals) {
                 final filtered = chemicals.where((c) {
-                  return c.name.toLowerCase().contains(_query) ||
-                         c.formula.toLowerCase().contains(_query);
+                  return c.name.toLowerCase().contains(_query);
                 }).toList();
 
                 if (filtered.isEmpty) {
@@ -59,7 +58,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
                     final chemical = filtered[index];
                     return ListTile(
                       title: Text(chemical.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text("${chemical.formula} • MW: ${chemical.molecularWeight} g/mol"),
+                      subtitle: Text("MW: ${chemical.molecularWeight} g/mol"),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         Navigator.pop(context, chemical);

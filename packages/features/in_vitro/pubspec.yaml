@@ -16,6 +16,8 @@ dependencies:
     path: ../../core/math_engine
   localization:
     path: ../../core/localization
+  chemical_reference:
+    path: ../../core/chemical_reference
 
 dev_dependencies:
   flutter_test:

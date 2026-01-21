@@ -34,7 +34,7 @@ class ExperimentPage extends ConsumerWidget {
                     final log = logs[index];
                     return Card(
                       child: ListTile(
-                        leading: const Icon(Icons.mic, color: AppColors.tealScience),
+                        leading: const Icon(Icons.mic, color: AppColors.primary),
                         title: Text(log.content),
                         subtitle: Text(log.timestamp.toString()),
                       ),
@@ -61,7 +61,7 @@ class ExperimentPage extends ConsumerWidget {
                  GloveButton(
                   label: 'LOG',
                   icon: Icons.mic,
-                  backgroundColor: AppColors.deepLabBlue,
+                  backgroundColor: AppColors.primary,
                   onPressed: () {
                     // Temporary simulation
                     repository.addLog(experimentId, "Simulated Log Entry", "voice");

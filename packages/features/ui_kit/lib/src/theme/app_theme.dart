@@ -1,62 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../ui_kit.dart';
+import 'app_colors.dart';
+import 'app_typography.dart';
 
 class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900
-      primaryColor: const Color(0xFF2DD4BF), // Teal 400
-      colorScheme: const ColorScheme.dark(
-        primary: Color(0xFF2DD4BF),
-        secondary: Color(0xFF38BDF8), // Sky 400
-        surface: Color(0xFF1E293B), // Slate 800
-        background: Color(0xFF0F172A),
-        error: Color(0xFFF43F5E), // Rose 500
-        onPrimary: Colors.black,
+      scaffoldBackgroundColor: AppColors.background,
+      primaryColor: AppColors.primary,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.primary,
+        secondary: AppColors.accent,
+        surface: AppColors.surface,
+        background: AppColors.background,
+        error: AppColors.alert,
+        onPrimary: AppColors.textMain,
       ),
-      fontFamily: GoogleFonts.outfit().fontFamily,
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).apply(
-        bodyColor: const Color(0xFFE2E8F0), // Slate 200
-        displayColor: const Color(0xFFF1F5F9), // Slate 100
+      fontFamily: GoogleFonts.inter().fontFamily,
+      textTheme: TextTheme(
+        displayLarge: AppTypography.headlineLarge,
+        displayMedium: AppTypography.headlineMedium,
+        bodyLarge: AppTypography.labelLarge,
+        bodyMedium: AppTypography.labelMedium,
       ),
-      // cardTheme: CardTheme(
-      //   color: const Color(0xFF1E293B).withOpacity(0.7),
-      //   elevation: 0,
-      //   shape: RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.circular(16),
-      //     side: BorderSide(color: Colors.white.withOpacity(0.1)),
-      //   ),
-      // ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          letterSpacing: 1.0,
-        ),
+        titleTextStyle: AppTypography.headlineMedium,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E293B),
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: AppColors.glassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          borderSide: BorderSide(color: AppColors.glassBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
+          borderSide: BorderSide(color: AppColors.primary),
         ),
-        labelStyle: const TextStyle(color: Color(0xFF94A3B8)), // Slate 400
+        labelStyle: TextStyle(color: AppColors.textMuted),
       ),
     );
   }

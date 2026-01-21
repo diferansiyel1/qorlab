@@ -116,7 +116,7 @@ class _SingleDoseFormState extends ConsumerState<_SingleDoseForm> {
                 : null,
             backgroundColor:
                 (doseState.isSafe && doseState.volumeMl > Decimal.zero)
-                    ? AppColors.tealScience
+                    ? AppColors.success
                     : Colors.grey,
           ),
         ],
@@ -361,12 +361,12 @@ class _SafetyBanner extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: state.isSafe
-            ? AppColors.tealScience.withValues(alpha: 0.1)
-            : AppColors.biohazardRed.withValues(alpha: 0.1),
+            ? AppColors.success.withValues(alpha: 0.1)
+            : AppColors.alert.withValues(alpha: 0.1),
         border: Border.all(
             color: state.isSafe
-                ? AppColors.tealScience
-                : AppColors.biohazardRed),
+                ? AppColors.success
+                : AppColors.alert),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -374,8 +374,8 @@ class _SafetyBanner extends StatelessWidget {
           Icon(
             state.isSafe ? Icons.check_circle : Icons.warning,
             color: state.isSafe
-                ? AppColors.tealScience
-                : AppColors.biohazardRed,
+                ? AppColors.success
+                : AppColors.alert,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -384,8 +384,8 @@ class _SafetyBanner extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: state.isSafe
-                        ? AppColors.tealScience
-                        : AppColors.biohazardRed,
+                        ? AppColors.success
+                        : AppColors.alert,
                   ),
             ),
           ),

@@ -55,7 +55,10 @@ dependencies:
     path: ../../packages/features/in_vitro
 
 
-
+  chemical_reference:
+    path: ../../packages/core/chemical_reference
+  randomization_engine:
+    path: ../../packages/core/randomization_engine
 
 
 
