@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui_kit/ui_kit.dart';
-import '../data/experiment_repository.dart';
+import 'package:experiment_log/experiment_log.dart';
+
 import 'package:database/database.dart';
 
 class ExperimentPage extends ConsumerWidget {

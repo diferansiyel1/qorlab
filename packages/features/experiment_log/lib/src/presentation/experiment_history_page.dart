@@ -2,27 +2,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
+import 'package:experiment_log/experiment_log.dart';
 import 'package:database/database.dart';
 import 'package:intl/intl.dart';
-import '../data/isar_experiment_action_handler.dart'; // To access the provider
 import '../domain/log_exporter.dart';
 import 'voice_recorder_dialog.dart';
 
 
 
 final experimentLogsProvider = StreamProvider.autoDispose.family<List<LogEntry>, int>((ref, experimentId) {
-  final isarAsync = ref.watch(isarProvider);
-  
-  if (!isarAsync.hasValue) {
-    return const Stream.empty();
-  }
-  
-  final isar = isarAsync.value!;
-  return isar.logEntrys
-      .filter()
-      .experimentIdEqualTo(experimentId)
-      .sortByTimestampDesc()
-      .watch(fireImmediately: true);
+  final repo = ref.watch(experimentRepositoryProvider);
+  return repo.watchLogs(experimentId);
 });
 
 class ExperimentHistoryPage extends ConsumerWidget {

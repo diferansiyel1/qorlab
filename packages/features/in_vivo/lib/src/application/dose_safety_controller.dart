@@ -1,4 +1,5 @@
 import 'package:decimal/decimal.dart';
+import 'package:math_engine/math_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_vivo/src/domain/animal_profile.dart';
 import 'package:in_vivo/src/data/species_repository.dart';
@@ -8,11 +9,13 @@ class DoseState {
   final Decimal volumeMl;
   final bool isSafe;
   final String message;
+  final CocktailResult? cocktailResult;
 
   const DoseState({
     required this.volumeMl,
     required this.isSafe,
     required this.message,
+    this.cocktailResult,
   });
 
   factory DoseState.initial() => DoseState(
@@ -68,6 +71,47 @@ class DoseSafetyController extends StateNotifier<DoseState> {
       volumeMl: volumeMl,
       isSafe: isSafe,
       message: message,
+    );
+  }
+
+  void calculateCocktail({
+    required AnimalProfile species,
+    required String route, // Usually IP
+    required Decimal weightG,
+    required List<DrugInput> drugs,
+    required int numAnimals,
+    required Decimal errorMarginPercent,
+  }) {
+    if (drugs.isEmpty) {
+        state = DoseState(volumeMl: Decimal.zero, isSafe: false, message: 'Add at least one drug');
+        return;
+    }
+
+    // 1. Calculate
+    final result = CocktailCalculator.calculate(
+      drugs: drugs, 
+      weightG: weightG, 
+      numAnimals: numAnimals, 
+      errorMarginPercent: errorMarginPercent
+    );
+
+    // 2. Safety Check (Total Volume vs Max Limit)
+    // Convert weight to kg for limit check
+    final weightKg = (weightG / Decimal.fromInt(1000)).toDecimal();
+    final maxRate = species.maxVolumePerKgMl[route] ?? Decimal.fromInt(100);
+    final maxAllowedVol = (maxRate * weightKg);
+
+    final isSafe = result.totalVolumePerAnimal <= maxAllowedVol;
+
+    final msg = isSafe
+       ? 'Cocktail Safe. Total: ${result.totalVolumePerAnimal} ml/animal'
+       : 'WARNING: ${result.totalVolumePerAnimal} ml exceeds limit ($maxAllowedVol ml)';
+
+    state = DoseState(
+      volumeMl: result.totalVolumePerAnimal, // Show total per animal
+      isSafe: isSafe,
+      message: msg,
+      cocktailResult: result,
     );
   }
 }

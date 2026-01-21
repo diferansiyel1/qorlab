@@ -1,4 +1,5 @@
 import 'package:database/database.dart';
+import 'fake_database.dart'; // Contains web fakes
 import 'package:smart_timer/smart_timer.dart'; // For timerLoggerProvider
 import 'timer_logger_adapter.dart'; // Local adapter
 
@@ -15,7 +16,6 @@ import 'package:experiment_log/experiment_log.dart';
 import 'package:smart_timer/smart_timer.dart';
 import 'package:in_vivo/in_vivo.dart';
 import 'package:in_vitro/in_vitro.dart';
-import 'package:isar/isar.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localization/localization.dart';
@@ -151,18 +151,42 @@ class HomePage extends ConsumerWidget {
     final experimentRepo = ref.watch(experimentRepositoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
+      backgroundColor: Colors.transparent, // Let root gradient show through
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.appTitle),
+        backgroundColor: Colors.transparent,
+      ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(AppLocalizations.of(context)!.useGlovesWrapper, style: theme.textTheme.headlineLarge),
-              const SizedBox(height: 32),
+              // Hero Section or Welcome
+              Text(
+                "Welcome to QorLab",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.deepLabBlue,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Select a protocol to begin",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 48),
+
+              // Main Actions
               GloveButton(
                 label: AppLocalizations.of(context)!.newExperiment,
                 icon: Icons.science,
+                isPrimary: true,
                 onPressed: () async {
                    await experimentRepo.createExperiment("Experiment ${DateTime.now()}");
                    if (context.mounted) {
@@ -170,41 +194,63 @@ class HomePage extends ConsumerWidget {
                    }
                 },
               ),
-               const SizedBox(height: 16),
-               GloveButton(
+              const SizedBox(height: 16),
+              
+              GloveButton(
                 label: AppLocalizations.of(context)!.openExperiment,
                 icon: Icons.folder_open,
-                isPrimary: false,
+                isPrimary: false, 
+                // Using Outline style via isPrimary=false
                 onPressed: () {
                   context.go('/experiment/1');
                 },
               ),
-              const SizedBox(height: 16),
-               GloveButton(
-                label: AppLocalizations.of(context)!.timers,
-                icon: Icons.timer,
-                backgroundColor: AppColors.tealScience,
-                onPressed: () {
-                  context.go('/timers');
-                },
+              
+              const SizedBox(height: 32),
+              
+              // Tools Section
+              Text(
+                "Quick Tools",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white54,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
-              GloveButton(
-                label: AppLocalizations.of(context)!.inVivoSafety,
-                icon: Icons.health_and_safety,
-                backgroundColor: AppColors.biohazardRed,
-                onPressed: () {
-                  context.go('/in-vivo');
-                },
+              
+              Row(
+                children: [
+                  Expanded(
+                    child: GloveButton(
+                      label: AppLocalizations.of(context)!.timers,
+                      icon: Icons.timer,
+                      backgroundColor: AppColors.tealScience,
+                      onPressed: () => context.go('/timers'),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              GloveButton(
-                label: AppLocalizations.of(context)!.chemistry,
-                icon: Icons.science_outlined,
-                backgroundColor: AppColors.deepLabBlue,
-                onPressed: () {
-                  context.go('/in-vitro');
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: GloveButton(
+                      label: "Safety", // Shortened for grid/row
+                      icon: Icons.health_and_safety,
+                      backgroundColor: AppColors.biohazardRed,
+                      onPressed: () => context.go('/in-vivo'),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GloveButton(
+                      label: "Molarity", // Shortened
+                      icon: Icons.science_outlined,
+                      backgroundColor: AppColors.deepLabBlue,
+                      onPressed: () => context.go('/in-vitro'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -214,7 +260,7 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-// --- Adapters & Fakes ---
+// --- Adapters ---
 
 class MainMolarityLogger implements MolarityLogger {
   final ExperimentActionHandler handler;
@@ -233,44 +279,5 @@ class MainDoseLogger implements DoseLogger {
   @override
   Future<void> logDose({required String species, required String route, required Decimal weightG, required Decimal doseMgPerKg, required Decimal concentrationMgMl, required Decimal volumeMl, required bool isSafe}) {
     return handler.logDose(species: species, route: route, weightG: weightG, doseMgPerKg: doseMgPerKg, concentrationMgMl: concentrationMgMl, volumeMl: volumeMl, isSafe: isSafe);
-  }
-}
-
-class FakeExperimentRepository implements ExperimentRepository {
-  @override
-  Future<void> createExperiment(String title) async {
-    debugPrint("Mock: Created experiment $title");
-  }
-
-  @override
-  Future<void> addLog(int experimentId, String content, String type) async {
-     debugPrint("Mock: Added log $content");
-  }
-
-  @override
-  Stream<List<LogEntry>> watchLogs(int experimentId) {
-    return Stream.value([]);
-  }
-}
-
-class FakeExperimentActionHandler implements ExperimentActionHandler {
-  @override
-  Future<void> logDose({required String species, required String route, required Decimal weightG, required Decimal doseMgPerKg, required Decimal concentrationMgMl, required Decimal volumeMl, required bool isSafe}) async {
-    debugPrint("Mock Log Dose: $species");
-  }
-
-  @override
-  Future<void> logMolarity({required String chemicalName, required Decimal molecularWeight, required Decimal volumeMl, required Decimal molarity, required Decimal massG}) async {
-    debugPrint("Mock Log Molarity: $chemicalName");
-  }
-
-  @override
-  Future<void> logVoiceNote({required String text}) async {
-    debugPrint("Mock Log Voice: $text");
-  }
-
-  @override
-  Future<void> logNote({required String text}) async {
-    debugPrint("Mock Log Note: $text");
   }
 }

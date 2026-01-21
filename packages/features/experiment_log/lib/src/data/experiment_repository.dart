@@ -2,11 +2,11 @@ import 'package:database/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
-final experimentRepositoryProvider = Provider<ExperimentRepository>((ref) {
+final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((ref) {
   return ExperimentRepository(ref.watch(isarProvider).value!);
 });
 
-class ExperimentRepository {
+class ExperimentRepository implements ExperimentRepositoryInterface {
   final Isar _isar;
 
   ExperimentRepository(this._isar);

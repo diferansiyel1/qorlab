@@ -7,3 +7,4 @@ export 'package:decimal/decimal.dart';
 export 'src/dose_calculator.dart';
 export 'src/solution_calculator.dart';
 export 'src/unit_converter.dart';
+export 'src/cocktail_calculator.dart';
