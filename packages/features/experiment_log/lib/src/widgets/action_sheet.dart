@@ -1,31 +1,23 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:experiment_log/experiment_log.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
 class ActionSheet extends ConsumerWidget {
-  const ActionSheet({super.key});
+  final int experimentId;
+  
+  const ActionSheet({super.key, required this.experimentId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // We assume we are in experiment context. 
-    // Ideally, we pass experimentId or read from provider.
-    // For MVP, lets assume ID=1 or read from route if possible?
-    // Actually, ActionSheet is pushed via `showModalBottomSheet`. 
-    // We need to pass experimentId to ActionSheet or use a provider.
-    // Let's assume ID=1 for this demo or pass it in constructor.
-    // Refactoring to require experimentId requires updating calling code.
-    // Let's stick to ID=1 (User's open experiment) for MVP or fix calling code next.
-    // Valid approach: Read from GoRouter state? No, that's hard in modal.
-    // Let's UPDATE calling code to pass experimentId.
-    // But first, let's implement the logic assuming we have `experimentId`.
-    // Wait, ref.watch(experimentRepositoryProvider) is available.
+    // Validate experimentId in debug mode
+    assert(experimentId > 0, 'experimentId must be a positive integer');
     
-    // We will simulate we are on Experiment 1 for simplicity of this Refactor step,
-    // OR we update the constructor. Let's update constructor.
-    // But `ExperimentTimelinePage` calls it.
-    
-    return const _ActionSheetContent(experimentId: 1); 
+    return _ActionSheetContent(experimentId: experimentId); 
   }
 }
 
@@ -88,11 +80,9 @@ class _ActionSheetContent extends ConsumerWidget {
                 icon: Icons.camera_alt_rounded,
                 label: 'Photo',
                 color: AppColors.textMain,
-                onTap: () {
+                onTap: () async {
                    context.pop();
-                   // Simulate Photo Log
-                   repository.addLog(experimentId, "Photo: Specimen A", "photo");
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Photo captured")));
+                   await _capturePhoto(context, repository);
                 },
               ),
               _ActionButton(
@@ -111,6 +101,15 @@ class _ActionSheetContent extends ConsumerWidget {
                  onTap: () {
                     context.pop(); 
                     _showTextDialog(context, ref, repository);
+                 },
+              ),
+              _ActionButton(
+                icon: Icons.thermostat_rounded,
+                label: 'Parameter',
+                color: AppColors.alert,
+                 onTap: () {
+                    context.pop(); 
+                    _showParameterDialog(context, repository);
                  },
               ),
             ],
@@ -141,8 +140,112 @@ class _ActionSheetContent extends ConsumerWidget {
                  Navigator.pop(context);
               }),
            ],
+         );
+      });
+   }
+
+  void _showParameterDialog(BuildContext context, dynamic repo) {
+     showDialog(context: context, builder: (context) {
+        String selectedParameter = 'Temperature';
+        final valueController = TextEditingController();
+        final units = {
+          'Temperature': '°C',
+          'pH': '',
+          'Weight': 'g',
+          'Glucose': 'mg/dL',
+        };
+        
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+               backgroundColor: AppColors.surface,
+               title: Text("Log Parameter", style: AppTypography.headlineMedium),
+               content: Column(
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   DropdownButtonFormField<String>(
+                     value: selectedParameter,
+                     dropdownColor: AppColors.surface,
+                     style: const TextStyle(color: AppColors.textMain),
+                     decoration: const InputDecoration(
+                       labelText: 'Parameter Type',
+                       labelStyle: TextStyle(color: AppColors.textMuted),
+                     ),
+                     items: ['Temperature', 'pH', 'Weight', 'Glucose']
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: (value) {
+                       setState(() => selectedParameter = value!);
+                     },
+                   ),
+                   const SizedBox(height: 16),
+                   TextField(
+                     controller: valueController,
+                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                     style: const TextStyle(color: AppColors.textMain),
+                     decoration: InputDecoration(
+                       hintText: "Enter value...",
+                       hintStyle: const TextStyle(color: AppColors.textMuted),
+                       suffixText: units[selectedParameter],
+                       suffixStyle: const TextStyle(color: AppColors.textMuted),
+                     ),
+                   ),
+                 ],
+               ),
+               actions: [
+                  TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context)),
+                  TextButton(child: const Text("Save"), onPressed: () {
+                     if (valueController.text.isNotEmpty) {
+                        final unit = units[selectedParameter] ?? '';
+                        final content = '$selectedParameter: ${valueController.text} $unit'.trim();
+                        repo.addLog(experimentId, content, "parameter");
+                     }
+                     Navigator.pop(context);
+                  }),
+               ],
+            );
+          },
         );
      });
+  }
+  Future<void> _capturePhoto(BuildContext context, dynamic repository) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      
+      if (pickedFile != null) {
+        // Get the app's documents directory
+        final appDir = await getApplicationDocumentsDirectory();
+        final experimentDir = Directory('${appDir.path}/experiments/$experimentId');
+        
+        // Create directory if it doesn't exist
+        if (!await experimentDir.exists()) {
+          await experimentDir.create(recursive: true);
+        }
+        
+        // Copy image to permanent location
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final fileName = '$timestamp.jpg';
+        final savedPath = '${experimentDir.path}/$fileName';
+        
+        await File(pickedFile.path).copy(savedPath);
+        
+        // Log the photo with its path
+        repository.addLog(experimentId, savedPath, "photo");
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Photo captured and saved")),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to capture photo: $e")),
+        );
+      }
+    }
   }
 }
 

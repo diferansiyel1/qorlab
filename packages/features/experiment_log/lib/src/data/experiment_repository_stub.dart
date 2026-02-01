@@ -9,11 +9,14 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   ExperimentRepository(dynamic _);
   
   @override
-  Future<void> createExperiment(String title) async {}
+  Future<void> createExperiment(Experiment experiment) async {}
   
   @override
   Future<void> addLog(int experimentId, String content, String type) async {}
   
   @override
   Stream<List<LogEntry>> watchLogs(int experimentId) => const Stream.empty();
+
+  @override
+  Stream<List<Experiment>> watchExperiments() => const Stream.empty();
 }

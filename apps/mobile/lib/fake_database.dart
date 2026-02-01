@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FakeExperimentRepository implements ExperimentRepositoryInterface {
   @override
-  Future<void> createExperiment(String title) async {
-    debugPrint("Web Mock: Created experiment $title");
+  Future<void> createExperiment(Experiment experiment) async {
+    debugPrint("Web Mock: Created experiment ${experiment.title}");
   }
 
   @override
@@ -23,6 +23,11 @@ class FakeExperimentRepository implements ExperimentRepositoryInterface {
         ..type = "text"
         ..timestamp = DateTime.now()
     ]);
+  }
+
+  @override
+  Stream<List<Experiment>> watchExperiments() {
+    return Stream.value([]);
   }
 }
 

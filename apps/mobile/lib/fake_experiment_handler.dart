@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:experiment_log/experiment_log.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider definition
@@ -18,7 +19,7 @@ class FakeExperimentActionHandler implements ExperimentActionHandler {
     required Decimal volumeMl,
     required bool isSafe,
   }) async {
-    print("LOG: Dose Calculated - $species, Volume: $volumeMl mL, Safe: $isSafe");
+    debugPrint("LOG: Dose Calculated - $species, Volume: $volumeMl mL, Safe: $isSafe");
   }
 
   @override
@@ -29,6 +30,17 @@ class FakeExperimentActionHandler implements ExperimentActionHandler {
     required Decimal molarity,
     required Decimal massG,
   }) async {
-    print("LOG: Molarity Calculated - $chemicalName, Mass: $massG g");
+    debugPrint("LOG: Molarity Calculated - $chemicalName, Mass: $massG g");
+  }
+
+  @override
+  Future<void> logVoiceNote({required String text}) async {
+    debugPrint("LOG: Voice Note - $text");
+  }
+
+  @override
+  Future<void> logNote({required String text}) async {
+    debugPrint("LOG: Note - $text");
   }
 }
+

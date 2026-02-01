@@ -1,0 +1,8 @@
+# melos_managed_dependency_overrides: chemical_reference,localization,math_engine
+dependency_overrides:
+  chemical_reference:
+    path: ../../core/chemical_reference
+  localization:
+    path: ../../core/localization
+  math_engine:
+    path: ../../core/math_engine

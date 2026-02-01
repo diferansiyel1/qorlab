@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Free Mode Scratchpad Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1329ec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101222",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Technical grid pattern for the scratchpad background */
+        .bg-grid-pattern {
+            background-color: #101222; /* Matches theme background-dark */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark bg-grid-pattern text-white h-screen flex flex-col overflow-hidden font-display selection:bg-primary/30">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-4 py-3 bg-background-dark/80 backdrop-blur-md sticky top-0 z-30 border-b border-white/5">
+<div class="flex size-10 shrink-0 items-center justify-start">
+<button class="text-white hover:text-primary transition-colors rounded-full p-1">
+<span class="material-symbols-outlined text-[28px]">close</span>
+</button>
+</div>
+<div class="flex flex-col items-center flex-1">
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">Free Mode</h2>
+<!-- Not Recording Indicator -->
+<div class="flex items-center gap-1.5 mt-0.5 opacity-60">
+<div class="size-2 rounded-full border border-gray-400"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-gray-300">Not Recording</span>
+</div>
+</div>
+<div class="flex size-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-lg text-white hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[24px]">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Main Scrollable Area -->
+<main class="flex-1 overflow-y-auto w-full relative pb-28">
+<!-- Meta Text / Warning -->
+<div class="w-full pt-4 pb-2 px-6">
+<div class="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-white/5 border border-white/5">
+<span class="material-symbols-outlined text-gray-400 text-sm">info</span>
+<p class="text-gray-400 text-xs font-medium leading-normal text-center">Scratchpad Active - Data is not saved to ELN.</p>
+</div>
+</div>
+<!-- Calculations Stack -->
+<div class="flex flex-col gap-3 px-4 py-2">
+<!-- Card 1: Molarity -->
+<div class="relative group flex flex-col bg-[#1c1e2e] dark:bg-[#1c1e2e] border border-white/5 rounded-lg p-4 shadow-sm hover:border-primary/40 transition-all duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center rounded-md bg-[#282a39] shrink-0 size-8 text-white/80">
+<span class="material-symbols-outlined text-[18px]">science</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-gray-500">Molarity Calc</span>
+</div>
+<button class="text-gray-500 hover:text-white hover:bg-white/10 p-1.5 rounded-md transition-colors" title="Copy Result">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-300 text-sm font-medium leading-normal opacity-80">5g NaCl in 500ml</p>
+<p class="text-primary text-2xl font-mono font-bold leading-tight tracking-tight">0.171 M</p>
+</div>
+</div>
+<!-- Card 2: Unit Conversion -->
+<div class="relative group flex flex-col bg-[#1c1e2e] dark:bg-[#1c1e2e] border border-white/5 rounded-lg p-4 shadow-sm hover:border-primary/40 transition-all duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center rounded-md bg-[#282a39] shrink-0 size-8 text-white/80">
+<span class="material-symbols-outlined text-[18px]">thermostat</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-gray-500">Conversion</span>
+</div>
+<button class="text-gray-500 hover:text-white hover:bg-white/10 p-1.5 rounded-md transition-colors" title="Copy Result">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-300 text-sm font-medium leading-normal opacity-80">25 Celsius to Kelvin</p>
+<p class="text-primary text-2xl font-mono font-bold leading-tight tracking-tight">298.15 K</p>
+</div>
+</div>
+<!-- Card 3: Dilution -->
+<div class="relative group flex flex-col bg-[#1c1e2e] dark:bg-[#1c1e2e] border border-white/5 rounded-lg p-4 shadow-sm hover:border-primary/40 transition-all duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center rounded-md bg-[#282a39] shrink-0 size-8 text-white/80">
+<span class="material-symbols-outlined text-[18px]">opacity</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-gray-500">Dilution</span>
+</div>
+<button class="text-gray-500 hover:text-white hover:bg-white/10 p-1.5 rounded-md transition-colors" title="Copy Result">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-300 text-sm font-medium leading-normal opacity-80">C1V1 = C2V2 (10mM, 50uL -&gt; 2mM)</p>
+<div class="flex items-baseline gap-2">
+<span class="text-gray-500 font-mono text-sm">V2 =</span>
+<p class="text-primary text-2xl font-mono font-bold leading-tight tracking-tight">250 uL</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Clear Action -->
+<div class="flex justify-center py-6">
+<button class="flex items-center gap-2 px-4 py-2 rounded-full text-gray-600 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">delete_sweep</span>
+<span class="text-sm font-bold tracking-wide">Clear Scratchpad</span>
+</button>
+</div>
+</main>
+<!-- Bottom Input Area -->
+<div class="absolute bottom-0 left-0 w-full z-40">
+<!-- Gradient fade to hide scroll underneath -->
+<div class="h-12 w-full bg-gradient-to-t from-background-dark to-transparent pointer-events-none"></div>
+<div class="bg-background-dark/95 backdrop-blur-xl border-t border-white/10 px-4 pt-3 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+<div class="flex gap-3 items-end max-w-[640px] mx-auto">
+<div class="relative flex-1 group">
+<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-500 group-focus-within:text-primary transition-colors">calculate</span>
+</div>
+<input class="w-full bg-[#1c1e2e] border border-white/10 text-white placeholder-gray-500 rounded-xl py-3.5 pl-10 pr-4 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 font-mono text-sm shadow-inner transition-all" placeholder="Type formula..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-blue-600 text-white rounded-xl size-12 flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 transition-all active:scale-95 active:shadow-none">
+<span class="material-symbols-outlined text-[24px]">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

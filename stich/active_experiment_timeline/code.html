@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Active Experiment Timeline</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1329ec",
+                        "primary-dark": "#0f20bd",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101222",
+                        "surface-dark": "#1a1c2e",
+                        "surface-highlight": "#23263a",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        "glow-red": "0 0 12px rgba(239, 68, 68, 0.6)",
+                        "glow-primary": "0 0 15px rgba(19, 41, 236, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for cleaner mobile view */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white overflow-hidden h-screen flex flex-col">
+<!-- Sticky TopAppBar -->
+<header class="shrink-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 pt-safe-top">
+<div class="flex items-center justify-between p-4 pb-3">
+<div class="flex flex-col">
+<span class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Exp-002</span>
+<h2 class="text-lg font-bold leading-tight tracking-tight">InVivo Dose Group A</h2>
+</div>
+<div class="flex items-center gap-2 bg-red-500/10 dark:bg-red-900/20 border border-red-500/20 px-3 py-1.5 rounded-full">
+<div class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-glow-red"></div>
+<p class="text-red-600 dark:text-red-400 text-xs font-bold tracking-wider">REC</p>
+<span class="text-xs font-mono text-slate-600 dark:text-slate-300 ml-1">00:45:12</span>
+</div>
+</div>
+</header>
+<!-- Main Content: Timeline Stream -->
+<main class="flex-1 overflow-y-auto no-scrollbar relative w-full px-4 pt-6 pb-32">
+<!-- Timeline Item: Start -->
+<div class="grid grid-cols-[3.5rem_2rem_1fr] gap-x-2 relative group">
+<!-- Timestamp -->
+<div class="text-right pt-1">
+<p class="font-mono text-xs text-slate-400 dark:text-slate-500">10:00</p>
+</div>
+<!-- Spine -->
+<div class="flex flex-col items-center h-full relative">
+<div class="w-[2px] bg-slate-200 dark:bg-[#2b2e42] h-full absolute top-0 bottom-0 left-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 bg-background-light dark:bg-background-dark p-1 rounded-full border border-slate-200 dark:border-[#2b2e42]">
+<span class="material-symbols-outlined text-[18px] text-slate-400">timer</span>
+</div>
+</div>
+<!-- Card -->
+<div class="pb-8">
+<div class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 p-3 rounded-lg opacity-70">
+<p class="text-sm font-medium text-slate-600 dark:text-slate-300">Auto-Log: Timer Started</p>
+<p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Phase: Solubilization</p>
+</div>
+</div>
+</div>
+<!-- Timeline Item: Data Log (Mass) -->
+<div class="grid grid-cols-[3.5rem_2rem_1fr] gap-x-2 relative group">
+<div class="text-right pt-1">
+<p class="font-mono text-xs text-slate-500 dark:text-slate-400">10:05</p>
+</div>
+<div class="flex flex-col items-center h-full relative">
+<div class="w-[2px] bg-slate-200 dark:bg-[#2b2e42] h-full absolute top-0 bottom-0 left-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 bg-primary text-white p-1.5 rounded-full shadow-glow-primary">
+<span class="material-symbols-outlined text-[20px]">scale</span>
+</div>
+</div>
+<div class="pb-8">
+<div class="bg-white dark:bg-surface-highlight border-l-4 border-primary p-4 rounded-r-lg rounded-l-sm shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Preparation</span>
+<span class="material-symbols-outlined text-slate-400 text-[16px]">dns</span>
+</div>
+<p class="text-slate-700 dark:text-slate-200 text-sm mb-1">Measured Mass</p>
+<p class="font-mono text-xl font-bold text-slate-900 dark:text-white">5.500 <span class="text-sm font-normal text-slate-500">mg</span></p>
+<p class="text-[10px] text-slate-400 mt-2 font-mono">Source: Mettler Toledo X4</p>
+</div>
+</div>
+</div>
+<!-- Timeline Item: Note -->
+<div class="grid grid-cols-[3.5rem_2rem_1fr] gap-x-2 relative group">
+<div class="text-right pt-1">
+<p class="font-mono text-xs text-slate-500 dark:text-slate-400">10:12</p>
+</div>
+<div class="flex flex-col items-center h-full relative">
+<div class="w-[2px] bg-slate-200 dark:bg-[#2b2e42] h-full absolute top-0 bottom-0 left-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 bg-background-light dark:bg-background-dark p-1 rounded-full border border-slate-200 dark:border-[#2b2e42]">
+<span class="material-symbols-outlined text-[18px] text-yellow-500">visibility</span>
+</div>
+</div>
+<div class="pb-8">
+<div class="bg-yellow-50/50 dark:bg-yellow-500/5 border border-yellow-200 dark:border-yellow-500/20 p-3 rounded-lg">
+<p class="text-xs font-bold text-yellow-600 dark:text-yellow-500 mb-1">OBSERVATION</p>
+<p class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">Solution appears turbid after initial mixing. Recommend extended sonication time.</p>
+</div>
+</div>
+</div>
+<!-- Timeline Item: Auto Log (Temp) -->
+<div class="grid grid-cols-[3.5rem_2rem_1fr] gap-x-2 relative group">
+<div class="text-right pt-1">
+<p class="font-mono text-xs text-slate-500 dark:text-slate-400">10:15</p>
+</div>
+<div class="flex flex-col items-center h-full relative">
+<div class="w-[2px] bg-slate-200 dark:bg-[#2b2e42] h-full absolute top-0 bottom-0 left-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 bg-background-light dark:bg-background-dark p-1 rounded-full border border-slate-200 dark:border-[#2b2e42]">
+<span class="material-symbols-outlined text-[18px] text-blue-400">thermometer</span>
+</div>
+</div>
+<div class="pb-8">
+<div class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/5 p-3 rounded-lg flex items-center justify-between gap-4">
+<div>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-300">Temp Reached</p>
+</div>
+<div class="bg-slate-100 dark:bg-black/30 px-2 py-1 rounded">
+<span class="font-mono text-sm font-bold text-blue-600 dark:text-blue-400">37.0°C</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Current Active State Indicator -->
+<div class="grid grid-cols-[3.5rem_2rem_1fr] gap-x-2 relative opacity-50">
+<div class="text-right pt-1">
+<p class="font-mono text-xs text-slate-600 dark:text-slate-600">Now</p>
+</div>
+<div class="flex flex-col items-center h-full relative">
+<div class="w-[2px] bg-gradient-to-b from-slate-200 dark:from-[#2b2e42] to-transparent h-16 absolute top-0 left-1/2 -translate-x-1/2"></div>
+<div class="relative z-10 w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-600 mt-2"></div>
+</div>
+</div>
+</main>
+<!-- Bottom Toolbar (ToolBar Component Variant 2) -->
+<div class="fixed bottom-0 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 pb-safe-bottom z-50">
+<div class="flex flex-col gap-3 px-4 py-3">
+<!-- Quick Actions -->
+<div class="grid grid-cols-4 gap-2">
+<button class="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform group">
+<div class="bg-slate-200 dark:bg-surface-highlight text-slate-700 dark:text-slate-200 p-2 rounded-full group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">photo_camera</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Photo</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform group">
+<div class="bg-slate-200 dark:bg-surface-highlight text-slate-700 dark:text-slate-200 p-2 rounded-full group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">edit_note</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Note</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform group">
+<div class="bg-slate-200 dark:bg-surface-highlight text-slate-700 dark:text-slate-200 p-2 rounded-full group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">timer</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Lap</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform group">
+<div class="bg-primary/10 dark:bg-primary/20 text-primary p-2 rounded-full">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</div>
+<span class="text-[10px] font-medium text-primary">Inject</span>
+</button>
+</div>
+<!-- Guarded End Experiment Button -->
+<button class="flex w-full items-center justify-center overflow-hidden rounded-lg h-12 bg-surface-dark border border-white/10 text-red-400 gap-2 text-sm font-bold hover:bg-red-500/10 transition-colors active:bg-red-500/20">
+<span class="material-symbols-outlined text-[20px] filled">pause_circle</span>
+<span>End Experiment</span>
+</button>
+</div>
+</div>
+</body></html>

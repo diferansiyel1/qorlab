@@ -24,20 +24,20 @@ void main() {
         ),
       )
       ..addScenario(
-        'Custom Color (Teal)',
+        'Custom Color (Teal/Success)',
         GloveButton(
           label: 'CUSTOM',
           icon: Icons.timer,
-          backgroundColor: AppColors.tealScience,
+          backgroundColor: AppColors.success,
           onPressed: () {},
         ),
       )
       ..addScenario(
-        'Warning (Red)',
+        'Warning (Red/Alert)',
         GloveButton(
           label: 'DANGER',
           icon: Icons.warning,
-          backgroundColor: AppColors.biohazardRed,
+          backgroundColor: AppColors.alert,
           onPressed: () {},
         ),
       );
@@ -64,11 +64,11 @@ void main() {
             spacing: 10,
             runSpacing: 10,
             children: [
-               _colorBox('Deep Lab Blue', AppColors.deepLabBlue),
-               _colorBox('Sterile White', AppColors.sterileWhite),
-               _colorBox('Teal Science', AppColors.tealScience),
-               _colorBox('Border Dark', AppColors.borderDark),
-               _colorBox('Biohazard Red', AppColors.biohazardRed),
+               _colorBox('Primary (Blue)', AppColors.primary),
+               _colorBox('Text Main', AppColors.textMain),
+               _colorBox('Success (Green)', AppColors.success),
+               _colorBox('Glass Border', AppColors.glassBorder),
+               _colorBox('Alert (Red)', AppColors.alert),
             ],
           ),
         ),
@@ -85,21 +85,21 @@ ThemeData _createOfflineTheme(Brightness brightness) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.deepLabBlue,
+      seedColor: AppColors.primary,
       brightness: brightness,
-      primary: AppColors.deepLabBlue,
-      secondary: AppColors.tealScience,
-      error: AppColors.biohazardRed,
-      surface: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      primary: AppColors.primary,
+      secondary: AppColors.success,
+      error: AppColors.alert,
+      surface: isDark ? AppColors.surface : Colors.white,
     ),
-    scaffoldBackgroundColor: isDark ? AppColors.oledBlack : AppColors.sterileWhite,
+    scaffoldBackgroundColor: isDark ? AppColors.background : Colors.white,
     cardTheme: CardThemeData(
-      color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      color: isDark ? AppColors.surface : Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          color: isDark ? AppColors.glassBorder : Colors.grey.withOpacity(0.3),
           width: 1,
         ),
       ),

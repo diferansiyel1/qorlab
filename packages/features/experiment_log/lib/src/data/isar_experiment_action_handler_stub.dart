@@ -2,12 +2,16 @@ import '../domain/experiment_action_handler.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Provider to track the currently active experiment ID.
+/// Must be set before logging any actions.
+final currentExperimentIdProvider = StateProvider<int?>((ref) => null);
+
 final experimentActionHandlerProvider = Provider<ExperimentActionHandler>((ref) {
   throw UnimplementedError("Use overrideWithValue for ExperimentActionHandler on web");
 });
 
 class IsarExperimentActionHandler implements ExperimentActionHandler {
-  IsarExperimentActionHandler(dynamic _);
+  IsarExperimentActionHandler(dynamic _, dynamic __);
 
   @override
   Future<void> logMolarity({required String chemicalName, required Decimal molecularWeight, required Decimal volumeMl, required Decimal molarity, required Decimal massG}) async {}
@@ -21,3 +25,4 @@ class IsarExperimentActionHandler implements ExperimentActionHandler {
   @override
   Future<void> logNote({required String text}) async {}
 }
+

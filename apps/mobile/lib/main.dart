@@ -20,6 +20,11 @@ import 'package:in_vitro/in_vitro.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:localization/localization.dart';
 import 'home_page.dart';
+import 'features/tools/centrifuge_page.dart';
+import 'features/tools/power_analysis_page.dart';
+import 'features/tools/plate_map_page.dart';
+import 'features/free_mode/free_mode_page.dart';
+import 'features/experiment/new_experiment_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -119,6 +124,10 @@ final _router = GoRouter(
       builder: (context, state) => const HomePage(),
       routes: [
         GoRoute(
+          path: 'experiment/new',
+          builder: (context, state) => const NewExperimentPage(),
+        ),
+        GoRoute(
           path: 'experiment/:id',
           builder: (context, state) {
             final id = int.parse(state.pathParameters['id']!);
@@ -126,6 +135,10 @@ final _router = GoRouter(
             // return ExperimentHistoryPage(experimentId: id);
             return ExperimentTimelinePage(experimentId: id);
           },
+        ),
+        GoRoute(
+          path: 'free-mode',
+          builder: (context, state) => const FreeModePage(),
         ),
         GoRoute(
           path: 'timers',
@@ -138,6 +151,18 @@ final _router = GoRouter(
         GoRoute(
           path: 'in-vitro',
           builder: (context, state) => const MolarityCalculatorPage(),
+        ),
+        GoRoute(
+          path: 'centrifuge',
+          builder: (context, state) => const CentrifugePage(),
+        ),
+        GoRoute(
+          path: 'power-analysis',
+          builder: (context, state) => const PowerAnalysisPage(),
+        ),
+        GoRoute(
+          path: 'plate-map',
+          builder: (context, state) => const PlateMapPage(),
         ),
       ],
     ),

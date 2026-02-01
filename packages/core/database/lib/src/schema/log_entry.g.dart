@@ -15,7 +15,7 @@ extension GetLogEntryCollection on Isar {
 
 const LogEntrySchema = CollectionSchema(
   name: r'LogEntry',
-  id: -8268688274231935295,
+  id: 1,
   properties: {
     r'content': PropertySchema(
       id: 0,
@@ -55,7 +55,7 @@ const LogEntrySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'timestamp': IndexSchema(
-      id: 1852253767416892198,
+      id: 2,
       name: r'timestamp',
       unique: false,
       replace: false,
@@ -68,7 +68,7 @@ const LogEntrySchema = CollectionSchema(
       ],
     ),
     r'experimentId': IndexSchema(
-      id: -2596400929068244875,
+      id: 3,
       name: r'experimentId',
       unique: false,
       replace: false,

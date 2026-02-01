@@ -1,0 +1,22 @@
+# melos_managed_dependency_overrides: chemical_reference,database,experiment_log,in_vitro,in_vivo,localization,math_engine,randomization_engine,smart_timer,ui_kit
+dependency_overrides:
+  chemical_reference:
+    path: ../../packages/core/chemical_reference
+  database:
+    path: ../../packages/core/database
+  experiment_log:
+    path: ../../packages/features/experiment_log
+  in_vitro:
+    path: ../../packages/features/in_vitro
+  in_vivo:
+    path: ../../packages/features/in_vivo
+  localization:
+    path: ../../packages/core/localization
+  math_engine:
+    path: ../../packages/core/math_engine
+  randomization_engine:
+    path: ../../packages/core/randomization_engine
+  smart_timer:
+    path: ../../packages/features/smart_timer
+  ui_kit:
+    path: ../../packages/features/ui_kit

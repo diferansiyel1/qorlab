@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:experiment_log/experiment_log.dart';
 import 'package:database/database.dart'; // For LogEntry
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'widgets/timeline_cards.dart';
 import 'widgets/action_sheet.dart';
 import 'data/timeline_event.dart';
+import 'data/isar_experiment_action_handler.dart';
 
 class ExperimentTimelinePage extends ConsumerWidget {
   final int experimentId;
@@ -16,6 +18,13 @@ class ExperimentTimelinePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Set the current experiment ID for action handlers
+    Future.microtask(() {
+      if (context.mounted) {
+        ref.read(currentExperimentIdProvider.notifier).state = experimentId;
+      }
+    });
+    
     final repository = ref.watch(experimentRepositoryProvider);
     final logsAsync = repository.watchLogs(experimentId);
 
@@ -66,12 +75,26 @@ class ExperimentTimelinePage extends ConsumerWidget {
                     ],
                   ),
                   const Spacer(),
-                  const Icon(Icons.mic_rounded, color: AppColors.accent),
+                  Builder(
+                    builder: (iconContext) {
+                      return GestureDetector(
+                        onTap: () {
+                          final box = iconContext.findRenderObject() as RenderBox?;
+                          Rect? origin;
+                          if (box != null) {
+                            origin = box.localToGlobal(Offset.zero) & box.size;
+                          }
+                          _exportAndShare(context, repository, sharePositionOrigin: origin);
+                        },
+                        child: const Icon(Icons.share_rounded, color: AppColors.accent),
+                      );
+                    }
+                  ),
                 ],
               ),
             ),
             
-            // 2. Timeline Stream
+            // 2. Timeline List
             Expanded(
               child: StreamBuilder<List<LogEntry>>(
                 stream: logsAsync,
@@ -87,22 +110,20 @@ class ExperimentTimelinePage extends ConsumerWidget {
                   if (logs.isEmpty) {
                     return Center(
                       child: Text(
-                        "No events yet.\nTap + to start.",
+                        'No logs yet.\nTap + to add.',
                         textAlign: TextAlign.center,
                         style: AppTypography.labelMedium.copyWith(color: AppColors.textMuted),
                       ),
                     );
                   }
-
-                  return ListView.builder(
+                  
+                  return ListView.separated(
                     padding: const EdgeInsets.all(24),
                     itemCount: logs.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       final log = logs[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: TimelineCard(event: _mapToEvent(log)),
-                      );
+                      return TimelineCard(event: _mapToEvent(log));
                     },
                   );
                 },
@@ -116,7 +137,7 @@ class ExperimentTimelinePage extends ConsumerWidget {
           showModalBottomSheet(
             context: context,
             backgroundColor: Colors.transparent,
-            builder: (context) => const ActionSheet(),
+            builder: (context) => ActionSheet(experimentId: experimentId),
           );
         },
         backgroundColor: AppColors.primary,
@@ -129,7 +150,7 @@ class ExperimentTimelinePage extends ConsumerWidget {
     final timeStr = DateFormat('HH:mm').format(log.timestamp);
     
     // Mapping logic
-    if (log.type == 'dose') {
+    if (log.type == 'dose' || log.type == 'data_dose') {
        // "Dose: IP 10mg/kg of DrugX" (Need parsing metadata ideally, but using content for now)
        // Content format from DoseLogger: "Dose: Route Species..."
        return TimelineEvent.dose(
@@ -138,11 +159,17 @@ class ExperimentTimelinePage extends ConsumerWidget {
          dose: log.content, // Shows the full string
          route: "",
        );
-    } else if (log.type == 'data') {
+    } else if (log.type == 'data' || log.type == 'data_molarity') {
        return TimelineEvent.result(
          time: timeStr,
          title: "Data Log",
          value: log.content,
+       );
+    } else if (log.type == 'photo') {
+       // Content contains the photo path
+       return TimelineEvent.photo(
+         time: timeStr,
+         photoPath: log.content,
        );
     }
     
@@ -151,5 +178,74 @@ class ExperimentTimelinePage extends ConsumerWidget {
       time: timeStr,
       text: log.content,
     );
+  }
+
+  Future<void> _exportAndShare(BuildContext context, dynamic repository, {Rect? sharePositionOrigin}) async {
+    try {
+      // Get all logs for this experiment
+      final stream = repository.watchLogs(experimentId);
+      final logs = await stream.first;
+      
+      if (logs.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No logs to export')),
+          );
+        }
+        return;
+      }
+      
+      // Format export text
+      final buffer = StringBuffer();
+      buffer.writeln('═══════════════════════════════════');
+      buffer.writeln('QORLAB EXPERIMENT REPORT');
+      buffer.writeln('═══════════════════════════════════');
+      buffer.writeln('Experiment: #$experimentId');
+      buffer.writeln('Date: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}');
+      buffer.writeln('Total Events: ${logs.length}');
+      buffer.writeln('───────────────────────────────────');
+      buffer.writeln('');
+      
+      for (final log in logs) {
+        final timeStr = DateFormat('HH:mm').format(log.timestamp);
+        final typeLabel = _getTypeLabel(log.type);
+        
+        buffer.writeln('[$timeStr] $typeLabel');
+        
+        if (log.type == 'photo') {
+          buffer.writeln('  📷 Photo attached');
+        } else {
+          buffer.writeln('  ${log.content}');
+        }
+        buffer.writeln('');
+      }
+      
+      buffer.writeln('───────────────────────────────────');
+      buffer.writeln('Exported from QorLab');
+      
+      await Share.share(
+        buffer.toString(), 
+        subject: 'Experiment #$experimentId Report',
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    }
+  }
+
+  String _getTypeLabel(String type) {
+    switch (type) {
+      case 'voice': return '🎤 Voice Note';
+      case 'text': return '📝 Note';
+      case 'photo': return '📷 Photo';
+      case 'parameter': return '📊 Parameter';
+      case 'data_dose': return '💉 Dose';
+      case 'data_molarity': return '🧪 Molarity';
+      default: return '📌 Event';
+    }
   }
 }

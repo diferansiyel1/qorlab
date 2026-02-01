@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+/// Glass morphism container widget matching stich design
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double? width;
@@ -10,6 +11,8 @@ class GlassContainer extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
   final bool active;
+  final Color? accentColor;
+  final bool showBottomAccent;
 
   const GlassContainer({
     super.key,
@@ -20,31 +23,66 @@ class GlassContainer extends StatelessWidget {
     this.margin,
     this.onTap,
     this.active = false,
+    this.accentColor,
+    this.showBottomAccent = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveAccent = accentColor ?? AppColors.primary;
+
     return Container(
       margin: margin,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: GestureDetector(
             onTap: onTap,
             child: Container(
               width: width,
               height: height,
-              padding: padding ?? const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.glassBackground,
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: active ? AppColors.accent : AppColors.glassBorder,
+                  color: active ? effectiveAccent : AppColors.glassBorder,
                   width: active ? 2 : 1,
                 ),
+                boxShadow: active ? AppColors.primaryGlow : null,
               ),
-              child: child,
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: padding ?? const EdgeInsets.all(16),
+                    child: child,
+                  ),
+                  // Bottom accent gradient line (from stich metric cards)
+                  if (showBottomAccent)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        height: 3,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              effectiveAccent,
+                              effectiveAccent.withOpacity(0),
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

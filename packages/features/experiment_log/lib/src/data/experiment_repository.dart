@@ -6,22 +6,24 @@ final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((re
   return ExperimentRepository(ref.watch(isarProvider).value!);
 });
 
+final experimentsProvider = StreamProvider<List<Experiment>>((ref) {
+  final repository = ref.watch(experimentRepositoryProvider);
+  return repository.watchExperiments();
+});
+
 class ExperimentRepository implements ExperimentRepositoryInterface {
   final Isar _isar;
 
   ExperimentRepository(this._isar);
 
-  Future<void> createExperiment(String title) async {
-    final experiment = Experiment()
-      ..title = title
-      ..createdAt = DateTime.now()
-      ..isActive = true;
-
+  @override
+  Future<void> createExperiment(Experiment experiment) async {
     await _isar.writeTxn(() async {
-      await _isar.experiments.put(experiment);
+      await _isar.collection<Experiment>().put(experiment);
     });
   }
 
+  @override
   Future<void> addLog(int experimentId, String content, String type) async {
     final log = LogEntry()
       ..experimentId = experimentId
@@ -30,15 +32,21 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
       ..type = type;
 
     await _isar.writeTxn(() async {
-      await _isar.logEntrys.put(log);
+      await _isar.collection<LogEntry>().put(log);
     });
   }
 
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) {
-    return _isar.logEntrys
+    return _isar.collection<LogEntry>()
         .filter()
         .experimentIdEqualTo(experimentId)
         .sortByTimestampDesc()
         .watch(fireImmediately: true);
+  }
+
+  @override
+  Stream<List<Experiment>> watchExperiments() {
+    return _isar.collection<Experiment>().where().sortByCreatedAtDesc().watch(fireImmediately: true);
   }
 }

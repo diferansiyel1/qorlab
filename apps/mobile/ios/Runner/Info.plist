@@ -49,6 +49,10 @@
 	<string>This app needs access to microphone to record voice notes for experiments.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app needs access to speech recognition to transcribe voice notes.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to camera to capture experiment photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to photo library to save experiment photos.</string>
 </dict>
 
 </plist>

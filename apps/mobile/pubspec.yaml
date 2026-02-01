@@ -59,6 +59,7 @@ dependencies:
     path: ../../packages/core/chemical_reference
   randomization_engine:
     path: ../../packages/core/randomization_engine
+  package_info_plus: ^9.0.0
 
 
 
