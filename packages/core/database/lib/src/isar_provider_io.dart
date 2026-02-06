@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'schema/experiment.dart';
 import 'schema/log_entry.dart';
+import 'schema/measurement_point.dart';
+import 'schema/measurement_series.dart';
 
 const String _isarName = 'qorlab';
 
@@ -31,7 +33,12 @@ final isarProvider = FutureProvider<Isar>((ref) async {
 
   Future<Isar> open() {
     return Isar.open(
-      [ExperimentSchema, LogEntrySchema],
+      [
+        ExperimentSchema,
+        LogEntrySchema,
+        MeasurementSeriesSchema,
+        MeasurementPointSchema,
+      ],
       directory: isarDir.path,
       name: _isarName,
       inspector: kDebugMode,
