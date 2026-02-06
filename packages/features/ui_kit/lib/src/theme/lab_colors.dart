@@ -11,8 +11,6 @@ abstract class LabColors {
 
   static Brightness get brightness => _brightness;
 
-  static bool get _isDark => _brightness == Brightness.dark;
-
   static Color backgroundFor(Brightness brightness) {
     return brightness == Brightness.dark
         ? const Color(0xFF000000)

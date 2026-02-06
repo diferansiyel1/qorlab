@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -22,12 +23,23 @@ class AppLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
+            // Ambient background: subtle iridescent blobs for a "liquid crystal" feel.
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _AmbientPainter(
+                  brightness: brightness,
+                  primary: AppColors.primary,
+                ),
+              ),
+            ),
+
             // Main Content
             Padding(
               padding: const EdgeInsets.only(bottom: 90),
@@ -50,7 +62,7 @@ class AppLayout extends StatelessWidget {
                       right: 24,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withOpacity(0.95),
+                      color: AppColors.glassBackground,
                       border: Border(
                         top: BorderSide(
                           color: AppColors.glassBorder,
@@ -119,6 +131,79 @@ class AppLayout extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AmbientPainter extends CustomPainter {
+  final Brightness brightness;
+  final Color primary;
+
+  const _AmbientPainter({
+    required this.brightness,
+    required this.primary,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final isDark = brightness == Brightness.dark;
+    canvas.drawRect(Offset.zero & size, Paint()..color = AppColors.background);
+
+    // Very subtle iridescent blobs. They should be felt, not seen.
+    final blobs = <_BlobSpec>[
+      _BlobSpec(
+        center: Offset(size.width * 0.15, size.height * 0.08),
+        radius: math.min(size.width, size.height) * 0.55,
+        color: primary.withOpacity(isDark ? 0.10 : 0.08),
+      ),
+      _BlobSpec(
+        center: Offset(size.width * 0.92, size.height * 0.22),
+        radius: math.min(size.width, size.height) * 0.42,
+        color: const Color(0xFF64D2FF).withOpacity(isDark ? 0.06 : 0.05),
+      ),
+      _BlobSpec(
+        center: Offset(size.width * 0.55, size.height * 0.92),
+        radius: math.min(size.width, size.height) * 0.65,
+        color: const Color(0xFFFFD6A5).withOpacity(isDark ? 0.00 : 0.08),
+      ),
+    ];
+
+    for (final blob in blobs) {
+      if (blob.color.alpha == 0) continue;
+      final paint = Paint()
+        ..color = blob.color
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 60);
+      canvas.drawCircle(blob.center, blob.radius, paint);
+    }
+
+    // Gentle top-to-bottom fade for contrast under the nav bar.
+    final fade = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.transparent,
+          (isDark ? Colors.black : Colors.black).withOpacity(isDark ? 0.18 : 0.06),
+        ],
+        stops: const [0.65, 1.0],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, fade);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AmbientPainter oldDelegate) {
+    return oldDelegate.brightness != brightness || oldDelegate.primary != primary;
+  }
+}
+
+class _BlobSpec {
+  final Offset center;
+  final double radius;
+  final Color color;
+
+  const _BlobSpec({
+    required this.center,
+    required this.radius,
+    required this.color,
+  });
 }
 
 class _BottomBarItem extends StatelessWidget {

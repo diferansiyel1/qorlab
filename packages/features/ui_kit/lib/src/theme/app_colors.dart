@@ -58,27 +58,28 @@ class AppPalette {
         ),
         neonGlow = [
           BoxShadow(
-            color: primary.withOpacity(brightness == Brightness.dark ? 0.22 : 0.14),
+            // Softer than the previous "neon" look; closer to iOS glass glow.
+            color: primary.withOpacity(brightness == Brightness.dark ? 0.16 : 0.08),
             blurRadius: 12,
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: primary.withOpacity(brightness == Brightness.dark ? 0.12 : 0.08),
-            blurRadius: 24,
+            color: primary.withOpacity(brightness == Brightness.dark ? 0.08 : 0.04),
+            blurRadius: 28,
             spreadRadius: 0,
           ),
         ],
         primaryGlow = [
           BoxShadow(
-            color: primary.withOpacity(brightness == Brightness.dark ? 0.28 : 0.18),
-            blurRadius: 16,
+            color: primary.withOpacity(brightness == Brightness.dark ? 0.18 : 0.10),
+            blurRadius: 18,
             spreadRadius: 0,
           ),
         ],
         alertGlow = [
           BoxShadow(
-            color: alert.withOpacity(brightness == Brightness.dark ? 0.5 : 0.25),
-            blurRadius: 12,
+            color: alert.withOpacity(brightness == Brightness.dark ? 0.34 : 0.18),
+            blurRadius: 14,
             spreadRadius: 0,
           ),
         ];
@@ -89,11 +90,15 @@ class AppPalettes {
     brightness: Brightness.light,
     background: const Color(0xFFF2F2F7),
     surface: const Color(0xFFFFFFFF),
-    surfaceHighlight: const Color(0xFFF5F5FA),
-    inputSurface: const Color(0xFFF7F7FA),
-    glassBackground: const Color(0x0D000000),
-    glassBorder: const Color(0xFFC6C6C8),
-    glassSelection: const Color(0x33000000),
+    // Cool-tinted highlight to avoid "flat gray" backgrounds.
+    surfaceHighlight: const Color(0xFFF7F9FF),
+    inputSurface: const Color(0xFFF8FAFF),
+    // Glass fill used with BackdropFilter. Keep translucent and slightly cool.
+    glassBackground: const Color(0xCCFFFFFF),
+    // Slightly softer separators for a "liquid crystal" edge.
+    glassBorder: const Color(0x99C6C6C8),
+    // Selection tint leans into the accent, used sparingly.
+    glassSelection: const Color(0x1A0A84FF),
     primary: const Color(0xFF0A84FF),
     primaryDark: const Color(0xFF0060DF),
     accent: const Color(0xFF0A84FF),
@@ -113,11 +118,12 @@ class AppPalettes {
     brightness: Brightness.dark,
     background: const Color(0xFF000000),
     surface: const Color(0xFF1C1C1E),
-    surfaceHighlight: const Color(0xFF2C2C2E),
-    inputSurface: const Color(0xFF2C2C2E),
-    glassBackground: const Color(0x0FFFFFFF),
-    glassBorder: const Color(0xFF38383A),
-    glassSelection: const Color(0x66FFFFFF),
+    surfaceHighlight: const Color(0xFF232325),
+    inputSurface: const Color(0xFF232325),
+    // Translucent dark glass to show blur and depth on OLED.
+    glassBackground: const Color(0x991C1C1E),
+    glassBorder: const Color(0x9938383A),
+    glassSelection: const Color(0x260A84FF),
     primary: const Color(0xFF0A84FF),
     primaryDark: const Color(0xFF0060DF),
     accent: const Color(0xFF0A84FF),

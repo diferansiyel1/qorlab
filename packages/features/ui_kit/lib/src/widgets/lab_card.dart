@@ -17,10 +17,25 @@ class LabCard extends StatelessWidget {
     this.color,
   });
 
+  LinearGradient _sheenGradient(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white.withAlpha(isDark ? 14 : 30),
+        Colors.transparent,
+        Colors.black.withAlpha(isDark ? 22 : 12),
+      ],
+      stops: const [0.0, 0.55, 1.0],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    LabColors.setBrightness(Theme.of(context).brightness);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = Theme.of(context).brightness;
+    LabColors.setBrightness(brightness);
+    final isDark = brightness == Brightness.dark;
 
     return Container(
       margin: margin,
@@ -41,7 +56,21 @@ class LabCard extends StatelessWidget {
             ? Border.all(color: LabColors.divider, width: 1)
             : null,
       ),
-      child: child,
+      child: Stack(
+        children: [
+          child,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: _sheenGradient(brightness),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
