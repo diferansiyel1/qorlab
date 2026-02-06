@@ -24,5 +24,6 @@
     "calculate": "CALCULATE",
     "saveToLog": "SAVE TO LOG",
     "savedToExperimentLog": "Saved to Experiment Log",
-    "invalidNumbers": "Invalid Numbers"
+    "invalidNumbers": "Invalid Numbers",
+    "noActiveExperiment": "No active experiment. Open one to log."
 }

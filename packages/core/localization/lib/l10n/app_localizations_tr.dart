@@ -82,4 +82,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get invalidNumbers => 'Geçersiz Değerler';
+
+  @override
+  String get noActiveExperiment => 'Aktif deney yok. Loglamak için bir deney aç.';
 }

@@ -24,6 +24,7 @@ void main() {
   test('Create Experiment and Add Log', () async {
     final experiment = Experiment()
       ..title = 'Test Exp'
+      ..code = 'TST-001'
       ..createdAt = DateTime.now();
 
     await isar.writeTxn(() async {

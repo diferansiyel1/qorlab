@@ -1,33 +1,32 @@
-import 'dart:convert';
 import 'package:decimal/decimal.dart';
 import 'package:database/database.dart';
+import 'package:experiment_domain/experiment_domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import '../domain/experiment_action_handler.dart';
-
-/// Provider to track the currently active experiment ID.
-/// Must be set before logging any actions.
-final currentExperimentIdProvider = StateProvider<int?>((ref) => null);
+import 'isar_experiment_event_logger.dart';
+import '../application/active_experiment_id.dart';
 
 final experimentActionHandlerProvider = Provider<ExperimentActionHandler>((ref) {
   final isarAsync = ref.watch(isarProvider);
   if (!isarAsync.hasValue) {
     throw StateError("Isar database not initialized");
   }
-  return IsarExperimentActionHandler(isarAsync.value!, ref);
+  final eventLogger = IsarExperimentEventLogger(isarAsync.value!);
+  return IsarExperimentActionHandler(eventLogger, ref);
 });
 
 class IsarExperimentActionHandler implements ExperimentActionHandler {
-  final Isar _isar;
+  final ExperimentEventLogger _logger;
   final Ref _ref;
 
-  IsarExperimentActionHandler(this._isar, this._ref);
+  IsarExperimentActionHandler(this._logger, this._ref);
 
   int get _experimentId {
-    final id = _ref.read(currentExperimentIdProvider);
+    final id = _ref.read(activeExperimentIdProvider);
     if (id == null || id <= 0) {
       throw StateError(
-        'No active experiment. Set currentExperimentIdProvider before logging.',
+        'No active experiment. Set activeExperimentIdProvider before logging.',
       );
     }
     return id;
@@ -41,22 +40,23 @@ class IsarExperimentActionHandler implements ExperimentActionHandler {
     required Decimal molarity,
     required Decimal massG,
   }) async {
-    final entry = LogEntry()
-      ..timestamp = DateTime.now()
-      ..experimentId = _experimentId
-      ..type = 'data_molarity'
-      ..content = 'Molarity Calculation: $chemicalName'
-      ..metadata = jsonEncode({
-        'chemicalName': chemicalName,
-        'molecularWeight': molecularWeight.toString(),
-        'volumeMl': volumeMl.toString(),
-        'molarity': molarity.toString(),
-        'massG': massG.toString(),
-      });
-
-    await _isar.writeTxn(() async {
-      await _isar.collection<LogEntry>().put(entry);
-    });
+    await _logger.logEvent(
+      ExperimentEvent(
+        experimentId: _experimentId,
+        occurredAt: DateTime.now(),
+        payloadVersion: 1,
+        kind: ExperimentEventKind.calculation,
+        type: 'data_molarity',
+        summary: 'Molarity Calculation: $chemicalName',
+        payload: {
+          'chemicalName': chemicalName,
+          'molecularWeight': ExperimentEvent.dec(molecularWeight),
+          'volumeMl': ExperimentEvent.dec(volumeMl),
+          'molarity': ExperimentEvent.dec(molarity),
+          'massG': ExperimentEvent.dec(massG),
+        },
+      ),
+    );
   }
 
   @override
@@ -69,52 +69,54 @@ class IsarExperimentActionHandler implements ExperimentActionHandler {
     required Decimal volumeMl,
     required bool isSafe,
   }) async {
-    final entry = LogEntry()
-      ..timestamp = DateTime.now()
-      ..experimentId = _experimentId
-      ..type = 'data_dose'
-      ..content = 'Dose Calculation for $species'
-      ..metadata = jsonEncode({
-        'species': species,
-        'route': route,
-        'weightG': weightG.toString(),
-        'doseMgPerKg': doseMgPerKg.toString(),
-        'concentrationMgMl': concentrationMgMl.toString(),
-        'volumeMl': volumeMl.toString(),
-        'isSafe': isSafe,
-      });
-
-    await _isar.writeTxn(() async {
-      await _isar.collection<LogEntry>().put(entry);
-    });
+    await _logger.logEvent(
+      ExperimentEvent(
+        experimentId: _experimentId,
+        occurredAt: DateTime.now(),
+        payloadVersion: 1,
+        kind: ExperimentEventKind.calculation,
+        type: 'data_dose',
+        summary: 'Dose Calculation for $species',
+        payload: {
+          'species': species,
+          'route': route,
+          'weightG': ExperimentEvent.dec(weightG),
+          'doseMgPerKg': ExperimentEvent.dec(doseMgPerKg),
+          'concentrationMgMl': ExperimentEvent.dec(concentrationMgMl),
+          'volumeMl': ExperimentEvent.dec(volumeMl),
+          'isSafe': isSafe,
+        },
+      ),
+    );
   }
 
   @override
   Future<void> logVoiceNote({required String text}) async {
-    final entry = LogEntry()
-      ..timestamp = DateTime.now()
-      ..experimentId = _experimentId
-      ..type = 'voice'
-      ..content = text
-      ..metadata = jsonEncode({});
-
-    await _isar.writeTxn(() async {
-      await _isar.collection<LogEntry>().put(entry);
-    });
+    await _logger.logEvent(
+      ExperimentEvent(
+        experimentId: _experimentId,
+        occurredAt: DateTime.now(),
+        payloadVersion: 1,
+        kind: ExperimentEventKind.voice,
+        type: 'voice',
+        summary: text,
+        payload: const {},
+      ),
+    );
   }
 
   @override
   Future<void> logNote({required String text}) async {
-    final entry = LogEntry()
-      ..timestamp = DateTime.now()
-      ..experimentId = _experimentId
-      ..type = 'text'
-      ..content = text
-      ..metadata = jsonEncode({});
-
-    await _isar.writeTxn(() async {
-      await _isar.collection<LogEntry>().put(entry);
-    });
+    await _logger.logEvent(
+      ExperimentEvent(
+        experimentId: _experimentId,
+        occurredAt: DateTime.now(),
+        payloadVersion: 1,
+        kind: ExperimentEventKind.text,
+        type: 'text',
+        summary: text,
+        payload: const {},
+      ),
+    );
   }
 }
-

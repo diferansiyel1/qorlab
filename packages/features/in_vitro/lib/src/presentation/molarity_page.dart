@@ -176,17 +176,54 @@ class _MolarityCalculatorPageState extends ConsumerState<MolarityCalculatorPage>
                      label: AppLocalizations.of(context)!.logThis,
                      icon: Icons.history_edu,
                      backgroundColor: AppColors.primary,
-                     onPressed: (state.massG != null) ? () {
-                        // Log using the logger port
-                        ref.read(molarityLoggerProvider).logResult(
-                          chemicalName: _selectedChemical?.name ?? 'Unknown',
-                          molecularWeight: ref.read(molarityControllerProvider).molecularWeight ?? Decimal.zero,
-                          volumeMl: ref.read(molarityControllerProvider).volumeL != null ? (ref.read(molarityControllerProvider).volumeL! * Decimal.fromInt(1000)) : Decimal.zero,
-                          molarity: ref.read(molarityControllerProvider).molarity ?? Decimal.zero,
-                          massG: state.massG!,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savedToLog)));
-                     } : null, // Disable if no result
+                     onPressed: (state.massG != null)
+                         ? () async {
+                             try {
+                               await ref.read(molarityLoggerProvider).logResult(
+                                     chemicalName:
+                                         _selectedChemical?.name ?? 'Unknown',
+                                     molecularWeight: ref
+                                             .read(molarityControllerProvider)
+                                             .molecularWeight ??
+                                         Decimal.zero,
+                                     volumeMl: ref
+                                                 .read(molarityControllerProvider)
+                                                 .volumeL !=
+                                             null
+                                         ? (ref
+                                                 .read(molarityControllerProvider)
+                                                 .volumeL! *
+                                             Decimal.fromInt(1000))
+                                         : Decimal.zero,
+                                     molarity: ref
+                                             .read(molarityControllerProvider)
+                                             .molarity ??
+                                         Decimal.zero,
+                                     massG: state.massG!,
+                                   );
+                               if (context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   SnackBar(
+                                     content: Text(
+                                       AppLocalizations.of(context)!.savedToLog,
+                                     ),
+                                   ),
+                                 );
+                               }
+                             } catch (_) {
+                               if (context.mounted) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   SnackBar(
+                                     content: Text(
+                                       AppLocalizations.of(context)!
+                                           .noActiveExperiment,
+                                     ),
+                                   ),
+                                 );
+                               }
+                             }
+                           }
+                         : null, // Disable if no result
                    ),
                 ],
               ),

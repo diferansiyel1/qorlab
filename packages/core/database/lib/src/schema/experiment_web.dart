@@ -13,8 +13,13 @@ class Experiment {
 
   late DateTime createdAt;
 
+  DateTime? startedAt;
+
+  DateTime? endedAt;
+
+  DateTime? lastEventAt;
+
   bool isActive = true;
 
   Experiment();
 }
-

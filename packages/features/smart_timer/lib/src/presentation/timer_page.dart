@@ -35,11 +35,29 @@ class TimerPage extends ConsumerWidget {
                         onResume: () => controller.startTimer(timer.id),
                         onStop: () => controller.stopTimer(timer.id),
                         onLog: () {
-                          ref.read(timerLoggerProvider).logTimerFinished(
-                            label: timer.label, 
-                            duration: timer.duration
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Timer logged to experiment')));
+                          () async {
+                            try {
+                              await ref.read(timerLoggerProvider).logTimerFinished(
+                                    label: timer.label,
+                                    duration: timer.duration,
+                                  );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Timer logged to experiment'),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('No active experiment to log into: $e'),
+                                  ),
+                                );
+                              }
+                            }
+                          }();
                         },
                       );
                     },

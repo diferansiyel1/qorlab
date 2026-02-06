@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui_kit/ui_kit.dart';
@@ -10,7 +12,6 @@ import 'package:share_plus/share_plus.dart';
 import 'widgets/timeline_cards.dart';
 import 'widgets/action_sheet.dart';
 import 'data/timeline_event.dart';
-import 'data/isar_experiment_action_handler.dart';
 
 class ExperimentTimelinePage extends ConsumerStatefulWidget {
   final int experimentId;
@@ -23,6 +24,12 @@ class ExperimentTimelinePage extends ConsumerStatefulWidget {
 class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage> {
   _NotebookBackground _background = _NotebookBackground.grid;
 
+  @override
+  void initState() {
+    super.initState();
+    ref.read(activeExperimentIdProvider.notifier).set(widget.experimentId);
+  }
+
   void _cycleBackground() {
     setState(() {
       _background = _background.next();
@@ -31,15 +38,10 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
 
   @override
   Widget build(BuildContext context) {
-    // Set the current experiment ID for action handlers
-    Future.microtask(() {
-      if (context.mounted) {
-        ref.read(currentExperimentIdProvider.notifier).state = widget.experimentId;
-      }
-    });
-    
     final repository = ref.watch(experimentRepositoryProvider);
     final logsAsync = repository.watchLogs(widget.experimentId);
+    final inkBlue = Color.lerp(AppColors.textMuted, AppColors.primary, 0.78) ?? AppColors.primary;
+    final inkGreen = Color.lerp(AppColors.textMuted, AppColors.success, 0.72) ?? AppColors.success;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -52,85 +54,94 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
             child: Column(
               children: [
                 // 1. Sticky Header
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.background.withOpacity(0.82),
-                    border: Border(
-                      bottom: BorderSide(color: AppColors.glassBorder),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: AppColors.textMain,
-                          size: 20,
+                ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.glassBackground,
+                        border: Border(
+                          bottom: BorderSide(color: AppColors.glassBorder),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            'Experiment #${widget.experimentId}',
-                            style: AppTypography.headlineMedium.copyWith(fontSize: 18),
+                          GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: AppColors.textMain,
+                              size: 20,
+                            ),
                           ),
-                          Row(
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
                               Text(
-                                'Active', // Could calculate duration here
-                                style: AppTypography.dataSmall.copyWith(color: AppColors.primary),
+                                'Experiment #${widget.experimentId}',
+                                style: AppTypography.headlineMedium.copyWith(fontSize: 18),
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: inkGreen,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Active', // Could calculate duration here
+                                    style: AppTypography.dataSmall.copyWith(color: inkGreen),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: _cycleBackground,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface.withOpacity(0.74),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.glassBorder),
+                              ),
+                              child: Icon(
+                                _background.icon,
+                                size: 18,
+                                color: AppColors.textMain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Builder(
+                            builder: (iconContext) {
+                              return GestureDetector(
+                                onTap: () {
+                                  final box = iconContext.findRenderObject() as RenderBox?;
+                                  Rect? origin;
+                                  if (box != null) {
+                                    origin = box.localToGlobal(Offset.zero) & box.size;
+                                  }
+                                  _exportAndShare(
+                                    context,
+                                    repository,
+                                    sharePositionOrigin: origin,
+                                  );
+                                },
+                                child: Icon(Icons.share_rounded, color: inkBlue),
+                              );
+                            },
+                          ),
                         ],
                       ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _cycleBackground,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface.withOpacity(0.92),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.glassBorder),
-                          ),
-                          child: Icon(
-                            _background.icon,
-                            size: 18,
-                            color: AppColors.textMain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Builder(
-                        builder: (iconContext) {
-                          return GestureDetector(
-                            onTap: () {
-                              final box = iconContext.findRenderObject() as RenderBox?;
-                              Rect? origin;
-                              if (box != null) {
-                                origin = box.localToGlobal(Offset.zero) & box.size;
-                              }
-                              _exportAndShare(context, repository, sharePositionOrigin: origin);
-                            },
-                            child: Icon(Icons.share_rounded, color: AppColors.accent),
-                          );
-                        },
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
@@ -195,29 +206,65 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
 
   TimelineEvent _mapToEvent(LogEntry log) {
     final timeStr = DateFormat('HH:mm').format(log.timestamp);
+
+    Map<String, Object?> payload = const {};
+    final raw = log.metadata;
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          payload = decoded;
+        }
+      } catch (_) {}
+    }
     
-    // Mapping logic
-    if (log.type == 'dose' || log.type == 'data_dose') {
-       // "Dose: IP 10mg/kg of DrugX" (Need parsing metadata ideally, but using content for now)
-       // Content format from DoseLogger: "Dose: Route Species..."
-       return TimelineEvent.dose(
-         time: timeStr,
-         drug: "Compound", // TODO: Parse from metadata
-         dose: log.content, // Shows the full string
-         route: "",
-       );
-    } else if (log.type == 'data' || log.type == 'data_molarity') {
-       return TimelineEvent.result(
-         time: timeStr,
-         title: "Data Log",
-         value: log.content,
-       );
-    } else if (log.type == 'photo') {
-       // Content contains the photo path
-       return TimelineEvent.photo(
-         time: timeStr,
-         photoPath: log.content,
-       );
+    final kind = (log.kind ?? '').toLowerCase();
+
+    if (log.type == 'data_dose' || kind == 'calculation') {
+      if (log.type == 'data_dose') {
+        final species = (payload['species']?.toString() ?? 'Unknown');
+        final route = (payload['route']?.toString() ?? '');
+        final doseMgPerKg = payload['doseMgPerKg']?.toString();
+        final volumeMl = payload['volumeMl']?.toString();
+
+        final doseLabel = [
+          if (doseMgPerKg != null) '$doseMgPerKg mg/kg',
+          if (volumeMl != null) '$volumeMl mL',
+        ].join(' · ');
+
+        return TimelineEvent.dose(
+          time: timeStr,
+          drug: species,
+          dose: doseLabel.isEmpty ? log.content : doseLabel,
+          route: route,
+        );
+      }
+    }
+
+    if (log.type == 'data_molarity') {
+      final chemicalName = payload['chemicalName']?.toString() ?? 'Unknown';
+      final massG = payload['massG']?.toString();
+      final volumeMl = payload['volumeMl']?.toString();
+      final molarity = payload['molarity']?.toString();
+
+      final value = [
+        if (massG != null) '$massG g',
+        if (volumeMl != null) '$volumeMl mL',
+        if (molarity != null) '$molarity M',
+      ].join(' · ');
+
+      return TimelineEvent.result(
+        time: timeStr,
+        title: 'Molarity: $chemicalName',
+        value: value.isEmpty ? log.content : value,
+      );
+    }
+
+    if (log.type == 'photo' || kind == 'photo') {
+      return TimelineEvent.photo(
+        time: timeStr,
+        photoPath: log.photoPath ?? log.content,
+      );
     }
     
     // Default to Note
@@ -255,11 +302,11 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
       
       for (final log in logs) {
         final timeStr = DateFormat('HH:mm').format(log.timestamp);
-        final typeLabel = _getTypeLabel(log.type);
+        final typeLabel = _getTypeLabel(log.kind ?? log.type);
         
         buffer.writeln('[$timeStr] $typeLabel');
         
-        if (log.type == 'photo') {
+        if ((log.kind ?? log.type) == 'photo') {
           buffer.writeln('  📷 Photo attached');
         } else {
           buffer.writeln('  ${log.content}');
@@ -284,15 +331,26 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
     }
   }
 
-  String _getTypeLabel(String type) {
-    switch (type) {
-      case 'voice': return '🎤 Voice Note';
-      case 'text': return '📝 Note';
-      case 'photo': return '📷 Photo';
-      case 'parameter': return '📊 Parameter';
-      case 'data_dose': return '💉 Dose';
-      case 'data_molarity': return '🧪 Molarity';
-      default: return '📌 Event';
+  String _getTypeLabel(String typeOrKind) {
+    switch (typeOrKind) {
+      case 'voice':
+        return '🎤 Voice Note';
+      case 'text':
+        return '📝 Note';
+      case 'photo':
+        return '📷 Photo';
+      case 'timer':
+        return '⏱️ Timer';
+      case 'measurement':
+        return '📈 Measurement';
+      case 'calculation':
+        return '🧮 Calculation';
+      case 'data_dose':
+        return '💉 Dose';
+      case 'data_molarity':
+        return '🧪 Molarity';
+      default:
+        return '📌 Event';
     }
   }
 }
@@ -364,10 +422,10 @@ class _NotebookGridPainter extends CustomPainter {
 
     if (!isDark) {
       // Warm wash to give "paper" feeling without overpowering the UI.
-      const paper = Color(0xFFFFE6A3);
+      const paper = Color(0xFFFFE2A1);
       canvas.drawRect(
         Offset.zero & size,
-        Paint()..color = paper.withOpacity(0.34),
+        Paint()..color = paper.withOpacity(0.54),
       );
     }
 
@@ -377,10 +435,10 @@ class _NotebookGridPainter extends CustomPainter {
 
     final major = isDark
         ? AppColors.glassBorder.withOpacity(0.20)
-        : const Color(0xFFC7A24A).withOpacity(0.22);
+        : const Color(0xFFB58B24).withOpacity(0.26);
     final minor = isDark
         ? AppColors.glassBorder.withOpacity(0.12)
-        : const Color(0xFFE7D08A).withOpacity(0.14);
+        : const Color(0xFFE5CC83).withOpacity(0.17);
 
     final paint = Paint()
       ..style = PaintingStyle.stroke
@@ -401,6 +459,28 @@ class _NotebookGridPainter extends CustomPainter {
     }
 
     if (!isDark) {
+      // Paper "fiber" speckle: extremely subtle, deterministic, and cheap.
+      const step = 18.0;
+      final cols = (size.width / step).ceil();
+      final rows = (size.height / step).ceil();
+      final specklePaint = Paint()
+        ..color = const Color(0xFF6B5A2E).withOpacity(0.028)
+        ..style = PaintingStyle.fill;
+
+      for (int r = 0; r <= rows; r++) {
+        for (int c = 0; c <= cols; c++) {
+          final h = (c * 73856093) ^ (r * 19349663);
+          // Only draw a few dots; keeps it light and "printed" rather than noisy.
+          if ((h % 17) != 0) continue;
+
+          final jitterX = ((h >> 4) & 0x7) * 0.7;
+          final jitterY = ((h >> 7) & 0x7) * 0.7;
+          final x = (c * step) + jitterX;
+          final y = (r * step) + jitterY;
+          canvas.drawCircle(Offset(x, y), 0.55, specklePaint);
+        }
+      }
+
       // Subtle vignette to reduce "flatness" while keeping it clinical.
       final vignette = Paint()
         ..shader = RadialGradient(

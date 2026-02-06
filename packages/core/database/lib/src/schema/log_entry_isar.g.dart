@@ -27,23 +27,38 @@ const LogEntrySchema = CollectionSchema(
       name: r'experimentId',
       type: IsarType.long,
     ),
-    r'metadata': PropertySchema(
+    r'kind': PropertySchema(
       id: 2,
+      name: r'kind',
+      type: IsarType.string,
+    ),
+    r'metadata': PropertySchema(
+      id: 3,
       name: r'metadata',
       type: IsarType.string,
     ),
+    r'payloadVersion': PropertySchema(
+      id: 4,
+      name: r'payloadVersion',
+      type: IsarType.long,
+    ),
     r'photoPath': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'photoPath',
       type: IsarType.string,
     ),
+    r'tOffsetMs': PropertySchema(
+      id: 6,
+      name: r'tOffsetMs',
+      type: IsarType.long,
+    ),
     r'timestamp': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'type': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'type',
       type: IsarType.string,
     )
@@ -79,6 +94,19 @@ const LogEntrySchema = CollectionSchema(
           caseSensitive: false,
         )
       ],
+    ),
+    r'kind': IndexSchema(
+      id: 1484550194077596484,
+      name: r'kind',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'kind',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
     )
   },
   links: {},
@@ -96,6 +124,12 @@ int _logEntryEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.content.length * 3;
+  {
+    final value = object.kind;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.metadata;
     if (value != null) {
@@ -120,10 +154,13 @@ void _logEntrySerialize(
 ) {
   writer.writeString(offsets[0], object.content);
   writer.writeLong(offsets[1], object.experimentId);
-  writer.writeString(offsets[2], object.metadata);
-  writer.writeString(offsets[3], object.photoPath);
-  writer.writeDateTime(offsets[4], object.timestamp);
-  writer.writeString(offsets[5], object.type);
+  writer.writeString(offsets[2], object.kind);
+  writer.writeString(offsets[3], object.metadata);
+  writer.writeLong(offsets[4], object.payloadVersion);
+  writer.writeString(offsets[5], object.photoPath);
+  writer.writeLong(offsets[6], object.tOffsetMs);
+  writer.writeDateTime(offsets[7], object.timestamp);
+  writer.writeString(offsets[8], object.type);
 }
 
 LogEntry _logEntryDeserialize(
@@ -136,10 +173,13 @@ LogEntry _logEntryDeserialize(
   object.content = reader.readString(offsets[0]);
   object.experimentId = reader.readLong(offsets[1]);
   object.id = id;
-  object.metadata = reader.readStringOrNull(offsets[2]);
-  object.photoPath = reader.readStringOrNull(offsets[3]);
-  object.timestamp = reader.readDateTime(offsets[4]);
-  object.type = reader.readString(offsets[5]);
+  object.kind = reader.readStringOrNull(offsets[2]);
+  object.metadata = reader.readStringOrNull(offsets[3]);
+  object.payloadVersion = reader.readLongOrNull(offsets[4]);
+  object.photoPath = reader.readStringOrNull(offsets[5]);
+  object.tOffsetMs = reader.readLongOrNull(offsets[6]);
+  object.timestamp = reader.readDateTime(offsets[7]);
+  object.type = reader.readString(offsets[8]);
   return object;
 }
 
@@ -159,8 +199,14 @@ P _logEntryDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readLongOrNull(offset)) as P;
+    case 7:
+      return (reader.readDateTime(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -448,6 +494,71 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> kindIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'kind',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> kindIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'kind',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> kindEqualTo(
+      String? kind) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'kind',
+        value: [kind],
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> kindNotEqualTo(
+      String? kind) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'kind',
+              lower: [],
+              upper: [kind],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'kind',
+              lower: [kind],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'kind',
+              lower: [kind],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'kind',
+              lower: [],
+              upper: [kind],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
 }
 
 extension LogEntryQueryFilter
@@ -688,6 +799,152 @@ extension LogEntryQueryFilter
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'kind',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'kind',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'kind',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'kind',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'kind',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'kind',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> kindIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'kind',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> metadataIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -830,6 +1087,79 @@ extension LogEntryQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'metadata',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition>
+      payloadVersionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'payloadVersion',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition>
+      payloadVersionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'payloadVersion',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> payloadVersionEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'payloadVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition>
+      payloadVersionGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'payloadVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition>
+      payloadVersionLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'payloadVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> payloadVersionBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'payloadVersion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -977,6 +1307,75 @@ extension LogEntryQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'photoPath',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'tOffsetMs',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'tOffsetMs',
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tOffsetMs',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tOffsetMs',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tOffsetMs',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterFilterCondition> tOffsetMsBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tOffsetMs',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1196,6 +1595,18 @@ extension LogEntryQuerySortBy on QueryBuilder<LogEntry, LogEntry, QSortBy> {
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByKind() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'kind', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByKindDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'kind', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByMetadata() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'metadata', Sort.asc);
@@ -1208,6 +1619,18 @@ extension LogEntryQuerySortBy on QueryBuilder<LogEntry, LogEntry, QSortBy> {
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByPayloadVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByPayloadVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByPhotoPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.asc);
@@ -1217,6 +1640,18 @@ extension LogEntryQuerySortBy on QueryBuilder<LogEntry, LogEntry, QSortBy> {
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByPhotoPathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByTOffsetMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tOffsetMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> sortByTOffsetMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tOffsetMs', Sort.desc);
     });
   }
 
@@ -1283,6 +1718,18 @@ extension LogEntryQuerySortThenBy
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByKind() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'kind', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByKindDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'kind', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByMetadata() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'metadata', Sort.asc);
@@ -1295,6 +1742,18 @@ extension LogEntryQuerySortThenBy
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByPayloadVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByPayloadVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByPhotoPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.asc);
@@ -1304,6 +1763,18 @@ extension LogEntryQuerySortThenBy
   QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByPhotoPathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByTOffsetMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tOffsetMs', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterSortBy> thenByTOffsetMsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tOffsetMs', Sort.desc);
     });
   }
 
@@ -1347,6 +1818,13 @@ extension LogEntryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByKind(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'kind', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByMetadata(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1354,10 +1832,22 @@ extension LogEntryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByPayloadVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'payloadVersion');
+    });
+  }
+
   QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByPhotoPath(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'photoPath', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QDistinct> distinctByTOffsetMs() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tOffsetMs');
     });
   }
 
@@ -1395,15 +1885,33 @@ extension LogEntryQueryProperty
     });
   }
 
+  QueryBuilder<LogEntry, String?, QQueryOperations> kindProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'kind');
+    });
+  }
+
   QueryBuilder<LogEntry, String?, QQueryOperations> metadataProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'metadata');
     });
   }
 
+  QueryBuilder<LogEntry, int?, QQueryOperations> payloadVersionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'payloadVersion');
+    });
+  }
+
   QueryBuilder<LogEntry, String?, QQueryOperations> photoPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'photoPath');
+    });
+  }
+
+  QueryBuilder<LogEntry, int?, QQueryOperations> tOffsetMsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tOffsetMs');
     });
   }
 

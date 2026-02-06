@@ -1,0 +1,11 @@
+name: experiment_domain
+description: Domain contracts and models for the experiment notebook spine.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  decimal: ^2.3.3
+

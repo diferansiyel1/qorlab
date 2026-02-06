@@ -32,13 +32,28 @@ const ExperimentSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'isActive': PropertySchema(
+    r'endedAt': PropertySchema(
       id: 3,
+      name: r'endedAt',
+      type: IsarType.dateTime,
+    ),
+    r'isActive': PropertySchema(
+      id: 4,
       name: r'isActive',
       type: IsarType.bool,
     ),
+    r'lastEventAt': PropertySchema(
+      id: 5,
+      name: r'lastEventAt',
+      type: IsarType.dateTime,
+    ),
+    r'startedAt': PropertySchema(
+      id: 6,
+      name: r'startedAt',
+      type: IsarType.dateTime,
+    ),
     r'title': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     )
@@ -83,8 +98,11 @@ void _experimentSerialize(
   writer.writeString(offsets[0], object.code);
   writer.writeDateTime(offsets[1], object.createdAt);
   writer.writeString(offsets[2], object.description);
-  writer.writeBool(offsets[3], object.isActive);
-  writer.writeString(offsets[4], object.title);
+  writer.writeDateTime(offsets[3], object.endedAt);
+  writer.writeBool(offsets[4], object.isActive);
+  writer.writeDateTime(offsets[5], object.lastEventAt);
+  writer.writeDateTime(offsets[6], object.startedAt);
+  writer.writeString(offsets[7], object.title);
 }
 
 Experiment _experimentDeserialize(
@@ -97,9 +115,12 @@ Experiment _experimentDeserialize(
   object.code = reader.readString(offsets[0]);
   object.createdAt = reader.readDateTime(offsets[1]);
   object.description = reader.readStringOrNull(offsets[2]);
+  object.endedAt = reader.readDateTimeOrNull(offsets[3]);
   object.id = id;
-  object.isActive = reader.readBool(offsets[3]);
-  object.title = reader.readString(offsets[4]);
+  object.isActive = reader.readBool(offsets[4]);
+  object.lastEventAt = reader.readDateTimeOrNull(offsets[5]);
+  object.startedAt = reader.readDateTimeOrNull(offsets[6]);
+  object.title = reader.readString(offsets[7]);
   return object;
 }
 
@@ -117,8 +138,14 @@ P _experimentDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
+      return (reader.readBool(offset)) as P;
+    case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -554,6 +581,77 @@ extension ExperimentQueryFilter
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> endedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'endedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      endedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'endedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> endedAtEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'endedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      endedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'endedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> endedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'endedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> endedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'endedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -613,6 +711,152 @@ extension ExperimentQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isActive',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastEventAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastEventAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastEventAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastEventAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastEventAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      lastEventAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastEventAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      startedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'startedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      startedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'startedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> startedAtEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'startedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      startedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'startedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> startedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'startedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition> startedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'startedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -793,6 +1037,18 @@ extension ExperimentQuerySortBy
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByEndedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByEndedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByIsActive() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isActive', Sort.asc);
@@ -802,6 +1058,30 @@ extension ExperimentQuerySortBy
   QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByIsActiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isActive', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByLastEventAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEventAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByLastEventAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEventAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByStartedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByStartedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startedAt', Sort.desc);
     });
   }
 
@@ -856,6 +1136,18 @@ extension ExperimentQuerySortThenBy
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByEndedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByEndedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'endedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -877,6 +1169,30 @@ extension ExperimentQuerySortThenBy
   QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByIsActiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isActive', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByLastEventAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEventAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByLastEventAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastEventAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByStartedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByStartedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'startedAt', Sort.desc);
     });
   }
 
@@ -915,9 +1231,27 @@ extension ExperimentQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QDistinct> distinctByEndedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'endedAt');
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QDistinct> distinctByIsActive() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isActive');
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QDistinct> distinctByLastEventAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastEventAt');
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QDistinct> distinctByStartedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'startedAt');
     });
   }
 
@@ -955,9 +1289,27 @@ extension ExperimentQueryProperty
     });
   }
 
+  QueryBuilder<Experiment, DateTime?, QQueryOperations> endedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'endedAt');
+    });
+  }
+
   QueryBuilder<Experiment, bool, QQueryOperations> isActiveProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isActive');
+    });
+  }
+
+  QueryBuilder<Experiment, DateTime?, QQueryOperations> lastEventAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastEventAt');
+    });
+  }
+
+  QueryBuilder<Experiment, DateTime?, QQueryOperations> startedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'startedAt');
     });
   }
 

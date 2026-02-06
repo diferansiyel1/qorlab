@@ -24,5 +24,6 @@
     "calculate": "HESAPLA",
     "saveToLog": "LOG'A KAYDET",
     "savedToExperimentLog": "Deney Loguna Kaydedildi",
-    "invalidNumbers": "Geçersiz Değerler"
+    "invalidNumbers": "Geçersiz Değerler",
+    "noActiveExperiment": "Aktif deney yok. Loglamak için bir deney aç."
 }

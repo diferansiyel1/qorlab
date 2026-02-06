@@ -13,6 +13,12 @@ class LogEntry {
 
   String? photoPath;
 
+  String? kind;
+
+  int? tOffsetMs;
+
+  int? payloadVersion;
+
   // Type of log: "voice", "text", "photo", "data"
   late String type;
 
@@ -21,4 +27,3 @@ class LogEntry {
 
   LogEntry();
 }
-

@@ -15,18 +15,30 @@ final experimentLogsProvider = StreamProvider.autoDispose.family<List<LogEntry>,
   return repo.watchLogs(experimentId);
 });
 
-class ExperimentHistoryPage extends ConsumerWidget {
+class ExperimentHistoryPage extends ConsumerStatefulWidget {
   final int experimentId;
 
   const ExperimentHistoryPage({super.key, required this.experimentId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final logsAsync = ref.watch(experimentLogsProvider(experimentId));
+  ConsumerState<ExperimentHistoryPage> createState() =>
+      _ExperimentHistoryPageState();
+}
+
+class _ExperimentHistoryPageState extends ConsumerState<ExperimentHistoryPage> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(activeExperimentIdProvider.notifier).set(widget.experimentId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final logsAsync = ref.watch(experimentLogsProvider(widget.experimentId));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Experiment $experimentId Log'),
+        title: Text('Experiment ${widget.experimentId} Log'),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -34,7 +46,8 @@ class ExperimentHistoryPage extends ConsumerWidget {
             onPressed: () async {
               // We read the current value of the stream provider
               // Note: This gets the *latest* value. If stream is loading/error, we might want to handle that.
-              final logsState = ref.read(experimentLogsProvider(experimentId));
+              final logsState =
+                  ref.read(experimentLogsProvider(widget.experimentId));
               
               if (logsState.hasValue && logsState.value != null && logsState.value!.isNotEmpty) {
                 final exporter = LogExporter();
@@ -77,7 +90,16 @@ class ExperimentHistoryPage extends ConsumerWidget {
              // We need access to the handler. We can get it via provider or just write since we are in the same package.
              // Using handler for consistency with architecture.
              final handler = ref.read(experimentActionHandlerProvider);
-             await handler.logVoiceNote(text: result);
+             try {
+               await handler.logVoiceNote(text: result);
+             } catch (e) {
+               if (context.mounted) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   SnackBar(content: Text("Failed to log voice note: $e")),
+                 );
+               }
+               return;
+             }
              
              if (context.mounted) {
                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Voice Note Saved")));

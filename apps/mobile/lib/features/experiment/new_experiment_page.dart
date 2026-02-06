@@ -298,17 +298,20 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
     try {
       final repository = ref.read(experimentRepositoryProvider);
       final code = _generateCode();
+      final now = DateTime.now();
 
       final experiment = Experiment()
         ..title = _titleController.text
         ..code = code
         ..description = _descriptionController.text
-        ..createdAt = DateTime.now()
+        ..createdAt = now
+        ..startedAt = now
         ..isActive = true;
 
       await repository.createExperiment(experiment);
 
       if (mounted) {
+        ref.read(activeExperimentIdProvider.notifier).set(experiment.id);
         // Navigate to the new experiment's timeline
         context.go('/experiment/${experiment.id}');
       }

@@ -247,6 +247,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid Numbers'**
   String get invalidNumbers;
+
+  /// No description provided for @noActiveExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'No active experiment. Open one to log.'**
+  String get noActiveExperiment;
 }
 
 class _AppLocalizationsDelegate

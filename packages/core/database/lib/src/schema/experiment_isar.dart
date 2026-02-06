@@ -15,5 +15,16 @@ class Experiment {
 
   late DateTime createdAt;
 
+  /// `t=0` baseline for events in this experiment.
+  ///
+  /// Nullable for additive migrations; fall back to [createdAt] if absent.
+  DateTime? startedAt;
+
+  /// Nullable for additive migrations.
+  DateTime? endedAt;
+
+  /// Optional fast-path for listing; nullable for additive migrations.
+  DateTime? lastEventAt;
+
   bool isActive = true;
 }

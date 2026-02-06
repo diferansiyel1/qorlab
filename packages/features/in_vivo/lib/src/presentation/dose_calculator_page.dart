@@ -112,7 +112,7 @@ class _SingleDoseFormState extends ConsumerState<_SingleDoseForm> {
             label: AppLocalizations.of(context)!.saveToLog,
             icon: Icons.save,
             onPressed: (doseState.isSafe && doseState.volumeMl > Decimal.zero)
-                ? () => _saveToLog(species, doseState)
+                ? () async => _saveToLog(species, doseState)
                 : null,
             backgroundColor:
                 (doseState.isSafe && doseState.volumeMl > Decimal.zero)
@@ -143,23 +143,37 @@ class _SingleDoseFormState extends ConsumerState<_SingleDoseForm> {
     }
   }
 
-  void _saveToLog(AnimalProfile species, DoseState doseState) {
+  Future<void> _saveToLog(AnimalProfile species, DoseState doseState) async {
     final weight = Decimal.tryParse(_weightController.text) ?? Decimal.zero;
     final dose = Decimal.tryParse(_doseController.text) ?? Decimal.zero;
     final conc = Decimal.tryParse(_concentrationController.text) ?? Decimal.zero;
 
-    ref.read(doseLoggerProvider).logDose(
-          species: species.speciesName,
-          route: _selectedRoute,
-          weightG: weight,
-          doseMgPerKg: dose,
-          concentrationMgMl: conc,
-          volumeMl: doseState.volumeMl,
-          isSafe: doseState.isSafe,
+    try {
+      await ref.read(doseLoggerProvider).logDose(
+            species: species.speciesName,
+            route: _selectedRoute,
+            weightG: weight,
+            doseMgPerKg: dose,
+            concentrationMgMl: conc,
+            volumeMl: doseState.volumeMl,
+            isSafe: doseState.isSafe,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.savedToExperimentLog),
+          ),
         );
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(AppLocalizations.of(context)!.savedToExperimentLog)));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.noActiveExperiment),
+          ),
+        );
+      }
+    }
   }
 }
 

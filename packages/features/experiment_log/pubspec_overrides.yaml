@@ -1,7 +1,9 @@
-# melos_managed_dependency_overrides: database,math_engine,ui_kit
+# melos_managed_dependency_overrides: database,math_engine,ui_kit,experiment_domain
 dependency_overrides:
   database:
     path: ../../core/database
+  experiment_domain:
+    path: ../../core/experiment_domain
   math_engine:
     path: ../../core/math_engine
   ui_kit:

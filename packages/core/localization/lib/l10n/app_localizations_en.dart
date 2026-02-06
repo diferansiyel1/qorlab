@@ -82,4 +82,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidNumbers => 'Invalid Numbers';
+
+  @override
+  String get noActiveExperiment => 'No active experiment. Open one to log.';
 }
