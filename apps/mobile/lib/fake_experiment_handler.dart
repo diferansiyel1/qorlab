@@ -42,5 +42,9 @@ class FakeExperimentActionHandler implements ExperimentActionHandler {
   Future<void> logNote({required String text}) async {
     debugPrint("LOG: Note - $text");
   }
-}
 
+  @override
+  Future<void> logPhoto({required String filePath, String? caption}) async {
+    debugPrint("LOG: Photo - $filePath (${caption ?? ''})");
+  }
+}

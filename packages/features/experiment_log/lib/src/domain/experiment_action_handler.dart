@@ -33,4 +33,12 @@ abstract class ExperimentActionHandler {
   Future<void> logNote({
     required String text,
   });
+
+  /// Logs a photo attached to the active experiment.
+  ///
+  /// The file must already be persisted to an app-controlled directory.
+  Future<void> logPhoto({
+    required String filePath,
+    String? caption,
+  });
 }

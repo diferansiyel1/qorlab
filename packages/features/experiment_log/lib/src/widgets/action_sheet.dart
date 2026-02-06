@@ -6,6 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:experiment_log/experiment_log.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:localization/localization.dart';
+
+import '../presentation/measurement_entry_dialog.dart';
+import '../presentation/measurement_graphs_page.dart';
+import '../presentation/voice_recorder_dialog.dart';
 
 class ActionSheet extends ConsumerWidget {
   final int experimentId;
@@ -27,7 +32,7 @@ class _ActionSheetContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-     final repository = ref.watch(experimentRepositoryProvider);
+     final handler = ref.read(experimentActionHandlerProvider);
 
      return Container(
       decoration: BoxDecoration(
@@ -47,7 +52,7 @@ class _ActionSheetContent extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Log New Event', style: AppTypography.headlineMedium),
+          Text(AppLocalizations.of(context)!.logNewEvent, style: AppTypography.headlineMedium),
           const SizedBox(height: 24),
           
           GridView.count(
@@ -55,21 +60,44 @@ class _ActionSheetContent extends ConsumerWidget {
             shrinkWrap: true,
             mainAxisSpacing: 16,
             crossAxisSpacing: 16,
+            childAspectRatio: 1.05,
             children: [
               _ActionButton(
                 icon: Icons.mic_rounded,
-                label: 'Voice Note',
+                label: AppLocalizations.of(context)!.voiceNote,
                 color: AppColors.accent,
-                onTap: () {
-                   context.pop();
-                   // Simulate Voice Log
-                   repository.addLog(experimentId, "Voice Note (0:15)", "voice");
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Voice note recorded")));
+                onTap: () async {
+                  context.pop();
+                  final result = await showDialog<String>(
+                    context: context,
+                    builder: (_) => const VoiceRecorderDialog(),
+                  );
+
+                  if (result == null || result.trim().isEmpty) return;
+
+                  try {
+                    await handler.logVoiceNote(text: result.trim());
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!.voiceNoteSaved),
+                        ),
+                      );
+                    }
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context)!.noActiveExperiment),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               _ActionButton(
                 icon: Icons.calculate_rounded,
-                label: 'Dose Calc',
+                label: AppLocalizations.of(context)!.doseCalc,
                 color: AppColors.primary,
                 onTap: () {
                    context.pop();
@@ -78,16 +106,16 @@ class _ActionSheetContent extends ConsumerWidget {
               ),
               _ActionButton(
                 icon: Icons.camera_alt_rounded,
-                label: 'Photo',
+                label: AppLocalizations.of(context)!.photo,
                 color: AppColors.textMain,
                 onTap: () async {
                    context.pop();
-                   await _capturePhoto(context, repository);
+                   await _capturePhoto(context, handler);
                 },
               ),
               _ActionButton(
                 icon: Icons.science_rounded,
-                label: 'Molarity',
+                label: AppLocalizations.of(context)!.molarity,
                 color: AppColors.success,
                 onTap: () {
                   context.pop();
@@ -96,21 +124,37 @@ class _ActionSheetContent extends ConsumerWidget {
               ),
               _ActionButton(
                 icon: Icons.note_add_rounded,
-                label: 'Text',
+                label: AppLocalizations.of(context)!.textNote,
                 color: AppColors.textMuted,
                  onTap: () {
                     context.pop(); 
-                    _showTextDialog(context, ref, repository);
+                    _showTextDialog(context, handler);
                  },
               ),
               _ActionButton(
                 icon: Icons.thermostat_rounded,
-                label: 'Parameter',
+                label: AppLocalizations.of(context)!.measurement,
                 color: AppColors.alert,
-                 onTap: () {
-                    context.pop(); 
-                    _showParameterDialog(context, repository);
-                 },
+                onTap: () async {
+                  context.pop();
+                  await showDialog<void>(
+                    context: context,
+                    builder: (_) => MeasurementEntryDialog(experimentId: experimentId),
+                  );
+                },
+              ),
+              _ActionButton(
+                icon: Icons.show_chart_rounded,
+                label: AppLocalizations.of(context)!.graphs,
+                color: AppColors.primary,
+                onTap: () {
+                  context.pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => MeasurementGraphsPage(experimentId: experimentId),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -120,95 +164,56 @@ class _ActionSheetContent extends ConsumerWidget {
     );
   }
 
-  void _showTextDialog(BuildContext context, WidgetRef ref, dynamic repo) {
+  void _showTextDialog(BuildContext context, ExperimentActionHandler handler) {
      showDialog(context: context, builder: (context) {
         final controller = TextEditingController();
         return AlertDialog(
            backgroundColor: AppColors.surface,
-           title: Text("Add Note", style: AppTypography.headlineMedium),
+           title: Text(AppLocalizations.of(context)!.addNote, style: AppTypography.headlineMedium),
            content: TextField(
               controller: controller,
               style: TextStyle(color: AppColors.textMain),
-              decoration: InputDecoration(hintText: "Enter observation...", hintStyle: TextStyle(color: AppColors.textMuted)),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.enterObservation,
+                hintStyle: TextStyle(color: AppColors.textMuted),
+              ),
            ),
            actions: [
-              TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context)),
-              TextButton(child: const Text("Save"), onPressed: () {
-                 if (controller.text.isNotEmpty) {
-                    repo.addLog(experimentId, controller.text, "text");
-                 }
-                 Navigator.pop(context);
-              }),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.cancel),
+                onPressed: () => Navigator.pop(context),
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.save),
+                onPressed: () async {
+                  if (controller.text.trim().isEmpty) {
+                    Navigator.pop(context);
+                    return;
+                  }
+                  try {
+                    await handler.logNote(text: controller.text.trim());
+                    if (context.mounted) Navigator.pop(context);
+                  } catch (_) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text(AppLocalizations.of(context)!.noActiveExperiment),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+              ),
            ],
          );
       });
    }
 
-  void _showParameterDialog(BuildContext context, dynamic repo) {
-     showDialog(context: context, builder: (context) {
-        String selectedParameter = 'Temperature';
-        final valueController = TextEditingController();
-        final units = {
-          'Temperature': '°C',
-          'pH': '',
-          'Weight': 'g',
-          'Glucose': 'mg/dL',
-        };
-        
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-               backgroundColor: AppColors.surface,
-               title: Text("Log Parameter", style: AppTypography.headlineMedium),
-               content: Column(
-                 mainAxisSize: MainAxisSize.min,
-                 children: [
-                   DropdownButtonFormField<String>(
-                     value: selectedParameter,
-                     dropdownColor: AppColors.surface,
-                     style: TextStyle(color: AppColors.textMain),
-                     decoration: InputDecoration(
-                       labelText: 'Parameter Type',
-                       labelStyle: TextStyle(color: AppColors.textMuted),
-                     ),
-                     items: ['Temperature', 'pH', 'Weight', 'Glucose']
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: (value) {
-                       setState(() => selectedParameter = value!);
-                     },
-                   ),
-                   const SizedBox(height: 16),
-                   TextField(
-                     controller: valueController,
-                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                     style: TextStyle(color: AppColors.textMain),
-                     decoration: InputDecoration(
-                       hintText: "Enter value...",
-                       hintStyle: TextStyle(color: AppColors.textMuted),
-                       suffixText: units[selectedParameter],
-                       suffixStyle: TextStyle(color: AppColors.textMuted),
-                     ),
-                   ),
-                 ],
-               ),
-               actions: [
-                  TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context)),
-                  TextButton(child: const Text("Save"), onPressed: () {
-                     if (valueController.text.isNotEmpty) {
-                        final unit = units[selectedParameter] ?? '';
-                        final content = '$selectedParameter: ${valueController.text} $unit'.trim();
-                        repo.addLog(experimentId, content, "parameter");
-                     }
-                     Navigator.pop(context);
-                  }),
-               ],
-            );
-          },
-        );
-     });
-  }
-  Future<void> _capturePhoto(BuildContext context, dynamic repository) async {
+  Future<void> _capturePhoto(
+    BuildContext context,
+    ExperimentActionHandler handler,
+  ) async {
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
@@ -230,19 +235,27 @@ class _ActionSheetContent extends ConsumerWidget {
         
         await File(pickedFile.path).copy(savedPath);
         
-        // Log the photo with its path
-        repository.addLog(experimentId, savedPath, "photo");
+        try {
+          await handler.logPhoto(filePath: savedPath);
+        } catch (_) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.noActiveExperiment)),
+            );
+          }
+          return;
+        }
         
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Photo captured and saved")),
+            SnackBar(content: Text(AppLocalizations.of(context)!.photoSaved)),
           );
         }
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to capture photo: $e")),
+          SnackBar(content: Text("${AppLocalizations.of(context)!.photoFailed}: $e")),
         );
       }
     }

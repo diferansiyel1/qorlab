@@ -7,7 +7,7 @@ part 'active_experiment_id.g.dart';
 /// This is the minimal production spine needed for cross-feature logging:
 /// calculators, timers, and capture flows can log into the last active experiment
 /// without depending on UI routes.
-@riverpod
+@Riverpod(keepAlive: true)
 class ActiveExperimentId extends _$ActiveExperimentId {
   @override
   int? build() => null;
@@ -16,4 +16,3 @@ class ActiveExperimentId extends _$ActiveExperimentId {
 
   void clear() => state = null;
 }
-

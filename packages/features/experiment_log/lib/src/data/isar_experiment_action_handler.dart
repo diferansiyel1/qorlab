@@ -119,4 +119,22 @@ class IsarExperimentActionHandler implements ExperimentActionHandler {
       ),
     );
   }
+
+  @override
+  Future<void> logPhoto({required String filePath, String? caption}) async {
+    await _logger.logEvent(
+      ExperimentEvent(
+        experimentId: _experimentId,
+        occurredAt: DateTime.now(),
+        payloadVersion: 1,
+        kind: ExperimentEventKind.photo,
+        type: 'photo',
+        summary: caption?.trim().isNotEmpty == true ? caption!.trim() : 'Photo',
+        payload: {
+          'path': filePath,
+          if (caption?.trim().isNotEmpty == true) 'caption': caption!.trim(),
+        },
+      ),
+    );
+  }
 }

@@ -260,6 +260,24 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
       );
     }
 
+    if (log.type == 'measurement_point' || kind == 'measurement' || log.type == 'parameter') {
+      final label = payload['label']?.toString();
+      final unit = payload['unit']?.toString();
+      final value = payload['value']?.toString();
+
+      final title = label ?? 'Measurement';
+      final v = [
+        if (value != null) value,
+        if (unit != null && unit.isNotEmpty) unit,
+      ].join(' ');
+
+      return TimelineEvent.result(
+        time: timeStr,
+        title: title,
+        value: v.isEmpty ? log.content : v,
+      );
+    }
+
     if (log.type == 'photo' || kind == 'photo') {
       return TimelineEvent.photo(
         time: timeStr,

@@ -20,4 +20,7 @@ class IsarExperimentActionHandler implements ExperimentActionHandler {
 
   @override
   Future<void> logNote({required String text}) async {}
+
+  @override
+  Future<void> logPhoto({required String filePath, String? caption}) async {}
 }

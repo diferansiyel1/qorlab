@@ -253,6 +253,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No active experiment. Open one to log.'**
   String get noActiveExperiment;
+
+  /// No description provided for @logNewEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Log New Event'**
+  String get logNewEvent;
+
+  /// No description provided for @voiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Note'**
+  String get voiceNote;
+
+  /// No description provided for @voiceNoteSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note saved'**
+  String get voiceNoteSaved;
+
+  /// No description provided for @doseCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dose Calc'**
+  String get doseCalc;
+
+  /// No description provided for @photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photo;
+
+  /// No description provided for @photoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo captured and saved'**
+  String get photoSaved;
+
+  /// No description provided for @photoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to capture photo'**
+  String get photoFailed;
+
+  /// No description provided for @molarity.
+  ///
+  /// In en, this message translates to:
+  /// **'Molarity'**
+  String get molarity;
+
+  /// No description provided for @textNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get textNote;
+
+  /// No description provided for @measurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement'**
+  String get measurement;
+
+  /// No description provided for @graphs.
+  ///
+  /// In en, this message translates to:
+  /// **'Graphs'**
+  String get graphs;
+
+  /// No description provided for @addNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Note'**
+  String get addNote;
+
+  /// No description provided for @enterObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter observation...'**
+  String get enterObservation;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get saveFailed;
+
+  /// No description provided for @logMeasurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Measurement'**
+  String get logMeasurement;
+
+  /// No description provided for @measurementType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get measurementType;
+
+  /// No description provided for @measurementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get measurementLabel;
+
+  /// No description provided for @measurementUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get measurementUnit;
+
+  /// No description provided for @measurementValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get measurementValue;
+
+  /// No description provided for @measurementNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get measurementNote;
+
+  /// No description provided for @measurementPresetTemperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get measurementPresetTemperature;
+
+  /// No description provided for @measurementPresetAbsorbance.
+  ///
+  /// In en, this message translates to:
+  /// **'Absorbance'**
+  String get measurementPresetAbsorbance;
+
+  /// No description provided for @measurementPresetPh.
+  ///
+  /// In en, this message translates to:
+  /// **'pH'**
+  String get measurementPresetPh;
+
+  /// No description provided for @measurementPresetCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get measurementPresetCustom;
+
+  /// No description provided for @noMeasurementSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'No measurement series yet'**
+  String get noMeasurementSeries;
+
+  /// No description provided for @noMeasurementPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'No measurement points yet'**
+  String get noMeasurementPoints;
+
+  /// No description provided for @latestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Value'**
+  String get latestValue;
+
+  /// No description provided for @noUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'No unit'**
+  String get noUnit;
 }
 
 class _AppLocalizationsDelegate

@@ -51,6 +51,11 @@ class FakeExperimentActionHandler implements ExperimentActionHandler {
   Future<void> logNote({required String text}) async {
     debugPrint("Web Mock Log Note: $text");
   }
+
+  @override
+  Future<void> logPhoto({required String filePath, String? caption}) async {
+    debugPrint("Web Mock Log Photo: $filePath");
+  }
 }
 
 // Rename to avoid conflict with database.dart's isarProvider

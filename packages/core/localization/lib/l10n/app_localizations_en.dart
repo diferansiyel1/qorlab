@@ -85,4 +85,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noActiveExperiment => 'No active experiment. Open one to log.';
+
+  @override
+  String get logNewEvent => 'Log New Event';
+
+  @override
+  String get voiceNote => 'Voice Note';
+
+  @override
+  String get voiceNoteSaved => 'Voice note saved';
+
+  @override
+  String get doseCalc => 'Dose Calc';
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get photoSaved => 'Photo captured and saved';
+
+  @override
+  String get photoFailed => 'Failed to capture photo';
+
+  @override
+  String get molarity => 'Molarity';
+
+  @override
+  String get textNote => 'Text';
+
+  @override
+  String get measurement => 'Measurement';
+
+  @override
+  String get graphs => 'Graphs';
+
+  @override
+  String get addNote => 'Add Note';
+
+  @override
+  String get enterObservation => 'Enter observation...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get saveFailed => 'Save failed';
+
+  @override
+  String get logMeasurement => 'Log Measurement';
+
+  @override
+  String get measurementType => 'Type';
+
+  @override
+  String get measurementLabel => 'Label';
+
+  @override
+  String get measurementUnit => 'Unit';
+
+  @override
+  String get measurementValue => 'Value';
+
+  @override
+  String get measurementNote => 'Note (optional)';
+
+  @override
+  String get measurementPresetTemperature => 'Temperature';
+
+  @override
+  String get measurementPresetAbsorbance => 'Absorbance';
+
+  @override
+  String get measurementPresetPh => 'pH';
+
+  @override
+  String get measurementPresetCustom => 'Custom';
+
+  @override
+  String get noMeasurementSeries => 'No measurement series yet';
+
+  @override
+  String get noMeasurementPoints => 'No measurement points yet';
+
+  @override
+  String get latestValue => 'Latest Value';
+
+  @override
+  String get noUnit => 'No unit';
 }

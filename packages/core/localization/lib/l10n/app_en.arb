@@ -25,5 +25,39 @@
     "saveToLog": "SAVE TO LOG",
     "savedToExperimentLog": "Saved to Experiment Log",
     "invalidNumbers": "Invalid Numbers",
-    "noActiveExperiment": "No active experiment. Open one to log."
+    "noActiveExperiment": "No active experiment. Open one to log.",
+
+    "logNewEvent": "Log New Event",
+    "voiceNote": "Voice Note",
+    "voiceNoteSaved": "Voice note saved",
+    "doseCalc": "Dose Calc",
+    "photo": "Photo",
+    "photoSaved": "Photo captured and saved",
+    "photoFailed": "Failed to capture photo",
+    "molarity": "Molarity",
+    "textNote": "Text",
+    "measurement": "Measurement",
+    "graphs": "Graphs",
+
+    "addNote": "Add Note",
+    "enterObservation": "Enter observation...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveFailed": "Save failed",
+
+    "logMeasurement": "Log Measurement",
+    "measurementType": "Type",
+    "measurementLabel": "Label",
+    "measurementUnit": "Unit",
+    "measurementValue": "Value",
+    "measurementNote": "Note (optional)",
+    "measurementPresetTemperature": "Temperature",
+    "measurementPresetAbsorbance": "Absorbance",
+    "measurementPresetPh": "pH",
+    "measurementPresetCustom": "Custom",
+
+    "noMeasurementSeries": "No measurement series yet",
+    "noMeasurementPoints": "No measurement points yet",
+    "latestValue": "Latest Value",
+    "noUnit": "No unit"
 }

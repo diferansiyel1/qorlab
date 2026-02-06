@@ -25,5 +25,39 @@
     "saveToLog": "LOG'A KAYDET",
     "savedToExperimentLog": "Deney Loguna Kaydedildi",
     "invalidNumbers": "Geçersiz Değerler",
-    "noActiveExperiment": "Aktif deney yok. Loglamak için bir deney aç."
+    "noActiveExperiment": "Aktif deney yok. Loglamak için bir deney aç.",
+
+    "logNewEvent": "Yeni Olay Kaydet",
+    "voiceNote": "Sesli Not",
+    "voiceNoteSaved": "Sesli not kaydedildi",
+    "doseCalc": "Doz Hesabı",
+    "photo": "Fotoğraf",
+    "photoSaved": "Fotoğraf çekildi ve kaydedildi",
+    "photoFailed": "Fotoğraf çekilemedi",
+    "molarity": "Molarite",
+    "textNote": "Metin",
+    "measurement": "Ölçüm",
+    "graphs": "Grafikler",
+
+    "addNote": "Not Ekle",
+    "enterObservation": "Gözlem gir...",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "saveFailed": "Kaydetme başarısız",
+
+    "logMeasurement": "Ölçüm Kaydet",
+    "measurementType": "Tür",
+    "measurementLabel": "Etiket",
+    "measurementUnit": "Birim",
+    "measurementValue": "Değer",
+    "measurementNote": "Not (opsiyonel)",
+    "measurementPresetTemperature": "Sıcaklık",
+    "measurementPresetAbsorbance": "Absorbans",
+    "measurementPresetPh": "pH",
+    "measurementPresetCustom": "Özel",
+
+    "noMeasurementSeries": "Henüz ölçüm serisi yok",
+    "noMeasurementPoints": "Henüz ölçüm noktası yok",
+    "latestValue": "Son Değer",
+    "noUnit": "Birim yok"
 }

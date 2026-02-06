@@ -7,7 +7,7 @@ part of 'active_experiment_id.dart';
 // **************************************************************************
 
 String _$activeExperimentIdHash() =>
-    r'bf735f81c3a92366e969520f00acd45b98e05656';
+    r'36a253986de5bfb4e8eb1b32331269545e08a024';
 
 /// Global active experiment context (per app container).
 ///
@@ -18,7 +18,7 @@ String _$activeExperimentIdHash() =>
 /// Copied from [ActiveExperimentId].
 @ProviderFor(ActiveExperimentId)
 final activeExperimentIdProvider =
-    AutoDisposeNotifierProvider<ActiveExperimentId, int?>.internal(
+    NotifierProvider<ActiveExperimentId, int?>.internal(
       ActiveExperimentId.new,
       name: r'activeExperimentIdProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -28,6 +28,6 @@ final activeExperimentIdProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$ActiveExperimentId = AutoDisposeNotifier<int?>;
+typedef _$ActiveExperimentId = Notifier<int?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

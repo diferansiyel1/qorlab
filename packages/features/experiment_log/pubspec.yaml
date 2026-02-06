@@ -33,6 +33,8 @@ dependencies:
     path: ../../core/math_engine
   experiment_domain:
     path: ../../core/experiment_domain
+  localization:
+    path: ../../core/localization
 
 dev_dependencies:
   flutter_test:
