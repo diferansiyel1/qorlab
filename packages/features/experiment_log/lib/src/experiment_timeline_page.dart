@@ -27,7 +27,13 @@ class _ExperimentTimelinePageState extends ConsumerState<ExperimentTimelinePage>
   @override
   void initState() {
     super.initState();
-    ref.read(activeExperimentIdProvider.notifier).set(widget.experimentId);
+    // Updating providers during widget lifecycle (initState/build/etc) can
+    // trigger Riverpod's "modify during build" assertion. Schedule it after
+    // the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(activeExperimentIdProvider.notifier).set(widget.experimentId);
+    });
   }
 
   void _cycleBackground() {
