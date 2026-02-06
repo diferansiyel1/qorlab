@@ -4,25 +4,45 @@ import 'app_colors.dart';
 import 'app_typography.dart';
 
 /// QorLab App Theme
-/// Based on stich design reference files
+/// Light-first with optional dark mode.
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme => _buildTheme(AppPalettes.light);
+  static ThemeData get darkTheme => _buildTheme(AppPalettes.dark);
+
+  static ThemeData _buildTheme(AppPalette palette) {
+    AppColors.setPalette(palette);
+    final isDark = palette.brightness == Brightness.dark;
+    final colorScheme = isDark
+        ? ColorScheme.dark(
+            primary: palette.primary,
+            secondary: palette.accent,
+            surface: palette.surface,
+            error: palette.alert,
+            onPrimary: Colors.white,
+            onSecondary: palette.textMain,
+            onSurface: palette.textMain,
+            onError: palette.textMain,
+            outline: palette.glassBorder,
+          )
+        : ColorScheme.light(
+            primary: palette.primary,
+            secondary: palette.accent,
+            surface: palette.surface,
+            error: palette.alert,
+            onPrimary: Colors.white,
+            onSecondary: palette.textMain,
+            onSurface: palette.textMain,
+            onError: Colors.white,
+            outline: palette.glassBorder,
+          );
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
-      primaryColor: AppColors.primary,
-      colorScheme: ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.accent,
-        surface: AppColors.surface,
-        error: AppColors.alert,
-        onPrimary: AppColors.background,
-        onSecondary: AppColors.textMain,
-        onSurface: AppColors.textMain,
-        onError: AppColors.textMain,
-      ),
-      fontFamily: GoogleFonts.spaceGrotesk().fontFamily,
+      brightness: palette.brightness,
+      scaffoldBackgroundColor: palette.background,
+      primaryColor: palette.primary,
+      colorScheme: colorScheme,
+      fontFamily: GoogleFonts.inter().fontFamily,
       textTheme: TextTheme(
         displayLarge: AppTypography.headlineLarge,
         displayMedium: AppTypography.headlineMedium,
@@ -44,77 +64,76 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: AppTypography.headlineMedium,
-        iconTheme: const IconThemeData(color: AppColors.textMain),
+        iconTheme: IconThemeData(color: palette.textMain),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surface,
+        color: palette.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppColors.glassBorder),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: palette.glassBorder),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.inputSurface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        fillColor: palette.inputSurface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.transparent, width: 2),
+          borderSide: BorderSide(color: palette.glassBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: palette.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.alert, width: 2),
+          borderSide: BorderSide(color: palette.alert, width: 2),
         ),
         labelStyle: AppTypography.labelMedium,
         hintStyle: AppTypography.labelMedium.copyWith(
-          color: AppColors.textDark,
+          color: palette.textDark,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.background,
+          backgroundColor: palette.primary,
+          foregroundColor: isDark ? palette.background : Colors.white,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: AppTypography.labelLarge.copyWith(
             fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
+            letterSpacing: 0.6,
           ),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.background,
+        backgroundColor: palette.primary,
+        foregroundColor: isDark ? palette.background : Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: AppColors.background.withOpacity(0.95),
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMuted,
+        backgroundColor: palette.surface.withOpacity(0.95),
+        selectedItemColor: palette.primary,
+        unselectedItemColor: palette.textMuted,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.glassBorder,
+      dividerTheme: DividerThemeData(
+        color: palette.glassBorder,
         thickness: 1,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surface,
+        backgroundColor: palette.surface,
         contentTextStyle: AppTypography.labelMedium,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

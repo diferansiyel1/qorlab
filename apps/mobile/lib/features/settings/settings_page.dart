@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:ui_kit/ui_kit.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:ui_kit/ui_kit.dart';
 
 /// Settings page with app preferences
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   String _weightUnit = 'g';
   String _volumeUnit = 'mL';
   String _tempUnit = '°C';
@@ -38,24 +39,14 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 12),
             _SettingsTile(
-              icon: Icons.dark_mode_rounded,
-              title: 'Dark Mode',
-              subtitle: 'Optimized for lab environments',
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'ACTIVE',
-                  style: AppTypography.statusBadge.copyWith(
-                    color: AppColors.success,
-                  ),
-                ),
+              icon: Icons.color_lens_outlined,
+              title: 'Theme',
+              subtitle: 'Light, dark, or system default',
+              trailing: _ThemeModeToggle(
+                selected: ref.watch(themeModeProvider),
+                onChanged: (mode) {
+                  ref.read(themeModeProvider.notifier).state = mode;
+                },
               ),
             ),
 
@@ -112,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.cloud_upload_rounded,
               title: 'Export All Data',
               subtitle: 'Download experiments as CSV',
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.textMuted,
               ),
@@ -123,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.delete_outline_rounded,
               title: 'Clear Cache',
               subtitle: 'Free up storage space',
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.textMuted,
               ),
@@ -297,6 +288,38 @@ class _SettingsTile extends StatelessWidget {
           ),
           trailing,
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeModeToggle extends StatelessWidget {
+  final ThemeMode selected;
+  final ValueChanged<ThemeMode> onChanged;
+
+  const _ThemeModeToggle({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<ThemeMode>(
+      segments: const [
+        ButtonSegment(value: ThemeMode.system, label: Text('System')),
+        ButtonSegment(value: ThemeMode.light, label: Text('Light')),
+        ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
+      ],
+      selected: {selected},
+      onSelectionChanged: (value) => onChanged(value.first),
+      style: SegmentedButton.styleFrom(
+        minimumSize: const Size(64, 40),
+        backgroundColor: AppColors.background,
+        selectedBackgroundColor: AppColors.primary.withValues(alpha: 0.15),
+        selectedForegroundColor: AppColors.primary,
+        foregroundColor: AppColors.textMuted,
+        side: BorderSide(color: AppColors.glassBorder),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

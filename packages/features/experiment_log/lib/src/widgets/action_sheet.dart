@@ -30,7 +30,7 @@ class _ActionSheetContent extends ConsumerWidget {
      final repository = ref.watch(experimentRepositoryProvider);
 
      return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -128,8 +128,8 @@ class _ActionSheetContent extends ConsumerWidget {
            title: Text("Add Note", style: AppTypography.headlineMedium),
            content: TextField(
               controller: controller,
-              style: const TextStyle(color: AppColors.textMain),
-              decoration: const InputDecoration(hintText: "Enter observation...", hintStyle: TextStyle(color: AppColors.textMuted)),
+              style: TextStyle(color: AppColors.textMain),
+              decoration: InputDecoration(hintText: "Enter observation...", hintStyle: TextStyle(color: AppColors.textMuted)),
            ),
            actions: [
               TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context)),
@@ -166,8 +166,8 @@ class _ActionSheetContent extends ConsumerWidget {
                    DropdownButtonFormField<String>(
                      value: selectedParameter,
                      dropdownColor: AppColors.surface,
-                     style: const TextStyle(color: AppColors.textMain),
-                     decoration: const InputDecoration(
+                     style: TextStyle(color: AppColors.textMain),
+                     decoration: InputDecoration(
                        labelText: 'Parameter Type',
                        labelStyle: TextStyle(color: AppColors.textMuted),
                      ),
@@ -182,12 +182,12 @@ class _ActionSheetContent extends ConsumerWidget {
                    TextField(
                      controller: valueController,
                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                     style: const TextStyle(color: AppColors.textMain),
+                     style: TextStyle(color: AppColors.textMain),
                      decoration: InputDecoration(
                        hintText: "Enter value...",
-                       hintStyle: const TextStyle(color: AppColors.textMuted),
+                       hintStyle: TextStyle(color: AppColors.textMuted),
                        suffixText: units[selectedParameter],
-                       suffixStyle: const TextStyle(color: AppColors.textMuted),
+                       suffixStyle: TextStyle(color: AppColors.textMuted),
                      ),
                    ),
                  ],

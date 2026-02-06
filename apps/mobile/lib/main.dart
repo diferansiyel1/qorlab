@@ -4,8 +4,6 @@ import 'package:smart_timer/smart_timer.dart'; // For timerLoggerProvider
 import 'timer_logger_adapter.dart'; // Local adapter
 
 import 'package:decimal/decimal.dart';
-import 'package:in_vitro/src/domain/molarity_logger.dart';
-import 'package:in_vivo/src/domain/dose_logger.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +30,12 @@ void main() async {
   runApp(ProviderScope(
     overrides: [
       if (kIsWeb) ...[
-        // Web Overrides
+        experimentRepositoryProvider.overrideWithValue(FakeExperimentRepository()),
+        experimentActionHandlerProvider.overrideWithValue(FakeExperimentActionHandler()),
+        molarityLoggerProvider.overrideWith((ref) =>
+            MainMolarityLogger(ref.watch(experimentActionHandlerProvider))),
+        doseLoggerProvider.overrideWith(
+            (ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider))),
       ],
       // Adapter: Connect Timer to ExperimentLog
       timerLoggerProvider.overrideWith((ref) {
@@ -40,19 +43,7 @@ void main() async {
         return TimerLoggerAdapter(handler);
       }),
     ],
-    child: DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0F172A), // Slate 900
-            Color(0xFF1E293B), // Slate 800
-          ],
-        ),
-      ),
-      child: const AppBootstrapper(),
-    ),
+    child: const AppBootstrapper(),
   ));
 }
 
@@ -62,15 +53,7 @@ class AppBootstrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (kIsWeb) {
-      return ProviderScope(
-        overrides: [
-          experimentRepositoryProvider.overrideWithValue(FakeExperimentRepository()),
-          experimentActionHandlerProvider.overrideWithValue(FakeExperimentActionHandler()),
-          molarityLoggerProvider.overrideWith((ref) => MainMolarityLogger(ref.watch(experimentActionHandlerProvider))),
-          doseLoggerProvider.overrideWith((ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider))),
-        ],
-        child: const QorLabApp(),
-      );
+      return const QorLabApp();
     } else {
       final isarAsync = ref.watch(isarProvider);
       
@@ -95,17 +78,24 @@ class AppBootstrapper extends ConsumerWidget {
   }
 }
 
-class QorLabApp extends StatelessWidget {
+class QorLabApp extends ConsumerWidget {
   const QorLabApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       title: 'QorLab',
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
+      theme: LabTheme.getLight(),
+      darkTheme: LabTheme.getDark(),
+      themeMode: themeMode,
       routerConfig: _router,
+      builder: (context, child) {
+        final brightness = Theme.of(context).brightness;
+        AppColors.setBrightness(brightness);
+        LabColors.setBrightness(brightness);
+        return child ?? const SizedBox.shrink();
+      },
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

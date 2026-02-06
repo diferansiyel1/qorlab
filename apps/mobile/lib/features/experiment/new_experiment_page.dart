@@ -105,7 +105,7 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.close_rounded,
                 color: AppColors.textMain,
                 size: 20,
@@ -130,7 +130,7 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
           value: _selectedProject,
           isExpanded: true,
           dropdownColor: AppColors.surface,
-          icon: const Icon(Icons.expand_more_rounded, color: AppColors.textMuted),
+          icon: Icon(Icons.expand_more_rounded, color: AppColors.textMuted),
           style: AppTypography.labelLarge,
           items: _projects.map((project) {
             return DropdownMenuItem(
@@ -197,7 +197,7 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.science_rounded,
               color: AppColors.primary,
               size: 24,
@@ -251,7 +251,7 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
               disabledBackgroundColor: AppColors.textMuted.withValues(alpha: 0.3),
             ),
             child: _isCreating
-                ? const SizedBox(
+                ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(

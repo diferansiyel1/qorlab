@@ -50,7 +50,7 @@ class AppLayout extends StatelessWidget {
                       right: 24,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.background.withOpacity(0.95),
+                      color: AppColors.surface.withOpacity(0.95),
                       border: Border(
                         top: BorderSide(
                           color: AppColors.glassBorder,
@@ -255,7 +255,7 @@ class _AnimatedFabState extends State<_AnimatedFab>
                 child: AnimatedRotation(
                   turns: _isPressed ? 0.125 : 0,
                   duration: const Duration(milliseconds: 200),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add_rounded,
                     color: AppColors.background,
                     size: 28,

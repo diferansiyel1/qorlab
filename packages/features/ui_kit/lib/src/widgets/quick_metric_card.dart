@@ -9,18 +9,20 @@ class QuickMetricCard extends StatelessWidget {
   final String value;
   final String? status;
   final IconData icon;
-  final Color accentColor;
+  final Color? accentColor;
   final VoidCallback? onTap;
 
-  const QuickMetricCard({
+  QuickMetricCard({
     super.key,
     required this.label,
     required this.value,
     this.status,
     required this.icon,
-    this.accentColor = AppColors.primary,
+    Color? accentColor,
     this.onTap,
-  });
+  }) : accentColor = accentColor ?? AppColors.primary;
+
+  Color get _accent => accentColor ?? AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class QuickMetricCard extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 36,
-                color: accentColor.withOpacity(0.2),
+                color: _accent.withOpacity(0.2),
               ),
             ),
 
@@ -77,7 +79,7 @@ class QuickMetricCard extends StatelessWidget {
                       Text(
                         status!,
                         style: AppTypography.labelSmall.copyWith(
-                          color: accentColor,
+                          color: _accent,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -96,7 +98,7 @@ class QuickMetricCard extends StatelessWidget {
                 height: 3,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [accentColor, accentColor.withOpacity(0)],
+                    colors: [_accent, _accent.withOpacity(0)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),

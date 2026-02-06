@@ -5,6 +5,14 @@ final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((re
   throw UnimplementedError("Use overrideWithValue for ExperimentRepository on web");
 });
 
+final experimentsProvider = StreamProvider<List<Experiment>>(
+  (ref) {
+    final repository = ref.watch(experimentRepositoryProvider);
+    return repository.watchExperiments();
+  },
+  dependencies: [experimentRepositoryProvider],
+);
+
 class ExperimentRepository implements ExperimentRepositoryInterface {
   ExperimentRepository(dynamic _);
   

@@ -48,7 +48,7 @@ class _FilesPageState extends ConsumerState<FilesPage> {
                   decoration: InputDecoration(
                     hintText: 'Search experiments...',
                     hintStyle: AppTypography.labelMedium,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search_rounded,
                       color: AppColors.textMuted,
                     ),
@@ -100,7 +100,7 @@ class _FilesPageState extends ConsumerState<FilesPage> {
               return ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: filtered.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final exp = filtered[index];
                   return _ExperimentTile(
@@ -110,7 +110,7 @@ class _FilesPageState extends ConsumerState<FilesPage> {
                 },
               );
             },
-            loading: () => const Center(
+            loading: () => Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             ),
             error: (err, _) => Center(
@@ -262,7 +262,7 @@ class _ExperimentTile extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.science_rounded,
               color: AppColors.primary,
               size: 24,

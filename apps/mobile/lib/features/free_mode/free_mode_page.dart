@@ -75,7 +75,7 @@ class _FreeModePageState extends State<FreeModePage> {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_rounded,
                 color: AppColors.textMain,
                 size: 20,
@@ -253,7 +253,7 @@ class _FreeModePageState extends State<FreeModePage> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: AppColors.neonGlow,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_rounded,
                     color: AppColors.background,
                     size: 24,
@@ -435,7 +435,7 @@ class _HistoryCard extends StatelessWidget {
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.copy_rounded,
                   color: AppColors.textMuted,
                   size: 18,

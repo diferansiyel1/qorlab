@@ -240,7 +240,7 @@ class _ScienceInput extends StatelessWidget {
             border: const OutlineInputBorder(),
             filled: isActive,
             fillColor: isActive ? AppColors.primary.withOpacity(0.1) : null,
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.primary, width: 2),
             ),
           ),

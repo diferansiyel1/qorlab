@@ -1,27 +1,28 @@
 # QORLAB - UI/UX DESIGN SYSTEM & SPECIFICATIONS
 
-**Version:** 1.0
-**Design Philosophy:** "Functionality First, High Contrast, Glove-Friendly."
-**Target Environment:** Wet labs, Animal facilities (Low light, high stress, multitasking).
+**Version:** 2.0
+**Design Philosophy:** "Clinical Clarity, Light-First, Glove-Friendly."
+**Target Environment:** Wet labs, Animal facilities, office research stations (bright + low light).
 
 ---
 
 ## 1. CORE VISUAL IDENTITY
 
-### 1.1 Color Palette (Scientific & High Contrast)
-The app must support **True Dark Mode** natively (essential for fluorescence microscopy rooms).
+### 1.1 Color Palette (Scientific & Clinical)
+The app must support **Light Mode as default** and **Dark Mode on demand** (essential for low-light labs).
 
-* **Primary (Brand):** `Deep Lab Blue` (#0A84FF) - Used for primary actions (Save, Start).
-* **Secondary (Action):** `Teal Science` (#30D158) - Used for running timers, successful logs.
-* **Alert (Danger):** `Biohazard Red` (#FF453A) - Used for safety warnings, stop buttons, toxicity alerts.
-* **Background (Dark):** `OLED Black` (#000000) - Battery saving and low light reduction.
-* **Background (Light):** `Sterile White` (#F2F2F7) - High readability in bright offices.
-* **Surface Cards:** High contrast cards with distinct borders (1px solid #3A3A3C in dark mode).
+* **Primary (Brand):** `Clinical Blue` (#2D6BFF) - Primary actions (Save, Start).
+* **Secondary (Action):** `Warm Amber` (#F2A33A) - Highlights and attention.
+* **Success:** `Sterile Green` (#19A974) - Confirmation and safe results.
+* **Alert (Danger):** `Biohazard Red` (#E04848) - Safety warnings, stop buttons.
+* **Background (Light):** `Lab White` (#F7F8FA) - High readability in bright offices.
+* **Background (Dark):** `Deep Lab Navy` (#0C111A) - Low-light reduction.
+* **Surface Cards:** Clean layers with subtle borders (1px #E5E8EE in light, #2A3342 in dark).
 
 ### 1.2 Typography
-* **Headings:** Sans-serif, Bold (Inter or Roboto).
-* **Data & Numbers:** **Monospace** (JetBrains Mono or Roboto Mono).
-    * *Rationale:* Tabular alignment is critical for comparing molarity or doses. 
+* **Headings & UI:** IBM Plex Sans (bold, precise, clinical feel).
+* **Data & Numbers:** **Monospace** IBM Plex Mono.
+    * *Rationale:* Tabular alignment is critical for comparing molarity or doses.
     * *Size:* Minimum 18sp for data values.
 
 ---
@@ -50,10 +51,10 @@ The app must support **True Dark Mode** natively (essential for fluorescence mic
 
 ## 3. SCREEN-SPECIFIC SPECIFICATIONS
 
-### 3.1 Dashboard (Modular Home)
-* **Layout:** Grid-based masonry layout (Pinterest style but rigid).
-* **Customization:** Long-press to enter "Edit Mode". Users can drag & drop modules (e.g., "Rat Dose Calc", "Timer", "Notes").
-* **Status Bar:** Top strip showing "Offline/Online" status subtly.
+### 3.1 Dashboard (Lab Hub)
+* **Layout:** Clear vertical flow with "Active Experiment", "Modes", and "Recent Activity".
+* **Modes:** Single swipe switcher between **Logbook** and **Lab Tools**.
+* **Status Bar:** Top strip showing "Synced/Offline" and date.
 
 ### 3.2 "Lab Mode" (Active Experiment View)
 This is the distinct mode when an experiment is running.

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
@@ -150,7 +152,7 @@ class GloveNumPad extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 digit,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
@@ -191,6 +193,7 @@ class GloveNumPad extends StatelessWidget {
                         fontSize: 28,
                         fontWeight: FontWeight.w600,
                         color: color,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     )
                   : Icon(icon, size: 28, color: color),

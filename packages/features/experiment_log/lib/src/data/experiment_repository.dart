@@ -6,10 +6,13 @@ final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((re
   return ExperimentRepository(ref.watch(isarProvider).value!);
 });
 
-final experimentsProvider = StreamProvider<List<Experiment>>((ref) {
+final experimentsProvider = StreamProvider<List<Experiment>>(
+  (ref) {
   final repository = ref.watch(experimentRepositoryProvider);
   return repository.watchExperiments();
-});
+  },
+  dependencies: [experimentRepositoryProvider],
+);
 
 class ExperimentRepository implements ExperimentRepositoryInterface {
   final Isar _isar;

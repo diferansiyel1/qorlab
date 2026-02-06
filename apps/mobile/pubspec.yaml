@@ -39,6 +39,7 @@ dependencies:
   flutter_riverpod: ^2.4.9
   go_router: ^12.0.0
   permission_handler: ^11.3.0
+  intl: ^0.20.2
   localization:
     path: ../../packages/core/localization
   ui_kit:
@@ -53,6 +54,9 @@ dependencies:
     path: ../../packages/features/in_vivo
   in_vitro:
     path: ../../packages/features/in_vitro
+  decimal: ^2.3.3
+  math_engine:
+    path: ../../packages/core/math_engine
 
 
   chemical_reference:

@@ -61,14 +61,14 @@ class _CentrifugePageState extends ConsumerState<CentrifugePage> {
             // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppColors.glassBorder)),
               ),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => context.pop(),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, 
+                    child: Icon(Icons.arrow_back_ios_new_rounded, 
                         color: AppColors.textMain, size: 20),
                   ),
                   const SizedBox(width: 16),
@@ -96,7 +96,7 @@ class _CentrifugePageState extends ConsumerState<CentrifugePage> {
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 decoration: BoxDecoration(
                                   color: _isRpmToRcf 
-                                      ? AppColors.primary.withOpacity(0.3) 
+                                      ? AppColors.primary.withAlpha(77) 
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -119,7 +119,7 @@ class _CentrifugePageState extends ConsumerState<CentrifugePage> {
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 decoration: BoxDecoration(
                                   color: !_isRpmToRcf 
-                                      ? AppColors.accent.withOpacity(0.3) 
+                                      ? AppColors.accent.withAlpha(77) 
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -181,7 +181,7 @@ class _CentrifugePageState extends ConsumerState<CentrifugePage> {
                     const SizedBox(height: 24),
                     
                     // Calculate Button
-                    GloveButton(
+                    LabButton(
                       onPressed: _calculate,
                       label: 'Calculate',
                     ),

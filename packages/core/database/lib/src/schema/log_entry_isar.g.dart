@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'log_entry.dart';
+part of 'log_entry_isar.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -15,7 +15,7 @@ extension GetLogEntryCollection on Isar {
 
 const LogEntrySchema = CollectionSchema(
   name: r'LogEntry',
-  id: 1,
+  id: -8268688274231935295,
   properties: {
     r'content': PropertySchema(
       id: 0,
@@ -55,7 +55,7 @@ const LogEntrySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'timestamp': IndexSchema(
-      id: 2,
+      id: 1852253767416892198,
       name: r'timestamp',
       unique: false,
       replace: false,
@@ -68,7 +68,7 @@ const LogEntrySchema = CollectionSchema(
       ],
     ),
     r'experimentId': IndexSchema(
-      id: 3,
+      id: -2596400929068244875,
       name: r'experimentId',
       unique: false,
       replace: false,

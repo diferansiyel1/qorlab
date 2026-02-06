@@ -20,3 +20,8 @@ dependency_overrides:
     path: ../../packages/features/smart_timer
   ui_kit:
     path: ../../packages/features/ui_kit
+
+  # path_provider_foundation 2.6.0 uses FFI + native-assets (objective_c.framework),
+  # which currently fails to embed for iOS Simulator in our toolchain.
+  # Pin to the pre-native-assets implementation.
+  path_provider_foundation: 2.5.1

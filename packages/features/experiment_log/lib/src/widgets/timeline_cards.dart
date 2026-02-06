@@ -52,7 +52,7 @@ class TimelineCard extends StatelessWidget {
                         return Container(
                           height: 100,
                           color: AppColors.glassBackground,
-                          child: const Center(
+                          child: Center(
                             child: Icon(Icons.broken_image_rounded, color: AppColors.textMuted),
                           ),
                         );
@@ -79,11 +79,11 @@ class TimelineCard extends StatelessWidget {
 
   Icon _getIconForType(String type) {
     switch (type) {
-      case 'note': return const Icon(Icons.text_fields_rounded, size: 16, color: AppColors.textMuted);
-      case 'dose': return const Icon(Icons.medication_liquid_rounded, size: 16, color: AppColors.primary);
-      case 'result': return const Icon(Icons.analytics_rounded, size: 16, color: AppColors.success);
-      case 'photo': return const Icon(Icons.camera_alt_rounded, size: 16, color: AppColors.accent);
-      default: return const Icon(Icons.circle, size: 8, color: AppColors.textMuted);
+      case 'note': return Icon(Icons.text_fields_rounded, size: 16, color: AppColors.textMuted);
+      case 'dose': return Icon(Icons.medication_liquid_rounded, size: 16, color: AppColors.primary);
+      case 'result': return Icon(Icons.analytics_rounded, size: 16, color: AppColors.success);
+      case 'photo': return Icon(Icons.camera_alt_rounded, size: 16, color: AppColors.accent);
+      default: return Icon(Icons.circle, size: 8, color: AppColors.textMuted);
     }
   }
 

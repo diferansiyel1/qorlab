@@ -116,14 +116,14 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
             // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppColors.glassBorder)),
               ),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => context.pop(),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, 
+                    child: Icon(Icons.arrow_back_ios_new_rounded, 
                         color: AppColors.textMain, size: 20),
                   ),
                   const SizedBox(width: 16),
@@ -132,7 +132,7 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
                   const Spacer(),
                   GestureDetector(
                     onTap: () => setState(() => _initializeWells()),
-                    child: const Icon(Icons.refresh_rounded, 
+                    child: Icon(Icons.refresh_rounded, 
                         color: AppColors.textMuted, size: 24),
                   ),
                 ],
@@ -165,7 +165,7 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildLegendItem('Empty', AppColors.textMuted.withOpacity(0.3)),
+                          _buildLegendItem('Empty', AppColors.textMuted.withAlpha(77)),
                           _buildLegendItem('Control', AppColors.primary),
                           _buildLegendItem('Test', AppColors.alert),
                           _buildLegendItem('Blank', Colors.white),
@@ -195,7 +195,7 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
                     const SizedBox(height: 24),
                     
                     // Calculate Button
-                    GloveButton(
+                    LabButton(
                       onPressed: _calculate,
                       label: 'Calculate Viability',
                     ),
@@ -244,7 +244,7 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.8),
+            color: color.withAlpha(204),
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.glassBorder),
           ),
@@ -262,7 +262,7 @@ class _PlateMapPageState extends ConsumerState<PlateMapPage> {
           width: 16,
           height: 16,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.8),
+            color: color.withAlpha(204),
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.glassBorder),
           ),

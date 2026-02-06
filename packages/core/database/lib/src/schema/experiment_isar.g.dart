@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'experiment.dart';
+part of 'experiment_isar.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -15,7 +15,7 @@ extension GetExperimentCollection on Isar {
 
 const ExperimentSchema = CollectionSchema(
   name: r'experiments_v1',
-  id: 100,
+  id: 8339872482624701835,
   properties: {
     r'code': PropertySchema(
       id: 0,

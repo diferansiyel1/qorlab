@@ -52,14 +52,14 @@ class _PowerAnalysisPageState extends ConsumerState<PowerAnalysisPage> {
             // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppColors.glassBorder)),
               ),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => context.pop(),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, 
+                    child: Icon(Icons.arrow_back_ios_new_rounded, 
                         color: AppColors.textMain, size: 20),
                   ),
                   const SizedBox(width: 16),
@@ -234,9 +234,9 @@ class _PowerAnalysisPageState extends ConsumerState<PowerAnalysisPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withAlpha(51),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: color.withOpacity(0.5)),
+                  border: Border.all(color: color.withAlpha(128)),
                 ),
                 child: Text(
                   valueLabel,
@@ -249,9 +249,9 @@ class _PowerAnalysisPageState extends ConsumerState<PowerAnalysisPage> {
           SliderTheme(
             data: SliderThemeData(
               activeTrackColor: color,
-              inactiveTrackColor: color.withOpacity(0.2),
+              inactiveTrackColor: color.withAlpha(51),
               thumbColor: color,
-              overlayColor: color.withOpacity(0.1),
+              overlayColor: color.withAlpha(26),
               trackHeight: 4,
             ),
             child: Slider(
