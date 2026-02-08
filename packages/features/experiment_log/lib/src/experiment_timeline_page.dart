@@ -314,7 +314,11 @@ class _ExperimentTimelinePageState
                             const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final log = logs[index];
-                          return TimelineCard(event: _mapToEvent(log));
+                          return GestureDetector(
+                            onLongPress: () =>
+                                _confirmDeleteLogEntry(context, log),
+                            child: TimelineCard(event: _mapToEvent(log)),
+                          );
                         },
                       );
                     },
@@ -660,6 +664,53 @@ class _ExperimentTimelinePageState
     final width = raw.width.clamp(1.0, size.width - left).toDouble();
     final height = raw.height.clamp(1.0, size.height - top).toDouble();
     return Rect.fromLTWH(left, top, width, height);
+  }
+
+  Future<void> _confirmDeleteLogEntry(
+    BuildContext context,
+    LogEntry log,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            backgroundColor: AppColors.surface,
+            title: Text(l10n.deleteEntry, style: AppTypography.headlineMedium),
+            content: Text(
+              l10n.deleteEntryMessage,
+              style: AppTypography.bodyMedium,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.alert,
+                ),
+                child: Text(l10n.deleteEntry),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+
+    try {
+      await ref.read(experimentRepositoryProvider).deleteLogEntry(log.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.entryDeleted)));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.deleteFailed(error.toString()))),
+      );
+    }
   }
 }
 

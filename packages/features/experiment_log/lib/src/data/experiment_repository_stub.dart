@@ -30,6 +30,15 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   }) async {}
 
   @override
+  Future<void> deleteExperiment(int experimentId) async {}
+
+  @override
+  Future<void> deleteProject(String projectName) async {}
+
+  @override
+  Future<void> deleteLogEntry(int logEntryId) async {}
+
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) => const Stream.empty();
 
   @override

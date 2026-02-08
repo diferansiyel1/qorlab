@@ -934,4 +934,40 @@ class AppLocalizationsTr extends AppLocalizations {
   String createProjectFailed(Object error) {
     return 'Proje oluşturulamadı: $error';
   }
+
+  @override
+  String get deleteProject => 'Projeyi Sil';
+
+  @override
+  String deleteProjectMessage(Object count, Object projectName) {
+    return '\"$projectName\" projesini ve altındaki $count deneyi silmek istiyor musunuz? Bu işlem geri alınamaz.';
+  }
+
+  @override
+  String get projectDeleted => 'Proje silindi.';
+
+  @override
+  String get deleteExperiment => 'Deneyi Sil';
+
+  @override
+  String deleteExperimentMessage(Object code) {
+    return '$code deneyini ve tüm zaman çizelgesi verilerini silmek istiyor musunuz? Bu işlem geri alınamaz.';
+  }
+
+  @override
+  String get experimentDeleted => 'Deney silindi.';
+
+  @override
+  String get deleteEntry => 'Kaydı Sil';
+
+  @override
+  String get deleteEntryMessage => 'Bu zaman çizelgesi kaydı silinsin mi?';
+
+  @override
+  String get entryDeleted => 'Kayıt silindi.';
+
+  @override
+  String deleteFailed(Object error) {
+    return 'Silme işlemi başarısız: $error';
+  }
 }

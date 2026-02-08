@@ -936,4 +936,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String createProjectFailed(Object error) {
     return 'Error creating project: $error';
   }
+
+  @override
+  String get deleteProject => 'Delete Project';
+
+  @override
+  String deleteProjectMessage(Object count, Object projectName) {
+    return 'Delete project \"$projectName\" and all $count experiments under it? This cannot be undone.';
+  }
+
+  @override
+  String get projectDeleted => 'Project deleted.';
+
+  @override
+  String get deleteExperiment => 'Delete Experiment';
+
+  @override
+  String deleteExperimentMessage(Object code) {
+    return 'Delete experiment $code and all its timeline data? This cannot be undone.';
+  }
+
+  @override
+  String get experimentDeleted => 'Experiment deleted.';
+
+  @override
+  String get deleteEntry => 'Delete Entry';
+
+  @override
+  String get deleteEntryMessage => 'Delete this timeline entry?';
+
+  @override
+  String get entryDeleted => 'Entry deleted.';
+
+  @override
+  String deleteFailed(Object error) {
+    return 'Delete failed: $error';
+  }
 }

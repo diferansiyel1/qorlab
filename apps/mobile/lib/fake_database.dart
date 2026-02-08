@@ -26,6 +26,21 @@ class FakeExperimentRepository implements ExperimentRepositoryInterface {
   }
 
   @override
+  Future<void> deleteExperiment(int experimentId) async {
+    debugPrint("Web Mock: Delete experiment $experimentId");
+  }
+
+  @override
+  Future<void> deleteProject(String projectName) async {
+    debugPrint("Web Mock: Delete project $projectName");
+  }
+
+  @override
+  Future<void> deleteLogEntry(int logEntryId) async {
+    debugPrint("Web Mock: Delete log entry $logEntryId");
+  }
+
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) {
     return Stream.value([
       LogEntry()

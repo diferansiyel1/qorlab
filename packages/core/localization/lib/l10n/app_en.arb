@@ -290,4 +290,15 @@
     "projectDescriptionOptional": "Description (Optional)",
     "projectDescriptionHint": "Project objectives and scope...",
     "createProjectFailed": "Error creating project: {error}"
+    ,
+    "deleteProject": "Delete Project",
+    "deleteProjectMessage": "Delete project \"{projectName}\" and all {count} experiments under it? This cannot be undone.",
+    "projectDeleted": "Project deleted.",
+    "deleteExperiment": "Delete Experiment",
+    "deleteExperimentMessage": "Delete experiment {code} and all its timeline data? This cannot be undone.",
+    "experimentDeleted": "Experiment deleted.",
+    "deleteEntry": "Delete Entry",
+    "deleteEntryMessage": "Delete this timeline entry?",
+    "entryDeleted": "Entry deleted.",
+    "deleteFailed": "Delete failed: {error}"
 }

@@ -91,6 +91,106 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   }
 
   @override
+  Future<void> deleteExperiment(int experimentId) async {
+    await _isar.writeTxn(() async {
+      final series = await _isar
+          .collection<MeasurementSeries>()
+          .filter()
+          .experimentIdEqualTo(experimentId)
+          .findAll();
+      for (final s in series) {
+        final points = await _isar
+            .collection<MeasurementPoint>()
+            .filter()
+            .seriesIdEqualTo(s.id)
+            .findAll();
+        if (points.isNotEmpty) {
+          await _isar.collection<MeasurementPoint>().deleteAll(
+            points.map((p) => p.id).toList(),
+          );
+        }
+      }
+      if (series.isNotEmpty) {
+        await _isar.collection<MeasurementSeries>().deleteAll(
+          series.map((s) => s.id).toList(),
+        );
+      }
+
+      final logs = await _isar
+          .collection<LogEntry>()
+          .filter()
+          .experimentIdEqualTo(experimentId)
+          .findAll();
+      if (logs.isNotEmpty) {
+        await _isar.collection<LogEntry>().deleteAll(
+          logs.map((l) => l.id).toList(),
+        );
+      }
+
+      await _isar.collection<Experiment>().delete(experimentId);
+    });
+  }
+
+  @override
+  Future<void> deleteProject(String projectName) async {
+    final normalized = projectName.trim();
+    if (normalized.isEmpty) return;
+
+    await _isar.writeTxn(() async {
+      final experiments = await _isar
+          .collection<Experiment>()
+          .filter()
+          .projectNameEqualTo(normalized)
+          .findAll();
+      for (final experiment in experiments) {
+        final experimentId = experiment.id;
+        final series = await _isar
+            .collection<MeasurementSeries>()
+            .filter()
+            .experimentIdEqualTo(experimentId)
+            .findAll();
+        for (final s in series) {
+          final points = await _isar
+              .collection<MeasurementPoint>()
+              .filter()
+              .seriesIdEqualTo(s.id)
+              .findAll();
+          if (points.isNotEmpty) {
+            await _isar.collection<MeasurementPoint>().deleteAll(
+              points.map((p) => p.id).toList(),
+            );
+          }
+        }
+        if (series.isNotEmpty) {
+          await _isar.collection<MeasurementSeries>().deleteAll(
+            series.map((s) => s.id).toList(),
+          );
+        }
+
+        final logs = await _isar
+            .collection<LogEntry>()
+            .filter()
+            .experimentIdEqualTo(experimentId)
+            .findAll();
+        if (logs.isNotEmpty) {
+          await _isar.collection<LogEntry>().deleteAll(
+            logs.map((l) => l.id).toList(),
+          );
+        }
+
+        await _isar.collection<Experiment>().delete(experimentId);
+      }
+    });
+  }
+
+  @override
+  Future<void> deleteLogEntry(int logEntryId) async {
+    await _isar.writeTxn(() async {
+      await _isar.collection<LogEntry>().delete(logEntryId);
+    });
+  }
+
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) {
     return _isar
         .collection<LogEntry>()

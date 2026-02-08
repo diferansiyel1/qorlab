@@ -289,5 +289,15 @@
     "firstExperimentHint": "örn. Başlangıç analizi",
     "projectDescriptionOptional": "Açıklama (Opsiyonel)",
     "projectDescriptionHint": "Proje hedefleri ve kapsamı...",
-    "createProjectFailed": "Proje oluşturulamadı: {error}"
+    "createProjectFailed": "Proje oluşturulamadı: {error}",
+    "deleteProject": "Projeyi Sil",
+    "deleteProjectMessage": "\"{projectName}\" projesini ve altındaki {count} deneyi silmek istiyor musunuz? Bu işlem geri alınamaz.",
+    "projectDeleted": "Proje silindi.",
+    "deleteExperiment": "Deneyi Sil",
+    "deleteExperimentMessage": "{code} deneyini ve tüm zaman çizelgesi verilerini silmek istiyor musunuz? Bu işlem geri alınamaz.",
+    "experimentDeleted": "Deney silindi.",
+    "deleteEntry": "Kaydı Sil",
+    "deleteEntryMessage": "Bu zaman çizelgesi kaydı silinsin mi?",
+    "entryDeleted": "Kayıt silindi.",
+    "deleteFailed": "Silme işlemi başarısız: {error}"
 }

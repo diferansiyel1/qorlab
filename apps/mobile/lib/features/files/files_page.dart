@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:database/database.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:experiment_log/experiment_log.dart';
@@ -20,6 +21,7 @@ class _FilesPageState extends ConsumerState<FilesPage> {
   @override
   Widget build(BuildContext context) {
     final experimentsAsync = ref.watch(experimentsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,11 +32,17 @@ class _FilesPageState extends ConsumerState<FilesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Files',
-                style: AppTypography.headlineLarge,
-              ),
+              Text('Files', style: AppTypography.headlineLarge),
               const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push('/project/new'),
+                  icon: const Icon(Icons.create_new_folder_outlined),
+                  label: Text(l10n.newProject),
+                ),
+              ),
+              const SizedBox(height: 12),
 
               // Search bar
               Container(
@@ -97,15 +105,26 @@ class _FilesPageState extends ConsumerState<FilesPage> {
               if (filtered.isEmpty) {
                 return _buildEmptyState();
               }
+              final grouped = _groupByProject(filtered);
               return ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: filtered.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemCount: grouped.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
                 itemBuilder: (context, index) {
-                  final exp = filtered[index];
-                  return _ExperimentTile(
-                    experiment: exp,
-                    onTap: () => context.push('/experiment/${exp.id}'),
+                  final section = grouped[index];
+                  return _ProjectSection(
+                    projectName: section.projectName,
+                    experiments: section.experiments,
+                    onDeleteProject: () => _deleteProject(
+                      projectName: section.projectName,
+                      experiments: section.experiments,
+                    ),
+                    onOpenExperiment: (exp) {
+                      ref.read(activeExperimentIdProvider.notifier).set(exp.id);
+                      context.push('/experiment/${exp.id}');
+                    },
+                    onDeleteExperiment: (exp) => _deleteExperiment(exp),
                   );
                 },
               );
@@ -159,11 +178,31 @@ class _FilesPageState extends ConsumerState<FilesPage> {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((e) {
         return e.title.toLowerCase().contains(query) ||
-            e.code.toLowerCase().contains(query);
+            e.code.toLowerCase().contains(query) ||
+            (e.projectName?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
 
     return filtered;
+  }
+
+  List<_ProjectSectionData> _groupByProject(List<Experiment> experiments) {
+    final buckets = <String, List<Experiment>>{};
+    for (final experiment in experiments) {
+      final project = (experiment.projectName?.trim().isNotEmpty ?? false)
+          ? experiment.projectName!.trim()
+          : 'General Lab';
+      buckets.putIfAbsent(project, () => <Experiment>[]).add(experiment);
+    }
+
+    return buckets.entries
+        .map(
+          (entry) => _ProjectSectionData(
+            projectName: entry.key,
+            experiments: entry.value,
+          ),
+        )
+        .toList();
   }
 
   Widget _buildEmptyState() {
@@ -171,11 +210,7 @@ class _FilesPageState extends ConsumerState<FilesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.folder_open_rounded,
-            color: AppColors.textMuted,
-            size: 64,
-          ),
+          Icon(Icons.folder_open_rounded, color: AppColors.textMuted, size: 64),
           const SizedBox(height: 16),
           Text(
             'No Experiments Found',
@@ -195,6 +230,196 @@ class _FilesPageState extends ConsumerState<FilesPage> {
             onPressed: () => context.push('/experiment/new'),
             icon: const Icon(Icons.add_rounded),
             label: const Text('NEW EXPERIMENT'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteProject({
+    required String projectName,
+    required List<Experiment> experiments,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final activeExperimentId = ref.read(activeExperimentIdProvider);
+    final hasActiveInProject = experiments.any(
+      (e) => e.id == activeExperimentId,
+    );
+
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            backgroundColor: AppColors.surface,
+            title: Text(
+              l10n.deleteProject,
+              style: AppTypography.headlineMedium,
+            ),
+            content: Text(
+              l10n.deleteProjectMessage(experiments.length, projectName),
+              style: AppTypography.bodyMedium,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.alert,
+                ),
+                child: Text(l10n.deleteProject),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+
+    try {
+      await ref.read(experimentRepositoryProvider).deleteProject(projectName);
+      if (hasActiveInProject) {
+        ref.read(activeExperimentIdProvider.notifier).clear();
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.projectDeleted)));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.deleteFailed(error.toString()))),
+      );
+    }
+  }
+
+  Future<void> _deleteExperiment(Experiment experiment) async {
+    final l10n = AppLocalizations.of(context)!;
+    final activeExperimentId = ref.read(activeExperimentIdProvider);
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            backgroundColor: AppColors.surface,
+            title: Text(
+              l10n.deleteExperiment,
+              style: AppTypography.headlineMedium,
+            ),
+            content: Text(
+              l10n.deleteExperimentMessage(experiment.code),
+              style: AppTypography.bodyMedium,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.alert,
+                ),
+                child: Text(l10n.deleteExperiment),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+
+    try {
+      await ref
+          .read(experimentRepositoryProvider)
+          .deleteExperiment(experiment.id);
+      if (activeExperimentId == experiment.id) {
+        ref.read(activeExperimentIdProvider.notifier).clear();
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.experimentDeleted)));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.deleteFailed(error.toString()))),
+      );
+    }
+  }
+}
+
+class _ProjectSectionData {
+  final String projectName;
+  final List<Experiment> experiments;
+
+  const _ProjectSectionData({
+    required this.projectName,
+    required this.experiments,
+  });
+}
+
+class _ProjectSection extends StatelessWidget {
+  final String projectName;
+  final List<Experiment> experiments;
+  final ValueChanged<Experiment> onOpenExperiment;
+  final VoidCallback onDeleteProject;
+  final ValueChanged<Experiment> onDeleteExperiment;
+
+  const _ProjectSection({
+    required this.projectName,
+    required this.experiments,
+    required this.onOpenExperiment,
+    required this.onDeleteProject,
+    required this.onDeleteExperiment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  projectName,
+                  style: AppTypography.labelLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${experiments.length} exp',
+                style: AppTypography.labelSmall,
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: AppLocalizations.of(context)!.deleteProject,
+                onPressed: onDeleteProject,
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.alert,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: experiments.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final experiment = experiments[index];
+              return _ExperimentTile(
+                experiment: experiment,
+                onTap: () => onOpenExperiment(experiment),
+                onDelete: () => onDeleteExperiment(experiment),
+              );
+            },
           ),
         ],
       ),
@@ -241,10 +466,12 @@ class _FilterChip extends StatelessWidget {
 class _ExperimentTile extends StatelessWidget {
   final Experiment experiment;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const _ExperimentTile({
     required this.experiment,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
@@ -275,14 +502,18 @@ class _ExperimentTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  experiment.code,
-                  style: AppTypography.experimentCode,
-                ),
+                Text(experiment.code, style: AppTypography.experimentCode),
                 const SizedBox(height: 2),
                 Text(
                   experiment.title,
                   style: AppTypography.labelLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  experiment.projectName ?? 'General Lab',
+                  style: AppTypography.labelSmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -301,6 +532,16 @@ class _ExperimentTile extends StatelessWidget {
             type: experiment.isActive
                 ? StatusBadgeType.inProgress
                 : StatusBadgeType.completed,
+          ),
+          const SizedBox(width: 6),
+          IconButton(
+            tooltip: AppLocalizations.of(context)!.deleteExperiment,
+            onPressed: onDelete,
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.alert,
+              size: 20,
+            ),
           ),
         ],
       ),

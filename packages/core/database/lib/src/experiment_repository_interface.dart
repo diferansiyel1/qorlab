@@ -8,6 +8,9 @@ abstract class ExperimentRepositoryInterface {
     required int experimentId,
     required bool isActive,
   });
+  Future<void> deleteExperiment(int experimentId);
+  Future<void> deleteProject(String projectName);
+  Future<void> deleteLogEntry(int logEntryId);
   Stream<List<LogEntry>> watchLogs(int experimentId);
   Stream<List<Experiment>> watchExperiments();
 }

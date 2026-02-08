@@ -1779,6 +1779,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error creating project: {error}'**
   String createProjectFailed(Object error);
+
+  /// No description provided for @deleteProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Project'**
+  String get deleteProject;
+
+  /// No description provided for @deleteProjectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete project \"{projectName}\" and all {count} experiments under it? This cannot be undone.'**
+  String deleteProjectMessage(Object count, Object projectName);
+
+  /// No description provided for @projectDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted.'**
+  String get projectDeleted;
+
+  /// No description provided for @deleteExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Experiment'**
+  String get deleteExperiment;
+
+  /// No description provided for @deleteExperimentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete experiment {code} and all its timeline data? This cannot be undone.'**
+  String deleteExperimentMessage(Object code);
+
+  /// No description provided for @experimentDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment deleted.'**
+  String get experimentDeleted;
+
+  /// No description provided for @deleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Entry'**
+  String get deleteEntry;
+
+  /// No description provided for @deleteEntryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this timeline entry?'**
+  String get deleteEntryMessage;
+
+  /// No description provided for @entryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry deleted.'**
+  String get entryDeleted;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String deleteFailed(Object error);
 }
 
 class _AppLocalizationsDelegate
