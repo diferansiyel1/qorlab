@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:database/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
@@ -122,6 +125,7 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
           .experimentIdEqualTo(experimentId)
           .findAll();
       if (logs.isNotEmpty) {
+        await _deleteLogAttachmentsInBestEffort(logs);
         await _isar.collection<LogEntry>().deleteAll(
           logs.map((l) => l.id).toList(),
         );
@@ -173,6 +177,7 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
             .experimentIdEqualTo(experimentId)
             .findAll();
         if (logs.isNotEmpty) {
+          await _deleteLogAttachmentsInBestEffort(logs);
           await _isar.collection<LogEntry>().deleteAll(
             logs.map((l) => l.id).toList(),
           );
@@ -186,6 +191,46 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   @override
   Future<void> deleteLogEntry(int logEntryId) async {
     await _isar.writeTxn(() async {
+      final log = await _isar.collection<LogEntry>().get(logEntryId);
+      if (log == null) return;
+
+      final kind = (log.kind ?? log.type).toLowerCase();
+      if (kind == 'measurement' || log.type == 'measurement_point') {
+        final metadata = log.metadata;
+        if (metadata != null && metadata.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(metadata);
+            if (decoded is Map<String, dynamic>) {
+              final pointIdRaw = decoded['pointId'];
+              final pointId = pointIdRaw is int
+                  ? pointIdRaw
+                  : int.tryParse(pointIdRaw?.toString() ?? '');
+              if (pointId != null) {
+                final point = await _isar.collection<MeasurementPoint>().get(
+                  pointId,
+                );
+                if (point != null) {
+                  final seriesId = point.seriesId;
+                  await _isar.collection<MeasurementPoint>().delete(pointId);
+                  final hasRemaining = await _isar
+                      .collection<MeasurementPoint>()
+                      .filter()
+                      .seriesIdEqualTo(seriesId)
+                      .findFirst();
+                  if (hasRemaining == null) {
+                    await _isar.collection<MeasurementSeries>().delete(
+                      seriesId,
+                    );
+                  }
+                }
+              }
+            }
+          } catch (_) {}
+        }
+      } else {
+        await _deleteLogAttachmentsInBestEffort([log]);
+      }
+
       await _isar.collection<LogEntry>().delete(logEntryId);
     });
   }
@@ -208,5 +253,23 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
         .sortByLastEventAtDesc()
         .thenByCreatedAtDesc()
         .watch(fireImmediately: true);
+  }
+
+  Future<void> _deleteLogAttachmentsInBestEffort(List<LogEntry> logs) async {
+    for (final log in logs) {
+      final kind = (log.kind ?? log.type).toLowerCase();
+      if (kind != 'photo' && log.type != 'photo') continue;
+
+      final candidatePath = (log.photoPath?.trim().isNotEmpty ?? false)
+          ? log.photoPath!.trim()
+          : log.content.trim();
+      if (candidatePath.isEmpty) continue;
+      try {
+        final file = File(candidatePath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (_) {}
+    }
   }
 }
