@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ui_kit/ui_kit.dart';
 
@@ -18,6 +20,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Padding(
@@ -26,22 +29,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Text(
-              'Settings',
-              style: AppTypography.headlineLarge,
-            ),
+            Text('Settings', style: AppTypography.headlineLarge),
             const SizedBox(height: 24),
 
             // Display section
-            Text(
-              'DISPLAY',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('DISPLAY', style: AppTypography.labelUppercase),
             const SizedBox(height: 12),
             _SettingsTile(
               icon: Icons.color_lens_outlined,
               title: 'Theme',
               subtitle: 'Light, dark, or system default',
+              trailingBelow: true,
               trailing: _ThemeModeToggle(
                 selected: ref.watch(themeModeProvider),
                 onChanged: (mode) {
@@ -53,10 +51,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 24),
 
             // Units section
-            Text(
-              'UNITS',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('UNITS', style: AppTypography.labelUppercase),
             const SizedBox(height: 12),
             _SettingsTile(
               icon: Icons.scale_rounded,
@@ -93,21 +88,33 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             const SizedBox(height: 24),
 
-            // Data section
-            Text(
-              'DATA',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('PREMIUM', style: AppTypography.labelUppercase),
             const SizedBox(height: 12),
             _SettingsTile(
-              icon: Icons.cloud_upload_rounded,
-              title: 'Export All Data',
-              subtitle: 'Download experiments as CSV',
+              icon: Icons.workspace_premium_outlined,
+              title: l10n.premium,
+              subtitle: l10n.premiumManageSubtitle,
               trailing: Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.textMuted,
               ),
-              onTap: () => _showExportDialog(),
+              onTap: () => context.push('/premium'),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Data section
+            Text('DATA', style: AppTypography.labelUppercase),
+            const SizedBox(height: 12),
+            _SettingsTile(
+              icon: Icons.cloud_upload_rounded,
+              title: l10n.archive,
+              subtitle: l10n.archiveSubtitle,
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textMuted,
+              ),
+              onTap: () => context.push('/archive'),
             ),
             const SizedBox(height: 8),
             _SettingsTile(
@@ -124,10 +131,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 24),
 
             // About section
-            Text(
-              'ABOUT',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('ABOUT', style: AppTypography.labelUppercase),
             const SizedBox(height: 12),
             FutureBuilder<PackageInfo>(
               future: PackageInfo.fromPlatform(),
@@ -165,52 +169,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  void _showExportDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          'Export Data',
-          style: AppTypography.headlineMedium,
-        ),
-        content: Text(
-          'This will export all experiment data as CSV files.',
-          style: AppTypography.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'CANCEL',
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textMuted,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export started...')),
-              );
-            },
-            child: const Text('EXPORT'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showClearCacheDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(
-          'Clear Cache',
-          style: AppTypography.headlineMedium,
-        ),
+        title: Text('Clear Cache', style: AppTypography.headlineMedium),
         content: Text(
           'This will clear temporary files and cached data.',
           style: AppTypography.bodyMedium,
@@ -226,14 +190,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.alert,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.alert),
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cache cleared')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Cache cleared')));
             },
             child: const Text('CLEAR'),
           ),
@@ -248,6 +210,7 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget trailing;
+  final bool trailingBelow;
   final VoidCallback? onTap;
 
   const _SettingsTile({
@@ -255,34 +218,54 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.trailing,
+    this.trailingBelow = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (trailingBelow) {
+      return GlassContainer(
+        onTap: onTap,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: AppColors.primary, size: 24),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppTypography.labelLarge),
+                      Text(subtitle, style: AppTypography.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Align(alignment: Alignment.centerRight, child: trailing),
+          ],
+        ),
+      );
+    }
+
     return GlassContainer(
       onTap: onTap,
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primary,
-            size: 24,
-          ),
+          Icon(icon, color: AppColors.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: AppTypography.labelLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodySmall,
-                ),
+                Text(title, style: AppTypography.labelLarge),
+                Text(subtitle, style: AppTypography.bodySmall),
               ],
             ),
           ),
@@ -297,10 +280,7 @@ class _ThemeModeToggle extends StatelessWidget {
   final ThemeMode selected;
   final ValueChanged<ThemeMode> onChanged;
 
-  const _ThemeModeToggle({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _ThemeModeToggle({required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -350,10 +330,7 @@ class _UnitToggle extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(option),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
@@ -361,7 +338,9 @@ class _UnitToggle extends StatelessWidget {
               child: Text(
                 option,
                 style: AppTypography.labelSmall.copyWith(
-                  color: isSelected ? AppColors.background : AppColors.textMuted,
+                  color: isSelected
+                      ? AppColors.background
+                      : AppColors.textMuted,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),

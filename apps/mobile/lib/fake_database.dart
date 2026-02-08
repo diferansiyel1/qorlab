@@ -16,12 +16,22 @@ class FakeExperimentRepository implements ExperimentRepositoryInterface {
   }
 
   @override
+  Future<void> setExperimentStatus({
+    required int experimentId,
+    required bool isActive,
+  }) async {
+    debugPrint(
+      "Web Mock: Set experiment $experimentId status -> ${isActive ? 'active' : 'completed'}",
+    );
+  }
+
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) {
     return Stream.value([
       LogEntry()
         ..content = "System initialized"
         ..type = "text"
-        ..timestamp = DateTime.now()
+        ..timestamp = DateTime.now(),
     ]);
   }
 
@@ -33,12 +43,26 @@ class FakeExperimentRepository implements ExperimentRepositoryInterface {
 
 class FakeExperimentActionHandler implements ExperimentActionHandler {
   @override
-  Future<void> logDose({required String species, required String route, required Decimal weightG, required Decimal doseMgPerKg, required Decimal concentrationMgMl, required Decimal volumeMl, required bool isSafe}) async {
+  Future<void> logDose({
+    required String species,
+    required String route,
+    required Decimal weightG,
+    required Decimal doseMgPerKg,
+    required Decimal concentrationMgMl,
+    required Decimal volumeMl,
+    required bool isSafe,
+  }) async {
     debugPrint("Web Mock Log Dose: $species");
   }
 
   @override
-  Future<void> logMolarity({required String chemicalName, required Decimal molecularWeight, required Decimal volumeMl, required Decimal molarity, required Decimal massG}) async {
+  Future<void> logMolarity({
+    required String chemicalName,
+    required Decimal molecularWeight,
+    required Decimal volumeMl,
+    required Decimal molarity,
+    required Decimal massG,
+  }) async {
     debugPrint("Web Mock Log Molarity: $chemicalName");
   }
 

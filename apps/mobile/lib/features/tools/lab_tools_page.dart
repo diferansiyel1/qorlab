@@ -1,13 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'package:database/database.dart';
+import 'package:experiment_log/experiment_log.dart';
 
 /// Lab Tools page with grid of calculator tools
-class LabToolsPage extends StatelessWidget {
+class LabToolsPage extends ConsumerWidget {
   const LabToolsPage({super.key});
 
+  Experiment? _pickActiveExperiment({
+    required List<Experiment> experiments,
+    required int? preferredId,
+  }) {
+    if (experiments.isEmpty) return null;
+    if (preferredId != null) {
+      for (final experiment in experiments) {
+        if (experiment.id == preferredId) return experiment;
+      }
+    }
+    for (final experiment in experiments) {
+      if (experiment.isActive) return experiment;
+    }
+    return experiments.first;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final experiments =
+        ref.watch(experimentsProvider).valueOrNull ?? const <Experiment>[];
+    final activeExperimentId = ref.watch(activeExperimentIdProvider);
+    final activeExperiment = _pickActiveExperiment(
+      experiments: experiments,
+      preferredId: activeExperimentId,
+    );
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Padding(
@@ -16,22 +45,59 @@ class LabToolsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Text(
-              'Lab Tools',
-              style: AppTypography.headlineLarge,
-            ),
+            Text('Lab Tools', style: AppTypography.headlineLarge),
             const SizedBox(height: 8),
             Text(
               'Scientific calculators and utilities',
               style: AppTypography.labelMedium,
             ),
             const SizedBox(height: 24),
+            GlassContainer(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.playlist_add_check_circle_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      activeExperiment == null
+                          ? l10n.noActiveExperiment
+                          : '${activeExperiment.code} · ${activeExperiment.title}',
+                      style: AppTypography.bodySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  if (activeExperiment == null)
+                    OutlinedButton(
+                      onPressed: () => context.push('/experiment/new'),
+                      child: Text(l10n.newExperiment),
+                    )
+                  else
+                    IconButton(
+                      onPressed: () {
+                        ref
+                            .read(activeExperimentIdProvider.notifier)
+                            .set(activeExperiment.id);
+                        context.push('/experiment/${activeExperiment.id}');
+                      },
+                      icon: Icon(
+                        Icons.open_in_new_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // Calculator Tools section
-            Text(
-              'CALCULATORS',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('CALCULATORS', style: AppTypography.labelUppercase),
             const SizedBox(height: 16),
 
             // Tools grid
@@ -56,6 +122,20 @@ class LabToolsPage extends StatelessWidget {
                   subtitle: 'Solution prep',
                   color: Colors.purple,
                   onTap: () => context.push('/in-vitro'),
+                ),
+                _ToolCard(
+                  icon: Icons.hub_rounded,
+                  title: 'Compound Explorer',
+                  subtitle: 'Molecule geometry',
+                  color: const Color(0xFF00A7E1),
+                  onTap: () => context.push('/pubchem-explorer'),
+                ),
+                _ToolCard(
+                  icon: Icons.auto_graph_rounded,
+                  title: l10n.statWizardToolTitle,
+                  subtitle: l10n.statWizardToolSubtitle,
+                  color: const Color(0xFF5BD17A),
+                  onTap: () => context.push('/stat-wizard'),
                 ),
                 _ToolCard(
                   icon: Icons.sync_rounded,
@@ -91,10 +171,7 @@ class LabToolsPage extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Quick Actions section
-            Text(
-              'QUICK ACTIONS',
-              style: AppTypography.labelUppercase,
-            ),
+            Text('QUICK ACTIONS', style: AppTypography.labelUppercase),
             const SizedBox(height: 16),
 
             _ActionTile(
@@ -102,6 +179,13 @@ class LabToolsPage extends StatelessWidget {
               title: 'Free Mode Calculator',
               subtitle: 'Quick calculations without saving',
               onTap: () => context.push('/free-mode'),
+            ),
+            const SizedBox(height: 12),
+            _ActionTile(
+              icon: Icons.create_new_folder_outlined,
+              title: l10n.newProject,
+              subtitle: l10n.newProjectSubtitle,
+              onTap: () => context.push('/project/new'),
             ),
             const SizedBox(height: 12),
             _ActionTile(
@@ -152,22 +236,12 @@ class _ToolCard extends StatelessWidget {
               color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            child: Icon(icon, color: color, size: 24),
           ),
           const Spacer(),
-          Text(
-            title,
-            style: AppTypography.labelLarge,
-          ),
+          Text(title, style: AppTypography.labelLarge),
           const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: AppTypography.labelSmall,
-          ),
+          Text(subtitle, style: AppTypography.labelSmall),
         ],
       ),
     );
@@ -201,32 +275,19 @@ class _ActionTile extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: AppTypography.labelLarge,
-                ),
-                Text(
-                  subtitle,
-                  style: AppTypography.labelSmall,
-                ),
+                Text(title, style: AppTypography.labelLarge),
+                Text(subtitle, style: AppTypography.labelSmall),
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textMuted,
-          ),
+          Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
         ],
       ),
     );

@@ -2,17 +2,16 @@ import 'package:database/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
-final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((ref) {
+final experimentRepositoryProvider = Provider<ExperimentRepositoryInterface>((
+  ref,
+) {
   return ExperimentRepository(ref.watch(isarProvider).value!);
 });
 
-final experimentsProvider = StreamProvider<List<Experiment>>(
-  (ref) {
+final experimentsProvider = StreamProvider<List<Experiment>>((ref) {
   final repository = ref.watch(experimentRepositoryProvider);
   return repository.watchExperiments();
-  },
-  dependencies: [experimentRepositoryProvider],
-);
+}, dependencies: [experimentRepositoryProvider]);
 
 class ExperimentRepository implements ExperimentRepositoryInterface {
   final Isar _isar;
@@ -23,6 +22,10 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   Future<void> createExperiment(Experiment experiment) async {
     await _isar.writeTxn(() async {
       experiment.startedAt ??= experiment.createdAt;
+      final rawProject = experiment.projectName?.trim();
+      experiment.projectName = (rawProject == null || rawProject.isEmpty)
+          ? 'General Lab'
+          : rawProject;
       await _isar.collection<Experiment>().put(experiment);
     });
   }
@@ -32,8 +35,7 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
     final occurredAt = DateTime.now();
 
     await _isar.writeTxn(() async {
-      final experiment =
-          await _isar.collection<Experiment>().get(experimentId);
+      final experiment = await _isar.collection<Experiment>().get(experimentId);
       final startedAt = experiment?.startedAt ?? experiment?.createdAt;
       final tOffsetMs = startedAt == null
           ? null
@@ -66,8 +68,32 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
   }
 
   @override
+  Future<void> setExperimentStatus({
+    required int experimentId,
+    required bool isActive,
+  }) async {
+    await _isar.writeTxn(() async {
+      final experiment = await _isar.collection<Experiment>().get(experimentId);
+      if (experiment == null) return;
+      if (experiment.isActive == isActive) return;
+
+      final now = DateTime.now();
+      experiment.isActive = isActive;
+      if (isActive) {
+        experiment.endedAt = null;
+        experiment.startedAt ??= now;
+      } else {
+        experiment.endedAt = now;
+      }
+      experiment.lastEventAt = now;
+      await _isar.collection<Experiment>().put(experiment);
+    });
+  }
+
+  @override
   Stream<List<LogEntry>> watchLogs(int experimentId) {
-    return _isar.collection<LogEntry>()
+    return _isar
+        .collection<LogEntry>()
         .filter()
         .experimentIdEqualTo(experimentId)
         .sortByTimestampDesc()
@@ -76,6 +102,11 @@ class ExperimentRepository implements ExperimentRepositoryInterface {
 
   @override
   Stream<List<Experiment>> watchExperiments() {
-    return _isar.collection<Experiment>().where().sortByCreatedAtDesc().watch(fireImmediately: true);
+    return _isar
+        .collection<Experiment>()
+        .where()
+        .sortByLastEventAtDesc()
+        .thenByCreatedAtDesc()
+        .watch(fireImmediately: true);
   }
 }

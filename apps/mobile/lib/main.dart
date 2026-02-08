@@ -23,28 +23,46 @@ import 'features/tools/power_analysis_page.dart';
 import 'features/tools/plate_map_page.dart';
 import 'features/free_mode/free_mode_page.dart';
 import 'features/experiment/new_experiment_page.dart';
+import 'features/project/new_project_page.dart';
+import 'features/settings/premium_page.dart';
+import 'services/local_timer_notification_scheduler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  runApp(ProviderScope(
-    overrides: [
-      if (kIsWeb) ...[
-        experimentRepositoryProvider.overrideWithValue(FakeExperimentRepository()),
-        experimentActionHandlerProvider.overrideWithValue(FakeExperimentActionHandler()),
-        molarityLoggerProvider.overrideWith((ref) =>
-            MainMolarityLogger(ref.watch(experimentActionHandlerProvider))),
-        doseLoggerProvider.overrideWith(
-            (ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider))),
+
+  final timerScheduler = await createLocalTimerNotificationScheduler();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        if (kIsWeb) ...[
+          experimentRepositoryProvider.overrideWithValue(
+            FakeExperimentRepository(),
+          ),
+          experimentActionHandlerProvider.overrideWithValue(
+            FakeExperimentActionHandler(),
+          ),
+          molarityLoggerProvider.overrideWith(
+            (ref) =>
+                MainMolarityLogger(ref.watch(experimentActionHandlerProvider)),
+          ),
+          doseLoggerProvider.overrideWith(
+            (ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider)),
+          ),
+        ],
+        timerNotificationSchedulerProvider.overrideWithValue(timerScheduler),
+        // Adapter: Connect Timer to ExperimentLog
+        timerLoggerProvider.overrideWith((ref) {
+          final handler = ref.watch(experimentActionHandlerProvider);
+          return TimerLoggerAdapter(handler);
+        }),
+        timerExperimentContextProvider.overrideWith(
+          (ref) => ref.watch(activeExperimentIdProvider),
+        ),
       ],
-      // Adapter: Connect Timer to ExperimentLog
-      timerLoggerProvider.overrideWith((ref) {
-        final handler = ref.watch(experimentActionHandlerProvider);
-        return TimerLoggerAdapter(handler);
-      }),
-    ],
-    child: const AppBootstrapper(),
-  ));
+      child: const AppBootstrapper(),
+    ),
+  );
 }
 
 class AppBootstrapper extends ConsumerWidget {
@@ -56,15 +74,22 @@ class AppBootstrapper extends ConsumerWidget {
       return const QorLabApp();
     } else {
       final isarAsync = ref.watch(isarProvider);
-      
+
       return isarAsync.when(
         data: (isar) {
           return ProviderScope(
-             overrides: [
-               molarityLoggerProvider.overrideWith((ref) => MainMolarityLogger(ref.watch(experimentActionHandlerProvider))),
-               doseLoggerProvider.overrideWith((ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider))),
-             ],
-             child: const QorLabApp(),
+            overrides: [
+              molarityLoggerProvider.overrideWith(
+                (ref) => MainMolarityLogger(
+                  ref.watch(experimentActionHandlerProvider),
+                ),
+              ),
+              doseLoggerProvider.overrideWith(
+                (ref) =>
+                    MainDoseLogger(ref.watch(experimentActionHandlerProvider)),
+              ),
+            ],
+            child: const QorLabApp(),
           );
         },
         loading: () => const MaterialApp(
@@ -89,6 +114,7 @@ class QorLabApp extends ConsumerWidget {
       theme: LabTheme.getLight(),
       darkTheme: LabTheme.getDark(),
       themeMode: themeMode,
+      locale: const Locale('en'),
       routerConfig: _router,
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
@@ -118,6 +144,10 @@ final _router = GoRouter(
           builder: (context, state) => const NewExperimentPage(),
         ),
         GoRoute(
+          path: 'project/new',
+          builder: (context, state) => const NewProjectPage(),
+        ),
+        GoRoute(
           path: 'experiment/:id',
           builder: (context, state) {
             final id = int.parse(state.pathParameters['id']!);
@@ -130,10 +160,7 @@ final _router = GoRouter(
           path: 'free-mode',
           builder: (context, state) => const FreeModePage(),
         ),
-        GoRoute(
-          path: 'timers',
-          builder: (context, state) => const TimerPage(),
-        ),
+        GoRoute(path: 'timers', builder: (context, state) => const TimerPage()),
         GoRoute(
           path: 'in-vivo',
           builder: (context, state) => const DoseCalculatorPage(),
@@ -141,6 +168,14 @@ final _router = GoRouter(
         GoRoute(
           path: 'in-vitro',
           builder: (context, state) => const MolarityCalculatorPage(),
+        ),
+        GoRoute(
+          path: 'pubchem-explorer',
+          builder: (context, state) => const PubChemExplorerPage(),
+        ),
+        GoRoute(
+          path: 'stat-wizard',
+          builder: (context, state) => const StatWizardPage(),
         ),
         GoRoute(
           path: 'centrifuge',
@@ -154,6 +189,14 @@ final _router = GoRouter(
           path: 'plate-map',
           builder: (context, state) => const PlateMapPage(),
         ),
+        GoRoute(
+          path: 'archive',
+          builder: (context, state) => const ArchivePage(),
+        ),
+        GoRoute(
+          path: 'premium',
+          builder: (context, state) => const PremiumPage(),
+        ),
       ],
     ),
   ],
@@ -166,8 +209,20 @@ class MainMolarityLogger implements MolarityLogger {
   MainMolarityLogger(this.handler);
 
   @override
-  Future<void> logResult({required String chemicalName, required Decimal molecularWeight, required Decimal volumeMl, required Decimal molarity, required Decimal massG}) {
-    return handler.logMolarity(chemicalName: chemicalName, molecularWeight: molecularWeight, volumeMl: volumeMl, molarity: molarity, massG: massG);
+  Future<void> logResult({
+    required String chemicalName,
+    required Decimal molecularWeight,
+    required Decimal volumeMl,
+    required Decimal molarity,
+    required Decimal massG,
+  }) {
+    return handler.logMolarity(
+      chemicalName: chemicalName,
+      molecularWeight: molecularWeight,
+      volumeMl: volumeMl,
+      molarity: molarity,
+      massG: massG,
+    );
   }
 }
 
@@ -176,7 +231,23 @@ class MainDoseLogger implements DoseLogger {
   MainDoseLogger(this.handler);
 
   @override
-  Future<void> logDose({required String species, required String route, required Decimal weightG, required Decimal doseMgPerKg, required Decimal concentrationMgMl, required Decimal volumeMl, required bool isSafe}) {
-    return handler.logDose(species: species, route: route, weightG: weightG, doseMgPerKg: doseMgPerKg, concentrationMgMl: concentrationMgMl, volumeMl: volumeMl, isSafe: isSafe);
+  Future<void> logDose({
+    required String species,
+    required String route,
+    required Decimal weightG,
+    required Decimal doseMgPerKg,
+    required Decimal concentrationMgMl,
+    required Decimal volumeMl,
+    required bool isSafe,
+  }) {
+    return handler.logDose(
+      species: species,
+      route: route,
+      weightG: weightG,
+      doseMgPerKg: doseMgPerKg,
+      concentrationMgMl: concentrationMgMl,
+      volumeMl: volumeMl,
+      isSafe: isSafe,
+    );
   }
 }
