@@ -11,7 +11,7 @@ class LogEntry {
 
   late String content;
 
-  @Index()
+  @Index(composite: [CompositeIndex('timestamp')])
   late int experimentId;
 
   String? photoPath;

@@ -284,6 +284,13 @@ Convert legacy `setState` gradually; do not destabilize product.
 - Paper‑friendly export (PDF/CSV), charts embedded
 - Premium entitlement UX (restore, offline grace)
 
+### Phase 5 — Premium scientific intelligence
+
+- PubChem-backed compound intelligence panel (structure + key descriptors)
+- Molarity flow integration (select chemical -> enrich -> optional MW apply)
+- Client throttling + cache fallback to respect upstream request limits
+- Scale-ready proxy strategy (global rate limit, cache layers, stale-while-revalidate)
+
 ---
 
 ## 9) Open decisions (must be confirmed before building `.ql`)
@@ -291,4 +298,3 @@ Convert legacy `setState` gradually; do not destabilize product.
 1. `.ql` extension is final? (If yes, proceed.)
 2. Import default behavior is **Import‑as‑Copy**? (Recommended.)
 3. Desktop companion is **read‑only in v1**? (Recommended.)
-

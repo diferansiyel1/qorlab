@@ -9,6 +9,9 @@ import 'schema/experiment.dart';
 import 'schema/log_entry.dart';
 import 'schema/measurement_point.dart';
 import 'schema/measurement_series.dart';
+import 'schema/lab_timer.dart';
+import 'schema/lab_timer_lap.dart';
+import 'schema/chemical_bottle_record.dart';
 
 const String _isarName = 'qorlab';
 
@@ -24,7 +27,9 @@ final isarProvider = FutureProvider<Isar>((ref) async {
     docsDir = await getApplicationDocumentsDirectory();
   } catch (e, st) {
     if (!kDebugMode) rethrow;
-    debugPrint('path_provider failed ($e). Falling back to systemTemp for Isar.');
+    debugPrint(
+      'path_provider failed ($e). Falling back to systemTemp for Isar.',
+    );
     debugPrintStack(stackTrace: st);
     docsDir = Directory.systemTemp;
   }
@@ -38,6 +43,9 @@ final isarProvider = FutureProvider<Isar>((ref) async {
         LogEntrySchema,
         MeasurementSeriesSchema,
         MeasurementPointSchema,
+        LabTimerRecordSchema,
+        LabTimerLapRecordSchema,
+        ChemicalBottleRecordSchema,
       ],
       directory: isarDir.path,
       name: _isarName,

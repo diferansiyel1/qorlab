@@ -32,25 +32,33 @@ class LabButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LabColors.setBrightness(Theme.of(context).brightness);
-    final Color effectiveBackground = backgroundColor ??
-        (isPrimary ? LabColors.accent : LabColors.surface);
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
+    final buttonHeight = isDesktop ? 60.0 : 56.0;
+    final iconSize = isDesktop ? 24.0 : 22.0;
+    final borderRadius = isDesktop ? 18.0 : 16.0;
+    final buttonPadding = EdgeInsets.symmetric(
+      horizontal: isDesktop ? 24 : 20,
+      vertical: isDesktop ? 18 : 16,
+    );
+    final Color effectiveBackground =
+        backgroundColor ?? (isPrimary ? LabColors.accent : LabColors.surface);
 
     final Color effectiveForeground = backgroundColor != null
         ? (effectiveBackground.computeLuminance() > 0.55
-            ? Colors.black
-            : Colors.white)
+              ? Colors.black
+              : Colors.white)
         : (isPrimary ? Colors.white : LabColors.textPrimary);
 
     return SizedBox(
-      height: 56,
+      height: buttonHeight,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(56, 56),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          minimumSize: Size(56, buttonHeight),
+          padding: buttonPadding,
           backgroundColor: effectiveBackground,
           foregroundColor: effectiveForeground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(borderRadius),
             side: isPrimary
                 ? BorderSide.none
                 : BorderSide(color: LabColors.divider, width: 1),
@@ -66,6 +74,7 @@ class LabButton extends StatelessWidget {
                   label: label,
                   icon: icon,
                   color: effectiveForeground,
+                  iconSize: iconSize,
                 ),
         ),
       ),
@@ -77,11 +86,13 @@ class _ButtonContent extends StatelessWidget {
   final String label;
   final IconData? icon;
   final Color color;
+  final double iconSize;
 
   const _ButtonContent({
     required this.label,
     required this.icon,
     required this.color,
+    required this.iconSize,
   });
 
   @override
@@ -91,7 +102,7 @@ class _ButtonContent extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 22, color: color),
+          Icon(icon, size: iconSize, color: color),
           const SizedBox(width: 10),
           Flexible(
             child: Text(
@@ -100,9 +111,9 @@ class _ButtonContent extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               softWrap: false,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -115,9 +126,9 @@ class _ButtonContent extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       softWrap: false,
       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
+        color: color,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }

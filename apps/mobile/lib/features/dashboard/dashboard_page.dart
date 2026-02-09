@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -17,24 +18,27 @@ final recentActivityProvider = StreamProvider.family<List<LogEntry>, int?>((
   final repository = ref.watch(experimentRepositoryProvider);
   return repository
       .watchLogs(experimentId)
-      .map((logs) => logs.take(3).toList());
+      .map((logs) => logs.take(2).toList());
 });
 
 /// Dashboard page - Lab Hub (light-first, dual-mode entry)
 class DashboardPage extends ConsumerStatefulWidget {
   final VoidCallback? onOpenLabTools;
   final VoidCallback? onCreateProject;
+  final VoidCallback? onSearch;
 
-  const DashboardPage({super.key, this.onOpenLabTools, this.onCreateProject});
+  const DashboardPage({
+    super.key,
+    this.onOpenLabTools,
+    this.onCreateProject,
+    this.onSearch,
+  });
 
   @override
   ConsumerState<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
-  int _modeIndex = 0;
-  final PageController _pageController = PageController();
-
   int _alpha(double opacity) {
     final value = (opacity * 255).round();
     if (value < 0) return 0;
@@ -50,12 +54,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }) {
     final mix = isDark ? darkMix : lightMix;
     return Color.lerp(AppColors.textMuted, target, mix) ?? target;
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   Experiment? _pickActiveExperiment({
@@ -74,8 +72,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return experiments.first;
   }
 
+  void _lightHaptic() {
+    HapticFeedback.lightImpact();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final experiments =
         ref.watch(experimentsProvider).valueOrNull ?? const <Experiment>[];
     final activeExperimentId = ref.watch(activeExperimentIdProvider);
@@ -86,6 +89,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final recentLogs =
         ref.watch(recentActivityProvider(activeExperiment?.id)).valueOrNull ??
         const <LogEntry>[];
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dateLabel = DateFormat('EEE, MMM d').format(DateTime.now());
 
@@ -149,31 +153,47 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
-              _buildHeader(dateLabel, syncedInk: inkMint),
-              _buildActiveExperimentCard(
-                isDark: isDark,
-                runningInk: inkBlue,
-                voiceInk: inkBlue,
-                photoInk: inkCyan,
-                noteInk: inkMint,
-                activeExperiment: activeExperiment,
+              _buildHeader(
+                l10n: l10n,
+                dateLabel: dateLabel,
+                statusInk: inkMint,
+                isDesktop: isDesktop,
               ),
-              _buildModeSection(
-                modeInk: inkBlue,
-                toolsInk: inkAmber,
-                isDark: isDark,
+              _RevealSection(
+                delay: const Duration(milliseconds: 40),
+                child: _buildActiveExperimentCard(
+                  l10n: l10n,
+                  runningInk: inkBlue,
+                  voiceInk: inkBlue,
+                  photoInk: inkCyan,
+                  noteInk: inkMint,
+                  activeExperiment: activeExperiment,
+                  isDesktop: isDesktop,
+                ),
               ),
-              _buildQuickActions(
-                isDark: isDark,
-                experimentInk: inkBlue,
-                calcInk: inkCyan,
+              _RevealSection(
+                delay: const Duration(milliseconds: 90),
+                child: _buildCommandDeck(
+                  l10n: l10n,
+                  primaryInk: inkBlue,
+                  toolsInk: inkAmber,
+                  isDark: isDark,
+                  activeExperiment: activeExperiment,
+                  isDesktop: isDesktop,
+                ),
               ),
-              _buildRecentActivity(
-                isDark: isDark,
-                voiceInk: inkBlue,
-                photoInk: inkMint,
-                calcInk: inkAmber,
-                recentLogs: recentLogs,
+              _RevealSection(
+                delay: const Duration(milliseconds: 140),
+                child: _buildRecentActivity(
+                  l10n: l10n,
+                  isDark: isDark,
+                  voiceInk: inkBlue,
+                  photoInk: inkMint,
+                  calcInk: inkAmber,
+                  recentLogs: recentLogs,
+                  activeExperiment: activeExperiment,
+                  isDesktop: isDesktop,
+                ),
               ),
               const SizedBox(height: 110),
             ],
@@ -183,24 +203,44 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildHeader(String dateLabel, {required Color syncedInk}) {
+  Widget _buildHeader({
+    required AppLocalizations l10n,
+    required String dateLabel,
+    required Color statusInk,
+    required bool isDesktop,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: EdgeInsets.fromLTRB(
+        isDesktop ? 28 : 20,
+        isDesktop ? 16 : 12,
+        isDesktop ? 28 : 20,
+        isDesktop ? 8 : 6,
+      ),
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Lab Notebook', style: AppTypography.headlineLarge),
-                const SizedBox(height: 6),
+                Text(l10n.dashboardTitle, style: AppTypography.headlineLarge),
+                const SizedBox(height: 4),
                 Row(
                   children: [
-                    _StatusPill(label: 'Synced', color: syncedInk),
+                    _StatusPill(
+                      label: l10n.dashboardOfflineReady,
+                      color: statusInk,
+                    ),
                     const SizedBox(width: 8),
-                    Text(dateLabel, style: AppTypography.labelMedium),
+                    Flexible(
+                      child: Text(
+                        dateLabel,
+                        style: AppTypography.labelMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -222,10 +262,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
               ],
             ),
-            child: Icon(
-              Icons.search_rounded,
-              color: AppColors.textMuted,
-              size: 20,
+            child: IconButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                final onSearch = widget.onSearch;
+                if (onSearch != null) {
+                  onSearch();
+                }
+              },
+              icon: Icon(
+                Icons.search_rounded,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -234,25 +283,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildActiveExperimentCard({
-    required bool isDark,
+    required AppLocalizations l10n,
     required Color runningInk,
     required Color voiceInk,
     required Color photoInk,
     required Color noteInk,
     required Experiment? activeExperiment,
+    required bool isDesktop,
   }) {
     final hasExperiment = activeExperiment != null;
+    final code = hasExperiment ? activeExperiment.code.trim() : '';
     final title = hasExperiment
-        ? activeExperiment.title
-        : 'No active experiment';
+        ? (code.isNotEmpty ? code : activeExperiment.title)
+        : l10n.dashboardNoActiveExperimentTitle;
+    final projectName = hasExperiment
+        ? ((activeExperiment.projectName ?? '').trim().isEmpty
+              ? l10n.dashboardGeneralLab
+              : activeExperiment.projectName!.trim())
+        : l10n.dashboardGeneralLab;
     final subtitle = hasExperiment
-        ? '${activeExperiment.projectName ?? 'General Lab'} · ${_relativeTime(activeExperiment.createdAt)}'
-        : 'Create a new experiment to start logging.';
+        ? '$projectName · ${_relativeTime(l10n, activeExperiment.createdAt)}'
+        : l10n.dashboardNoActiveExperimentSubtitle;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 28 : 20,
+        vertical: isDesktop ? 14 : 12,
+      ),
       child: GlassContainer(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(isDesktop ? 22 : 18),
         accentColor: runningInk,
         showBottomAccent: true,
         child: Column(
@@ -260,16 +319,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           children: [
             Row(
               children: [
-                Text('ACTIVE EXPERIMENT', style: AppTypography.labelUppercase),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    l10n.dashboardSectionActiveExperiment,
+                    style: AppTypography.labelUppercase,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 _StatusPill(
-                  label: hasExperiment ? 'Running' : 'Idle',
+                  label: hasExperiment
+                      ? l10n.dashboardStatusRunning
+                      : l10n.dashboardStatusIdle,
                   color: hasExperiment ? runningInk : AppColors.textMuted,
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Text(title, style: AppTypography.headlineMedium),
+            Text(title, style: AppTypography.headlineLarge),
             const SizedBox(height: 6),
             Text(subtitle, style: AppTypography.bodySmall),
             const SizedBox(height: 16),
@@ -277,52 +345,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               children: [
                 _QuickLogButton(
                   icon: Icons.mic_rounded,
-                  label: 'Voice',
+                  label: l10n.dashboardVoice,
                   color: voiceInk,
+                  isDesktop: isDesktop,
                   onTap: () => _openActiveLogbook(activeExperiment),
                 ),
                 const SizedBox(width: 10),
                 _QuickLogButton(
                   icon: Icons.camera_alt_rounded,
-                  label: 'Photo',
+                  label: l10n.dashboardPhoto,
                   color: photoInk,
+                  isDesktop: isDesktop,
                   onTap: () => _openActiveLogbook(activeExperiment),
                 ),
                 const SizedBox(width: 10),
                 _QuickLogButton(
                   icon: Icons.note_alt_rounded,
-                  label: 'Note',
+                  label: l10n.dashboardNote,
                   color: noteInk,
+                  isDesktop: isDesktop,
                   onTap: () => _openActiveLogbook(activeExperiment),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: LabButton(
-                    label: hasExperiment ? 'Open Logbook' : 'Create Experiment',
-                    icon: Icons.play_arrow_rounded,
-                    onPressed: () => _openActiveLogbook(activeExperiment),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface.withAlpha(isDark ? 150 : 205),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.glassBorder),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.add_rounded),
-                    color: AppColors.textMain,
-                    onPressed: () => context.push('/experiment/new'),
-                  ),
-                ),
-              ],
+            SizedBox(
+              width: double.infinity,
+              child: LabButton(
+                label: hasExperiment
+                    ? l10n.dashboardOpenLogbook
+                    : l10n.dashboardCreateExperiment,
+                icon: Icons.play_arrow_rounded,
+                onPressed: () => _openActiveLogbook(activeExperiment),
+              ),
             ),
           ],
         ),
@@ -331,6 +386,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   void _openActiveLogbook(Experiment? activeExperiment) {
+    _lightHaptic();
+    if (!mounted) return;
     if (activeExperiment == null) {
       context.push('/experiment/new');
       return;
@@ -339,131 +396,94 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     context.push('/experiment/${activeExperiment.id}');
   }
 
-  String _relativeTime(DateTime dateTime) {
-    final diff = DateTime.now().difference(dateTime);
-    if (diff.inMinutes < 1) return 'started just now';
-    if (diff.inHours < 1) return 'started ${diff.inMinutes} min ago';
-    if (diff.inDays < 1) return 'started ${diff.inHours} h ago';
-    return 'started ${diff.inDays} d ago';
+  void _openExperimentWorkspace(Experiment? activeExperiment) {
+    _lightHaptic();
+    if (!mounted) return;
+    if (activeExperiment != null) {
+      _openActiveLogbook(activeExperiment);
+      return;
+    }
+    final onSearch = widget.onSearch;
+    if (onSearch != null) {
+      onSearch();
+      return;
+    }
+    context.push('/experiment/new');
   }
 
-  Widget _buildModeSection({
-    required Color modeInk,
+  void _openToolsWorkspace() {
+    _lightHaptic();
+    if (!mounted) return;
+    final openLabTools = widget.onOpenLabTools;
+    if (openLabTools != null) {
+      openLabTools();
+      return;
+    }
+    context.push('/free-mode');
+  }
+
+  String _relativeTime(AppLocalizations l10n, DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inMinutes < 1) return l10n.dashboardStartedJustNow;
+    if (diff.inHours < 1) {
+      return l10n.dashboardStartedMinutesAgo(diff.inMinutes);
+    }
+    if (diff.inDays < 1) {
+      return l10n.dashboardStartedHoursAgo(diff.inHours);
+    }
+    return l10n.dashboardStartedDaysAgo(diff.inDays);
+  }
+
+  Widget _buildCommandDeck({
+    required AppLocalizations l10n,
+    required Color primaryInk,
     required Color toolsInk,
     required bool isDark,
+    required Experiment? activeExperiment,
+    required bool isDesktop,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final hasExperiment = activeExperiment != null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Modes', style: AppTypography.headlineMedium),
-          const SizedBox(height: 12),
-          _ModeToggle(
-            index: _modeIndex,
-            modeInk: modeInk,
-            isDark: isDark,
-            onChanged: (index) {
-              setState(() => _modeIndex = index);
-              _pageController.animateToPage(
-                index,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 200,
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) => setState(() => _modeIndex = index),
-              children: [
-                _ModeCard(
-                  title: 'Experiment Logbook',
-                  subtitle: 'Capture every step, note, photo, and calculation.',
-                  icon: Icons.playlist_add_check_rounded,
-                  accent: modeInk,
-                  actionLabel: 'Start New Experiment',
-                  onAction: () => context.push('/experiment/new'),
-                ),
-                _ModeCard(
-                  title: 'Lab Tools',
-                  subtitle: 'Quick calculations, conversions, and protocols.',
-                  icon: Icons.science_rounded,
-                  accent: toolsInk,
-                  actionLabel: l10n.openLabTools,
-                  onAction: () {
-                    final openLabTools = widget.onOpenLabTools;
-                    if (openLabTools != null) {
-                      openLabTools();
-                      return;
-                    }
-                    context.push('/free-mode');
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(
+        isDesktop ? 28 : 20,
+        isDesktop ? 10 : 8,
+        isDesktop ? 28 : 20,
+        0,
       ),
-    );
-  }
-
-  Widget _buildQuickActions({
-    required bool isDark,
-    required Color experimentInk,
-    required Color calcInk,
-  }) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Quick Actions', style: AppTypography.headlineMedium),
+          Text(
+            l10n.dashboardWorkspaceTitle,
+            style: AppTypography.headlineMedium,
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: _ActionTile(
-                  title: 'New Experiment',
-                  subtitle: 'Create logbook',
-                  icon: Icons.add_circle_outline_rounded,
-                  accent: experimentInk,
+                child: _CommandTile(
+                  title: l10n.dashboardModeLogbookTitle,
+                  subtitle: hasExperiment
+                      ? l10n.dashboardOpenLogbook
+                      : l10n.dashboardBrowseExperiments,
+                  icon: Icons.playlist_add_check_rounded,
+                  accent: primaryInk,
                   isDark: isDark,
-                  onTap: () => context.push('/experiment/new'),
+                  onTap: () => _openExperimentWorkspace(activeExperiment),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _ActionTile(
-                  title: 'Free Calculation',
-                  subtitle: 'Scratchpad',
-                  icon: Icons.calculate_outlined,
-                  accent: calcInk,
+                child: _CommandTile(
+                  title: l10n.dashboardModeToolsTitle,
+                  subtitle: l10n.openLabTools,
+                  icon: Icons.science_rounded,
+                  accent: toolsInk,
                   isDark: isDark,
-                  onTap: () => context.push('/free-mode'),
+                  onTap: _openToolsWorkspace,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          _ActionTile(
-            title: l10n.newProject,
-            subtitle: l10n.newProjectSubtitle,
-            icon: Icons.create_new_folder_outlined,
-            accent: experimentInk,
-            isDark: isDark,
-            onTap: () {
-              final createProject = widget.onCreateProject;
-              if (createProject != null) {
-                createProject();
-                return;
-              }
-              context.push('/project/new');
-            },
           ),
         ],
       ),
@@ -471,19 +491,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildRecentActivity({
+    required AppLocalizations l10n,
     required bool isDark,
     required Color voiceInk,
     required Color photoInk,
     required Color calcInk,
     required List<LogEntry> recentLogs,
+    required Experiment? activeExperiment,
+    required bool isDesktop,
   }) {
-    if (recentLogs.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     final activities = recentLogs
         .map(
           (log) => _mapActivity(
+            l10n: l10n,
             log: log,
             voiceInk: voiceInk,
             photoInk: photoInk,
@@ -493,12 +513,40 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         .toList();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: EdgeInsets.fromLTRB(
+        isDesktop ? 28 : 20,
+        isDesktop ? 24 : 20,
+        isDesktop ? 28 : 20,
+        0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Recent Activity', style: AppTypography.headlineMedium),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.dashboardRecentActivity,
+                  style: AppTypography.headlineMedium,
+                ),
+              ),
+              if (activeExperiment != null)
+                TextButton(
+                  onPressed: () => _openActiveLogbook(activeExperiment),
+                  child: Text(l10n.dashboardViewAll),
+                ),
+            ],
+          ),
           const SizedBox(height: 12),
+          if (activities.isEmpty)
+            _ActivityItem(
+              icon: Icons.auto_awesome_rounded,
+              title: l10n.dashboardNoRecentActivity,
+              subtitle: l10n.dashboardModeLogbookSubtitle,
+              time: '',
+              iconInk: AppColors.textMuted,
+              isDark: isDark,
+            ),
           for (var index = 0; index < activities.length; index++) ...[
             if (index > 0) const SizedBox(height: 8),
             _ActivityItem(
@@ -516,6 +564,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   _ActivityModel _mapActivity({
+    required AppLocalizations l10n,
     required LogEntry log,
     required Color voiceInk,
     required Color photoInk,
@@ -526,18 +575,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     if (kind == 'voice' || log.type == 'voice') {
       return _ActivityModel(
         icon: Icons.mic_rounded,
-        title: 'Voice Note',
+        title: l10n.voiceNote,
         subtitle: subtitle,
-        timeLabel: _formatActivityTime(log.timestamp),
+        timeLabel: _formatActivityTime(l10n, log.timestamp),
         iconInk: voiceInk,
       );
     }
     if (kind == 'photo' || log.type == 'photo') {
       return _ActivityModel(
         icon: Icons.camera_alt_rounded,
-        title: 'Photo',
+        title: l10n.photo,
         subtitle: subtitle,
-        timeLabel: _formatActivityTime(log.timestamp),
+        timeLabel: _formatActivityTime(l10n, log.timestamp),
         iconInk: photoInk,
       );
     }
@@ -546,22 +595,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         log.type == 'data_molarity') {
       return _ActivityModel(
         icon: Icons.functions_rounded,
-        title: 'Calculation',
+        title: l10n.dashboardActivityCalculation,
         subtitle: subtitle,
-        timeLabel: _formatActivityTime(log.timestamp),
+        timeLabel: _formatActivityTime(l10n, log.timestamp),
         iconInk: calcInk,
       );
     }
     return _ActivityModel(
       icon: Icons.note_alt_rounded,
-      title: 'Note',
+      title: l10n.dashboardActivityNote,
       subtitle: subtitle,
-      timeLabel: _formatActivityTime(log.timestamp),
+      timeLabel: _formatActivityTime(l10n, log.timestamp),
       iconInk: AppColors.textMuted,
     );
   }
 
-  String _formatActivityTime(DateTime timestamp) {
+  String _formatActivityTime(AppLocalizations l10n, DateTime timestamp) {
     final now = DateTime.now();
     final isSameDay =
         now.year == timestamp.year &&
@@ -576,7 +625,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         timestamp.month == yesterday.month &&
         timestamp.day == yesterday.day;
     if (isYesterday) {
-      return 'Yesterday';
+      return l10n.dashboardYesterday;
     }
     return DateFormat('MMM d').format(timestamp);
   }
@@ -618,182 +667,67 @@ class _AmbientBlob extends StatelessWidget {
   }
 }
 
-class _ModeToggle extends StatelessWidget {
-  final int index;
-  final ValueChanged<int> onChanged;
-  final Color modeInk;
+class _CommandTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
   final bool isDark;
 
-  const _ModeToggle({
-    required this.index,
-    required this.onChanged,
-    required this.modeInk,
+  const _CommandTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final segmentWidth = constraints.maxWidth / 2;
-        return Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.glassBackground,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.glassBorder),
-          ),
-          child: Stack(
-            children: [
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                left: index * segmentWidth,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: segmentWidth,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface.withAlpha(isDark ? 85 : 168),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: modeInk.withAlpha(isDark ? 56 : 38),
-                    ),
-                  ),
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.glassBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.glassBorder),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withAlpha(7),
+                blurRadius: 12,
+                offset: const Offset(0, 7),
               ),
-              Row(
-                children: [
-                  _ModeToggleItem(
-                    label: 'Logbook',
-                    isActive: index == 0,
-                    modeInk: modeInk,
-                    onTap: () => onChanged(0),
-                  ),
-                  _ModeToggleItem(
-                    label: 'Tools',
-                    isActive: index == 1,
-                    modeInk: modeInk,
-                    onTap: () => onChanged(1),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ModeToggleItem extends StatelessWidget {
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  final Color modeInk;
-
-  const _ModeToggleItem({
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-    required this.modeInk,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.labelLarge.copyWith(
-              color: isActive ? modeInk : AppColors.textMuted,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class _ModeCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color accent;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  const _ModeCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.accent,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.glassBackground,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.glassBorder),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withAlpha(12),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: accent.withAlpha(isDark ? 42 : 28),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accent.withAlpha(isDark ? 66 : 38)),
-                ),
-                child: Icon(icon, color: accent),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accent.withAlpha(isDark ? 36 : 24),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: accent.withAlpha(isDark ? 58 : 34)),
               ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(title, style: AppTypography.labelLarge)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(subtitle, style: AppTypography.bodySmall),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: OutlinedButton(
-              onPressed: onAction,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: accent,
-                side: BorderSide(color: accent.withAlpha(90)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(actionLabel),
+              child: Icon(icon, color: accent, size: 20),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(title, style: AppTypography.labelLarge, maxLines: 1),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: AppTypography.bodySmall.copyWith(color: accent),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -803,12 +737,14 @@ class _QuickLogButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
+  final bool isDesktop;
   final VoidCallback onTap;
 
   const _QuickLogButton({
     required this.icon,
     required this.label,
     required this.color,
+    required this.isDesktop,
     required this.onTap,
   });
 
@@ -819,7 +755,8 @@ class _QuickLogButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          constraints: BoxConstraints(minHeight: isDesktop ? 62 : 56),
+          padding: EdgeInsets.symmetric(vertical: isDesktop ? 14 : 12),
           decoration: BoxDecoration(
             color: color.withAlpha(28),
             borderRadius: BorderRadius.circular(12),
@@ -827,13 +764,14 @@ class _QuickLogButton extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 18),
+              Icon(icon, color: color, size: isDesktop ? 20 : 18),
               const SizedBox(height: 6),
               Text(
                 label,
                 style: AppTypography.labelSmall.copyWith(
                   color: color,
                   fontWeight: FontWeight.w600,
+                  fontSize: isDesktop ? 13 : null,
                 ),
               ),
             ],
@@ -864,73 +802,6 @@ class _StatusPill extends StatelessWidget {
         style: AppTypography.labelSmall.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color accent;
-  final bool isDark;
-
-  const _ActionTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-    required this.accent,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.glassBackground,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.glassBorder),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.black.withAlpha(10),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: accent.withAlpha(isDark ? 40 : 26),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: accent.withAlpha(isDark ? 62 : 36)),
-              ),
-              child: Icon(icon, color: accent, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: AppTypography.labelLarge),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: AppTypography.bodySmall),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -994,8 +865,46 @@ class _ActivityItem extends StatelessWidget {
               ],
             ),
           ),
-          Text(time, style: AppTypography.labelSmall),
+          if (time.isNotEmpty) Text(time, style: AppTypography.labelSmall),
         ],
+      ),
+    );
+  }
+}
+
+class _RevealSection extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+
+  const _RevealSection({required this.child, required this.delay});
+
+  @override
+  State<_RevealSection> createState() => _RevealSectionState();
+}
+
+class _RevealSectionState extends State<_RevealSection> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (!mounted) return;
+      setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      opacity: _visible ? 1 : 0,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        offset: _visible ? Offset.zero : const Offset(0, 0.02),
+        child: widget.child,
       ),
     );
   }

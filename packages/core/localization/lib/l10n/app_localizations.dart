@@ -1086,6 +1086,282 @@ abstract class AppLocalizations {
   /// **'Inspect contingency table expected counts and report effect size (phi/Cramer\'s V or odds ratio).'**
   String get statWizardTipCategorical;
 
+  /// No description provided for @inventoryScanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Barcode'**
+  String get inventoryScanBarcode;
+
+  /// No description provided for @inventoryBarcodeNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No barcode match found. Please bind the bottle manually.'**
+  String get inventoryBarcodeNoMatch;
+
+  /// No description provided for @inventoryManualBindTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Bottle Binding'**
+  String get inventoryManualBindTitle;
+
+  /// No description provided for @inventoryManualCompoundName.
+  ///
+  /// In en, this message translates to:
+  /// **'Compound Name'**
+  String get inventoryManualCompoundName;
+
+  /// No description provided for @inventoryManualFormula.
+  ///
+  /// In en, this message translates to:
+  /// **'Formula (optional)'**
+  String get inventoryManualFormula;
+
+  /// No description provided for @inventoryManualMolecularWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Molecular Weight (g/mol)'**
+  String get inventoryManualMolecularWeight;
+
+  /// No description provided for @inventoryManualPurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Purity (%)'**
+  String get inventoryManualPurity;
+
+  /// No description provided for @inventoryManualCas.
+  ///
+  /// In en, this message translates to:
+  /// **'CAS Number (optional)'**
+  String get inventoryManualCas;
+
+  /// No description provided for @inventoryManualBarcodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Barcode'**
+  String get inventoryManualBarcodeTitle;
+
+  /// No description provided for @inventoryManualBarcodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode Value'**
+  String get inventoryManualBarcodeLabel;
+
+  /// No description provided for @molecularMethodsToolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Molecular Methods'**
+  String get molecularMethodsToolTitle;
+
+  /// No description provided for @molecularMethodsToolSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PCR and Western tools'**
+  String get molecularMethodsToolSubtitle;
+
+  /// No description provided for @molecularMethodsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Molecular Methods'**
+  String get molecularMethodsTitle;
+
+  /// No description provided for @molecularMethodsPcrSection.
+  ///
+  /// In en, this message translates to:
+  /// **'PCR Master Mix'**
+  String get molecularMethodsPcrSection;
+
+  /// No description provided for @molecularMethodsPcrReactionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Reaction Count'**
+  String get molecularMethodsPcrReactionCount;
+
+  /// No description provided for @molecularMethodsPcrVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume per Reaction (µL)'**
+  String get molecularMethodsPcrVolume;
+
+  /// No description provided for @molecularMethodsPcrTotalVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Master Mix Volume'**
+  String get molecularMethodsPcrTotalVolume;
+
+  /// No description provided for @molecularMethodsPrimerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Primer Preparation'**
+  String get molecularMethodsPrimerSection;
+
+  /// No description provided for @molecularMethodsPrimerSequence.
+  ///
+  /// In en, this message translates to:
+  /// **'Primer Sequence'**
+  String get molecularMethodsPrimerSequence;
+
+  /// No description provided for @molecularMethodsPrimerMass.
+  ///
+  /// In en, this message translates to:
+  /// **'Primer Mass (µg)'**
+  String get molecularMethodsPrimerMass;
+
+  /// No description provided for @molecularMethodsPrimerTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Concentration (µM)'**
+  String get molecularMethodsPrimerTarget;
+
+  /// No description provided for @molecularMethodsPrimerMw.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated MW (g/mol)'**
+  String get molecularMethodsPrimerMw;
+
+  /// No description provided for @molecularMethodsPrimerNmol.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (nmol)'**
+  String get molecularMethodsPrimerNmol;
+
+  /// No description provided for @molecularMethodsPrimerResuspension.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuspension Volume (µL)'**
+  String get molecularMethodsPrimerResuspension;
+
+  /// No description provided for @molecularMethodsWesternSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Western Blot Dilutions'**
+  String get molecularMethodsWesternSection;
+
+  /// No description provided for @molecularMethodsWesternStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Buffer (x)'**
+  String get molecularMethodsWesternStock;
+
+  /// No description provided for @molecularMethodsWesternTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Buffer (x)'**
+  String get molecularMethodsWesternTarget;
+
+  /// No description provided for @molecularMethodsWesternFinalVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Volume (mL)'**
+  String get molecularMethodsWesternFinalVolume;
+
+  /// No description provided for @molecularMethodsWesternPrimaryDilution.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Antibody Dilution (1:x)'**
+  String get molecularMethodsWesternPrimaryDilution;
+
+  /// No description provided for @molecularMethodsWesternSecondaryDilution.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Antibody Dilution (1:x)'**
+  String get molecularMethodsWesternSecondaryDilution;
+
+  /// No description provided for @molecularMethodsWesternStockVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Buffer Volume (mL)'**
+  String get molecularMethodsWesternStockVolume;
+
+  /// No description provided for @molecularMethodsWesternDiluentVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Diluent Volume (mL)'**
+  String get molecularMethodsWesternDiluentVolume;
+
+  /// No description provided for @molecularMethodsWesternPrimaryVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Antibody Volume (µL)'**
+  String get molecularMethodsWesternPrimaryVolume;
+
+  /// No description provided for @molecularMethodsWesternSecondaryVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Antibody Volume (µL)'**
+  String get molecularMethodsWesternSecondaryVolume;
+
+  /// No description provided for @molecularMethodsLoadingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Loading Helper'**
+  String get molecularMethodsLoadingSection;
+
+  /// No description provided for @molecularMethodsLoadingSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Samples'**
+  String get molecularMethodsLoadingSamples;
+
+  /// No description provided for @molecularMethodsLoadingTargetUg.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Load per Lane (µg)'**
+  String get molecularMethodsLoadingTargetUg;
+
+  /// No description provided for @molecularMethodsLoadingConcentration.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Concentration (µg/µL)'**
+  String get molecularMethodsLoadingConcentration;
+
+  /// No description provided for @molecularMethodsLoadingPerLane.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume per Lane (µL)'**
+  String get molecularMethodsLoadingPerLane;
+
+  /// No description provided for @molecularMethodsLoadingTotalWithExcess.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Volume +10% (µL)'**
+  String get molecularMethodsLoadingTotalWithExcess;
+
+  /// No description provided for @timerStopwatch.
+  ///
+  /// In en, this message translates to:
+  /// **'STOPWATCH'**
+  String get timerStopwatch;
+
+  /// No description provided for @timerTemplatePcr.
+  ///
+  /// In en, this message translates to:
+  /// **'PCR TEMPLATE'**
+  String get timerTemplatePcr;
+
+  /// No description provided for @timerTemplateWestern.
+  ///
+  /// In en, this message translates to:
+  /// **'WESTERN TEMPLATE'**
+  String get timerTemplateWestern;
+
+  /// No description provided for @timerTemplateStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{template} template started'**
+  String timerTemplateStarted(Object template);
+
+  /// No description provided for @timerTemplatePcrCyclesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PCR Cycles'**
+  String get timerTemplatePcrCyclesTitle;
+
+  /// No description provided for @timerTemplatePcrCyclesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle Count'**
+  String get timerTemplatePcrCyclesLabel;
+
   /// No description provided for @logNewEvent.
   ///
   /// In en, this message translates to:
@@ -1719,6 +1995,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Lab Tools'**
   String get openLabTools;
+
+  /// No description provided for @dashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab Notebook'**
+  String get dashboardTitle;
+
+  /// No description provided for @dashboardOfflineReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Ready'**
+  String get dashboardOfflineReady;
+
+  /// No description provided for @dashboardSectionActiveExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE EXPERIMENT'**
+  String get dashboardSectionActiveExperiment;
+
+  /// No description provided for @dashboardStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get dashboardStatusRunning;
+
+  /// No description provided for @dashboardStatusIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get dashboardStatusIdle;
+
+  /// No description provided for @dashboardNoActiveExperimentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No active experiment'**
+  String get dashboardNoActiveExperimentTitle;
+
+  /// No description provided for @dashboardNoActiveExperimentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new experiment to start logging.'**
+  String get dashboardNoActiveExperimentSubtitle;
+
+  /// No description provided for @dashboardOpenLogbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Logbook'**
+  String get dashboardOpenLogbook;
+
+  /// No description provided for @dashboardCreateExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Experiment'**
+  String get dashboardCreateExperiment;
+
+  /// No description provided for @dashboardVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get dashboardVoice;
+
+  /// No description provided for @dashboardPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get dashboardPhoto;
+
+  /// No description provided for @dashboardNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get dashboardNote;
+
+  /// No description provided for @dashboardGeneralLab.
+  ///
+  /// In en, this message translates to:
+  /// **'General Lab'**
+  String get dashboardGeneralLab;
+
+  /// No description provided for @dashboardStartedJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'started just now'**
+  String get dashboardStartedJustNow;
+
+  /// No description provided for @dashboardStartedMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'started {minutes} min ago'**
+  String dashboardStartedMinutesAgo(Object minutes);
+
+  /// No description provided for @dashboardStartedHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'started {hours} h ago'**
+  String dashboardStartedHoursAgo(Object hours);
+
+  /// No description provided for @dashboardStartedDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'started {days} d ago'**
+  String dashboardStartedDaysAgo(Object days);
+
+  /// No description provided for @dashboardWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get dashboardWorkspaceTitle;
+
+  /// No description provided for @dashboardModeLabelLogbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Logbook'**
+  String get dashboardModeLabelLogbook;
+
+  /// No description provided for @dashboardModeLabelTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get dashboardModeLabelTools;
+
+  /// No description provided for @dashboardModeLogbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment Logbook'**
+  String get dashboardModeLogbookTitle;
+
+  /// No description provided for @dashboardModeLogbookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture every step, note, photo, and calculation.'**
+  String get dashboardModeLogbookSubtitle;
+
+  /// No description provided for @dashboardModeLogbookAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start New Experiment'**
+  String get dashboardModeLogbookAction;
+
+  /// No description provided for @dashboardBrowseExperiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Experiments'**
+  String get dashboardBrowseExperiments;
+
+  /// No description provided for @dashboardModeToolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab Tools'**
+  String get dashboardModeToolsTitle;
+
+  /// No description provided for @dashboardModeToolsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick calculations, conversions, and protocols.'**
+  String get dashboardModeToolsSubtitle;
+
+  /// No description provided for @dashboardRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get dashboardRecentActivity;
+
+  /// No description provided for @dashboardViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get dashboardViewAll;
+
+  /// No description provided for @dashboardNoRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent activity yet'**
+  String get dashboardNoRecentActivity;
+
+  /// No description provided for @dashboardActivityCalculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation'**
+  String get dashboardActivityCalculation;
+
+  /// No description provided for @dashboardActivityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get dashboardActivityNote;
+
+  /// No description provided for @dashboardYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dashboardYesterday;
+
+  /// No description provided for @homeTabHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTabHome;
+
+  /// No description provided for @homeTabFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get homeTabFiles;
+
+  /// No description provided for @homeTabLab.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab'**
+  String get homeTabLab;
+
+  /// No description provided for @homeTabSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get homeTabSettings;
+
+  /// No description provided for @homeFabTapNewExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap: New Experiment'**
+  String get homeFabTapNewExperiment;
+
+  /// No description provided for @homeFabHoldQuickCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'HOLD: QUICK CALC'**
+  String get homeFabHoldQuickCalc;
 
   /// No description provided for @newProject.
   ///

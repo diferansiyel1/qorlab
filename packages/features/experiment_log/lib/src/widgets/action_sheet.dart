@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:experiment_log/experiment_log.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:localization/localization.dart';
@@ -139,9 +140,17 @@ class _ActionSheetContent extends ConsumerWidget {
                     label: AppLocalizations.of(context)!.photo,
                     color: AppColors.textMain,
                     onTap: () async {
+                      final rootContext = Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).context;
                       context.pop();
+                      // Wait one frame so iOS can dismiss the sheet before presenting camera UI.
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 120),
+                      );
                       _ensureActiveExperiment(ref);
-                      await _capturePhoto(context, handler);
+                      await _capturePhoto(rootContext, handler);
                     },
                   ),
                   _ActionButton(
@@ -258,8 +267,19 @@ class _ActionSheetContent extends ConsumerWidget {
     ExperimentActionHandler handler,
   ) async {
     try {
+      final hasCameraPermission = await _ensureCameraPermission(context);
+      if (!hasCameraPermission) {
+        return;
+      }
+
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      XFile? pickedFile;
+      try {
+        pickedFile = await picker.pickImage(source: ImageSource.camera);
+      } catch (_) {
+        // Some iOS configurations fail to present camera immediately after modal transitions.
+        pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      }
 
       if (pickedFile != null) {
         final bytes = await File(pickedFile.path).readAsBytes();
@@ -314,6 +334,32 @@ class _ActionSheetContent extends ConsumerWidget {
         );
       }
     }
+  }
+
+  Future<bool> _ensureCameraPermission(BuildContext context) async {
+    final status = await Permission.camera.status;
+    if (status == PermissionStatus.granted ||
+        status == PermissionStatus.limited) {
+      return true;
+    }
+
+    final requested = await Permission.camera.request();
+    if (requested == PermissionStatus.granted ||
+        requested == PermissionStatus.limited) {
+      return true;
+    }
+
+    if (requested == PermissionStatus.permanentlyDenied ||
+        requested == PermissionStatus.restricted) {
+      await openAppSettings();
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.photoFailed)),
+      );
+    }
+    return false;
   }
 
   String _safeImageExtension(String rawExtension) {

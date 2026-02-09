@@ -18,9 +18,12 @@ dependencies:
   permission_handler: ^11.3.0
   csv: ^6.0.0
   share_plus: ^10.1.4
+  path: ^1.9.0
   path_provider: ^2.1.2
   cross_file: ^0.3.4
+  file_selector: ^1.0.3
   image_picker: ^1.0.7
+  pdf: ^3.11.3
 
 
   
@@ -35,6 +38,8 @@ dependencies:
     path: ../../core/experiment_domain
   localization:
     path: ../../core/localization
+  ql_archive:
+    path: ../../core/ql_archive
 
 dev_dependencies:
   flutter_test:

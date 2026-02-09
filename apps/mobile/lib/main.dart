@@ -49,6 +49,11 @@ void main() async {
           doseLoggerProvider.overrideWith(
             (ref) => MainDoseLogger(ref.watch(experimentActionHandlerProvider)),
           ),
+          molecularMethodsLoggerProvider.overrideWith(
+            (ref) => MainMolecularMethodsLogger(
+              ref.watch(experimentActionHandlerProvider),
+            ),
+          ),
         ],
         timerNotificationSchedulerProvider.overrideWithValue(timerScheduler),
         // Adapter: Connect Timer to ExperimentLog
@@ -87,6 +92,11 @@ class AppBootstrapper extends ConsumerWidget {
               doseLoggerProvider.overrideWith(
                 (ref) =>
                     MainDoseLogger(ref.watch(experimentActionHandlerProvider)),
+              ),
+              molecularMethodsLoggerProvider.overrideWith(
+                (ref) => MainMolecularMethodsLogger(
+                  ref.watch(experimentActionHandlerProvider),
+                ),
               ),
             ],
             child: const QorLabApp(),
@@ -178,6 +188,10 @@ final _router = GoRouter(
           builder: (context, state) => const StatWizardPage(),
         ),
         GoRoute(
+          path: 'molecular-methods',
+          builder: (context, state) => const MolecularMethodsPage(),
+        ),
+        GoRoute(
           path: 'centrifuge',
           builder: (context, state) => const CentrifugePage(),
         ),
@@ -215,6 +229,9 @@ class MainMolarityLogger implements MolarityLogger {
     required Decimal volumeMl,
     required Decimal molarity,
     required Decimal massG,
+    Decimal? purityPercent,
+    String? barcode,
+    String? source,
   }) {
     return handler.logMolarity(
       chemicalName: chemicalName,
@@ -222,6 +239,9 @@ class MainMolarityLogger implements MolarityLogger {
       volumeMl: volumeMl,
       molarity: molarity,
       massG: massG,
+      purityPercent: purityPercent,
+      barcode: barcode,
+      source: source,
     );
   }
 }
@@ -248,6 +268,33 @@ class MainDoseLogger implements DoseLogger {
       concentrationMgMl: concentrationMgMl,
       volumeMl: volumeMl,
       isSafe: isSafe,
+    );
+  }
+}
+
+class MainMolecularMethodsLogger implements MolecularMethodsLogger {
+  MainMolecularMethodsLogger(this.handler);
+
+  final ExperimentActionHandler handler;
+
+  @override
+  Future<void> logCalculation({
+    required String summary,
+    required String calculatorId,
+    required int algorithmVersion,
+    required Map<String, String> inputs,
+    required Map<String, String> outputs,
+    Map<String, String> units = const <String, String>{},
+    List<String> assumptions = const <String>[],
+  }) {
+    return handler.logCalculation(
+      summary: summary,
+      calculatorId: calculatorId,
+      algorithmVersion: algorithmVersion,
+      inputs: inputs,
+      outputs: outputs,
+      units: units,
+      assumptions: assumptions,
     );
   }
 }

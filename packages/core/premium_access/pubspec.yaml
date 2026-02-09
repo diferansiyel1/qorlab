@@ -1,0 +1,23 @@
+name: premium_access
+description: Offline-first premium entitlement state and restore flow.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ^3.10.7
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.3.9
+  flutter_lints: ^6.0.0
+

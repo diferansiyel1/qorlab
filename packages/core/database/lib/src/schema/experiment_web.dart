@@ -11,6 +11,8 @@ class Experiment {
 
   String? description;
 
+  String? projectName;
+
   late DateTime createdAt;
 
   DateTime? startedAt;

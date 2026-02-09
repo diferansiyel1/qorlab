@@ -77,8 +77,24 @@ class FakeExperimentActionHandler implements ExperimentActionHandler {
     required Decimal volumeMl,
     required Decimal molarity,
     required Decimal massG,
+    Decimal? purityPercent,
+    String? barcode,
+    String? source,
   }) async {
     debugPrint("Web Mock Log Molarity: $chemicalName");
+  }
+
+  @override
+  Future<void> logCalculation({
+    required String summary,
+    required String calculatorId,
+    required int algorithmVersion,
+    required Map<String, String> inputs,
+    required Map<String, String> outputs,
+    Map<String, String> units = const <String, String>{},
+    List<String> assumptions = const <String>[],
+  }) async {
+    debugPrint('Web Mock Calculation: $calculatorId ($summary)');
   }
 
   @override

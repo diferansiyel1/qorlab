@@ -561,6 +561,152 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kontenjans tablosu beklenen hücre sayılarını kontrol edin ve etki büyüklüğü (phi/Cramer\'s V veya odds ratio) raporlayın.';
 
   @override
+  String get inventoryScanBarcode => 'Barkod Tara';
+
+  @override
+  String get inventoryBarcodeNoMatch =>
+      'Barkod eşleşmesi bulunamadı. Şişeyi manuel bağlayın.';
+
+  @override
+  String get inventoryManualBindTitle => 'Manuel Şişe Eşleme';
+
+  @override
+  String get inventoryManualCompoundName => 'Bileşik Adı';
+
+  @override
+  String get inventoryManualFormula => 'Formül (opsiyonel)';
+
+  @override
+  String get inventoryManualMolecularWeight => 'Moleküler Ağırlık (g/mol)';
+
+  @override
+  String get inventoryManualPurity => 'Saflık (%)';
+
+  @override
+  String get inventoryManualCas => 'CAS Numarası (opsiyonel)';
+
+  @override
+  String get inventoryManualBarcodeTitle => 'Barkod Gir';
+
+  @override
+  String get inventoryManualBarcodeLabel => 'Barkod Değeri';
+
+  @override
+  String get molecularMethodsToolTitle => 'Moleküler Yöntemler';
+
+  @override
+  String get molecularMethodsToolSubtitle => 'PCR ve Western araçları';
+
+  @override
+  String get molecularMethodsTitle => 'Moleküler Yöntemler';
+
+  @override
+  String get molecularMethodsPcrSection => 'PCR Master Mix';
+
+  @override
+  String get molecularMethodsPcrReactionCount => 'Reaksiyon Sayısı';
+
+  @override
+  String get molecularMethodsPcrVolume => 'Reaksiyon Başına Hacim (µL)';
+
+  @override
+  String get molecularMethodsPcrTotalVolume => 'Toplam Master Mix Hacmi';
+
+  @override
+  String get molecularMethodsPrimerSection => 'Primer Hazırlama';
+
+  @override
+  String get molecularMethodsPrimerSequence => 'Primer Sekansı';
+
+  @override
+  String get molecularMethodsPrimerMass => 'Primer Kütlesi (µg)';
+
+  @override
+  String get molecularMethodsPrimerTarget => 'Hedef Konsantrasyon (µM)';
+
+  @override
+  String get molecularMethodsPrimerMw => 'Tahmini MA (g/mol)';
+
+  @override
+  String get molecularMethodsPrimerNmol => 'Miktar (nmol)';
+
+  @override
+  String get molecularMethodsPrimerResuspension => 'Resüspansiyon Hacmi (µL)';
+
+  @override
+  String get molecularMethodsWesternSection => 'Western Blot Dilüsyonları';
+
+  @override
+  String get molecularMethodsWesternStock => 'Stok Tampon (x)';
+
+  @override
+  String get molecularMethodsWesternTarget => 'Hedef Tampon (x)';
+
+  @override
+  String get molecularMethodsWesternFinalVolume => 'Son Hacim (mL)';
+
+  @override
+  String get molecularMethodsWesternPrimaryDilution =>
+      'Primer Antikor Dilüsyonu (1:x)';
+
+  @override
+  String get molecularMethodsWesternSecondaryDilution =>
+      'Sekonder Antikor Dilüsyonu (1:x)';
+
+  @override
+  String get molecularMethodsWesternStockVolume => 'Stok Tampon Hacmi (mL)';
+
+  @override
+  String get molecularMethodsWesternDiluentVolume => 'Seyreltici Hacmi (mL)';
+
+  @override
+  String get molecularMethodsWesternPrimaryVolume =>
+      'Primer Antikor Hacmi (µL)';
+
+  @override
+  String get molecularMethodsWesternSecondaryVolume =>
+      'Sekonder Antikor Hacmi (µL)';
+
+  @override
+  String get molecularMethodsLoadingSection => 'Örnek Yükleme Yardımcısı';
+
+  @override
+  String get molecularMethodsLoadingSamples => 'Örnek Sayısı';
+
+  @override
+  String get molecularMethodsLoadingTargetUg => 'Kuyucuk Başına Hedef Yük (µg)';
+
+  @override
+  String get molecularMethodsLoadingConcentration =>
+      'Örnek Konsantrasyonu (µg/µL)';
+
+  @override
+  String get molecularMethodsLoadingPerLane => 'Kuyucuk Başına Hacim (µL)';
+
+  @override
+  String get molecularMethodsLoadingTotalWithExcess => 'Toplam Hacim +%10 (µL)';
+
+  @override
+  String get timerStopwatch => 'KRONOMETRE';
+
+  @override
+  String get timerTemplatePcr => 'PCR ŞABLONU';
+
+  @override
+  String get timerTemplateWestern => 'WESTERN ŞABLONU';
+
+  @override
+  String timerTemplateStarted(Object template) {
+    return '$template şablonu başlatıldı';
+  }
+
+  @override
+  String get timerTemplatePcrCyclesTitle => 'PCR Döngüleri';
+
+  @override
+  String get timerTemplatePcrCyclesLabel => 'Döngü Sayısı';
+
+  @override
   String get logNewEvent => 'Yeni Olay Kaydet';
 
   @override
@@ -902,6 +1048,129 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get openLabTools => 'Lab Araçlarını Aç';
+
+  @override
+  String get dashboardTitle => 'Lab Defteri';
+
+  @override
+  String get dashboardOfflineReady => 'Çevrimdışı Hazır';
+
+  @override
+  String get dashboardSectionActiveExperiment => 'AKTİF DENEY';
+
+  @override
+  String get dashboardStatusRunning => 'Çalışıyor';
+
+  @override
+  String get dashboardStatusIdle => 'Boşta';
+
+  @override
+  String get dashboardNoActiveExperimentTitle => 'Aktif deney yok';
+
+  @override
+  String get dashboardNoActiveExperimentSubtitle =>
+      'Kayda başlamak için yeni bir deney oluşturun.';
+
+  @override
+  String get dashboardOpenLogbook => 'Logbook\'u Aç';
+
+  @override
+  String get dashboardCreateExperiment => 'Deney Oluştur';
+
+  @override
+  String get dashboardVoice => 'Ses';
+
+  @override
+  String get dashboardPhoto => 'Fotoğraf';
+
+  @override
+  String get dashboardNote => 'Not';
+
+  @override
+  String get dashboardGeneralLab => 'Genel Laboratuvar';
+
+  @override
+  String get dashboardStartedJustNow => 'az önce başladı';
+
+  @override
+  String dashboardStartedMinutesAgo(Object minutes) {
+    return '$minutes dk önce başladı';
+  }
+
+  @override
+  String dashboardStartedHoursAgo(Object hours) {
+    return '$hours sa önce başladı';
+  }
+
+  @override
+  String dashboardStartedDaysAgo(Object days) {
+    return '$days gün önce başladı';
+  }
+
+  @override
+  String get dashboardWorkspaceTitle => 'Çalışma Alanı';
+
+  @override
+  String get dashboardModeLabelLogbook => 'Logbook';
+
+  @override
+  String get dashboardModeLabelTools => 'Araçlar';
+
+  @override
+  String get dashboardModeLogbookTitle => 'Deney Logbook\'u';
+
+  @override
+  String get dashboardModeLogbookSubtitle =>
+      'Her adımı, notu, fotoğrafı ve hesabı kaydedin.';
+
+  @override
+  String get dashboardModeLogbookAction => 'Yeni Deney Başlat';
+
+  @override
+  String get dashboardBrowseExperiments => 'Deneyleri Görüntüle';
+
+  @override
+  String get dashboardModeToolsTitle => 'Lab Araçları';
+
+  @override
+  String get dashboardModeToolsSubtitle =>
+      'Hızlı hesaplamalar, dönüşümler ve protokoller.';
+
+  @override
+  String get dashboardRecentActivity => 'Son Aktiviteler';
+
+  @override
+  String get dashboardViewAll => 'Tümünü gör';
+
+  @override
+  String get dashboardNoRecentActivity => 'Henüz aktivite yok';
+
+  @override
+  String get dashboardActivityCalculation => 'Hesaplama';
+
+  @override
+  String get dashboardActivityNote => 'Not';
+
+  @override
+  String get dashboardYesterday => 'Dün';
+
+  @override
+  String get homeTabHome => 'Ana Sayfa';
+
+  @override
+  String get homeTabFiles => 'Dosyalar';
+
+  @override
+  String get homeTabLab => 'Lab';
+
+  @override
+  String get homeTabSettings => 'Ayarlar';
+
+  @override
+  String get homeFabTapNewExperiment => 'Dokun: Yeni Deney';
+
+  @override
+  String get homeFabHoldQuickCalc => 'BASILI TUT: HIZLI HESAP';
 
   @override
   String get newProject => 'Yeni Proje';

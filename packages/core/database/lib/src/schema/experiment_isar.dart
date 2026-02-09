@@ -8,10 +8,15 @@ class Experiment {
   Id id = Isar.autoIncrement;
 
   late String title;
-  
+
   late String code; // e.g. EXP-001
 
   String? description;
+
+  /// Logical project grouping label for this experiment.
+  ///
+  /// Nullable for additive migrations.
+  String? projectName;
 
   late DateTime createdAt;
 

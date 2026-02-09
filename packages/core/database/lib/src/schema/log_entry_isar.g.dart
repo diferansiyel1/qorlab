@@ -82,14 +82,19 @@ const LogEntrySchema = CollectionSchema(
         )
       ],
     ),
-    r'experimentId': IndexSchema(
-      id: -2596400929068244875,
-      name: r'experimentId',
+    r'experimentId_timestamp': IndexSchema(
+      id: -4956688705298376366,
+      name: r'experimentId_timestamp',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
           name: r'experimentId',
+          type: IndexType.value,
+          caseSensitive: false,
+        ),
+        IndexPropertySchema(
+          name: r'timestamp',
           type: IndexType.value,
           caseSensitive: false,
         )
@@ -240,10 +245,10 @@ extension LogEntryQueryWhereSort on QueryBuilder<LogEntry, LogEntry, QWhere> {
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhere> anyExperimentId() {
+  QueryBuilder<LogEntry, LogEntry, QAfterWhere> anyExperimentIdTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'experimentId'),
+        const IndexWhereClause.any(indexName: r'experimentId_timestamp'),
       );
     });
   }
@@ -405,29 +410,29 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> experimentIdEqualTo(
-      int experimentId) {
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdEqualToAnyTimestamp(int experimentId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'experimentId',
+        indexName: r'experimentId_timestamp',
         value: [experimentId],
       ));
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> experimentIdNotEqualTo(
-      int experimentId) {
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdNotEqualToAnyTimestamp(int experimentId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'experimentId',
+              indexName: r'experimentId_timestamp',
               lower: [],
               upper: [experimentId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'experimentId',
+              indexName: r'experimentId_timestamp',
               lower: [experimentId],
               includeLower: false,
               upper: [],
@@ -435,13 +440,13 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'experimentId',
+              indexName: r'experimentId_timestamp',
               lower: [experimentId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'experimentId',
+              indexName: r'experimentId_timestamp',
               lower: [],
               upper: [experimentId],
               includeUpper: false,
@@ -450,13 +455,14 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> experimentIdGreaterThan(
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdGreaterThanAnyTimestamp(
     int experimentId, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'experimentId',
+        indexName: r'experimentId_timestamp',
         lower: [experimentId],
         includeLower: include,
         upper: [],
@@ -464,13 +470,14 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> experimentIdLessThan(
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdLessThanAnyTimestamp(
     int experimentId, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'experimentId',
+        indexName: r'experimentId_timestamp',
         lower: [],
         upper: [experimentId],
         includeUpper: include,
@@ -478,7 +485,8 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
     });
   }
 
-  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause> experimentIdBetween(
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdBetweenAnyTimestamp(
     int lowerExperimentId,
     int upperExperimentId, {
     bool includeLower = true,
@@ -486,10 +494,107 @@ extension LogEntryQueryWhere on QueryBuilder<LogEntry, LogEntry, QWhereClause> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'experimentId',
+        indexName: r'experimentId_timestamp',
         lower: [lowerExperimentId],
         includeLower: includeLower,
         upper: [upperExperimentId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdTimestampEqualTo(int experimentId, DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'experimentId_timestamp',
+        value: [experimentId, timestamp],
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdEqualToTimestampNotEqualTo(
+          int experimentId, DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'experimentId_timestamp',
+              lower: [experimentId],
+              upper: [experimentId, timestamp],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'experimentId_timestamp',
+              lower: [experimentId, timestamp],
+              includeLower: false,
+              upper: [experimentId],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'experimentId_timestamp',
+              lower: [experimentId, timestamp],
+              includeLower: false,
+              upper: [experimentId],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'experimentId_timestamp',
+              lower: [experimentId],
+              upper: [experimentId, timestamp],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdEqualToTimestampGreaterThan(
+    int experimentId,
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'experimentId_timestamp',
+        lower: [experimentId, timestamp],
+        includeLower: include,
+        upper: [experimentId],
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdEqualToTimestampLessThan(
+    int experimentId,
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'experimentId_timestamp',
+        lower: [experimentId],
+        upper: [experimentId, timestamp],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<LogEntry, LogEntry, QAfterWhereClause>
+      experimentIdEqualToTimestampBetween(
+    int experimentId,
+    DateTime lowerTimestamp,
+    DateTime upperTimestamp, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'experimentId_timestamp',
+        lower: [experimentId, lowerTimestamp],
+        includeLower: includeLower,
+        upper: [experimentId, upperTimestamp],
         includeUpper: includeUpper,
       ));
     });

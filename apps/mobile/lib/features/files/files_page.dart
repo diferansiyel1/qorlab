@@ -22,144 +22,160 @@ class _FilesPageState extends ConsumerState<FilesPage> {
   Widget build(BuildContext context) {
     final experimentsAsync = ref.watch(experimentsProvider);
     final l10n = AppLocalizations.of(context)!;
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
+    final horizontalPadding = isDesktop ? 28.0 : 20.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header with search
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Files', style: AppTypography.headlineLarge),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton.icon(
-                  onPressed: () => context.push('/project/new'),
-                  icon: const Icon(Icons.create_new_folder_outlined),
-                  label: Text(l10n.newProject),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Search bar
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.glassBorder),
-                ),
-                child: TextField(
-                  style: AppTypography.bodyMedium,
-                  decoration: InputDecoration(
-                    hintText: 'Search experiments...',
-                    hintStyle: AppTypography.labelMedium,
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: AppColors.textMuted,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                  onChanged: (value) => setState(() => _searchQuery = value),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Filter chips
-              Row(
-                children: [
-                  _FilterChip(
-                    label: 'All',
-                    isSelected: _filter == 'all',
-                    onTap: () => setState(() => _filter = 'all'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Active',
-                    isSelected: _filter == 'active',
-                    onTap: () => setState(() => _filter = 'active'),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: 'Completed',
-                    isSelected: _filter == 'completed',
-                    onTap: () => setState(() => _filter = 'completed'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isDesktop ? 1120 : double.infinity,
         ),
-
-        // Experiments list
-        Expanded(
-          child: experimentsAsync.when(
-            data: (experiments) {
-              final filtered = _filterExperiments(experiments);
-              if (filtered.isEmpty) {
-                return _buildEmptyState();
-              }
-              final grouped = _groupByProject(filtered);
-              return ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: grouped.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final section = grouped[index];
-                  return _ProjectSection(
-                    projectName: section.projectName,
-                    experiments: section.experiments,
-                    onDeleteProject: () => _deleteProject(
-                      projectName: section.projectName,
-                      experiments: section.experiments,
-                    ),
-                    onOpenExperiment: (exp) {
-                      ref.read(activeExperimentIdProvider.notifier).set(exp.id);
-                      context.push('/experiment/${exp.id}');
-                    },
-                    onDeleteExperiment: (exp) => _deleteExperiment(exp),
-                  );
-                },
-              );
-            },
-            loading: () => Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-            error: (err, _) => Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with search
+            Padding(
+              padding: EdgeInsets.all(horizontalPadding),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    color: AppColors.alert,
-                    size: 48,
+                  Text(l10n.homeTabFiles, style: AppTypography.headlineLarge),
+                  SizedBox(height: isDesktop ? 18 : 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/project/new'),
+                      icon: const Icon(Icons.create_new_folder_outlined),
+                      label: Text(l10n.newProject),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Search bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(isDesktop ? 14 : 12),
+                      border: Border.all(color: AppColors.glassBorder),
+                    ),
+                    child: TextField(
+                      style: AppTypography.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText: 'Search experiments...',
+                        hintStyle: AppTypography.labelMedium,
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: AppColors.textMuted,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: isDesktop ? 16 : 14,
+                        ),
+                      ),
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Error loading experiments',
-                    style: AppTypography.labelMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    err.toString(),
-                    style: AppTypography.bodySmall,
-                    textAlign: TextAlign.center,
+
+                  // Filter chips
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _FilterChip(
+                        label: 'All',
+                        isSelected: _filter == 'all',
+                        isDesktop: isDesktop,
+                        onTap: () => setState(() => _filter = 'all'),
+                      ),
+                      _FilterChip(
+                        label: 'Active',
+                        isSelected: _filter == 'active',
+                        isDesktop: isDesktop,
+                        onTap: () => setState(() => _filter = 'active'),
+                      ),
+                      _FilterChip(
+                        label: 'Completed',
+                        isSelected: _filter == 'completed',
+                        isDesktop: isDesktop,
+                        onTap: () => setState(() => _filter = 'completed'),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ),
 
-        const SizedBox(height: 100), // Bottom padding for nav bar
-      ],
+            // Experiments list
+            Expanded(
+              child: experimentsAsync.when(
+                data: (experiments) {
+                  final filtered = _filterExperiments(experiments);
+                  if (filtered.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  final grouped = _groupByProject(filtered);
+                  return ListView.separated(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                    ),
+                    itemCount: grouped.length,
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: isDesktop ? 18 : 16),
+                    itemBuilder: (context, index) {
+                      final section = grouped[index];
+                      return _ProjectSection(
+                        projectName: section.projectName,
+                        experiments: section.experiments,
+                        onDeleteProject: () => _deleteProject(
+                          projectName: section.projectName,
+                          experiments: section.experiments,
+                        ),
+                        onOpenExperiment: (exp) {
+                          ref
+                              .read(activeExperimentIdProvider.notifier)
+                              .set(exp.id);
+                          context.push('/experiment/${exp.id}');
+                        },
+                        onDeleteExperiment: (exp) => _deleteExperiment(exp),
+                      );
+                    },
+                  );
+                },
+                loading: () => Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+                error: (err, _) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: AppColors.alert,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading experiments',
+                        style: AppTypography.labelMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        err.toString(),
+                        style: AppTypography.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -375,8 +391,9 @@ class _ProjectSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
     return GlassContainer(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(isDesktop ? 14 : 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -406,12 +423,13 @@ class _ProjectSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: isDesktop ? 12 : 10),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: experiments.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 10),
+            separatorBuilder: (context, index) =>
+                SizedBox(height: isDesktop ? 12 : 10),
             itemBuilder: (context, index) {
               final experiment = experiments[index];
               return _ExperimentTile(
@@ -430,11 +448,13 @@ class _ProjectSection extends StatelessWidget {
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool isSelected;
+  final bool isDesktop;
   final VoidCallback onTap;
 
   const _FilterChip({
     required this.label,
     required this.isSelected,
+    required this.isDesktop,
     required this.onTap,
   });
 
@@ -443,10 +463,13 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 18 : 16,
+          vertical: isDesktop ? 10 : 8,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(isDesktop ? 22 : 20),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.glassBorder,
           ),
@@ -456,6 +479,7 @@ class _FilterChip extends StatelessWidget {
           style: AppTypography.labelMedium.copyWith(
             color: isSelected ? AppColors.background : AppColors.textMain,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            fontSize: isDesktop ? 16 : null,
           ),
         ),
       ),
@@ -476,15 +500,16 @@ class _ExperimentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
     return GlassContainer(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isDesktop ? 18 : 16),
       child: Row(
         children: [
           // Icon
           Container(
-            width: 48,
-            height: 48,
+            width: isDesktop ? 54 : 48,
+            height: isDesktop ? 54 : 48,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
@@ -492,10 +517,10 @@ class _ExperimentTile extends StatelessWidget {
             child: Icon(
               Icons.science_rounded,
               color: AppColors.primary,
-              size: 24,
+              size: isDesktop ? 26 : 24,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isDesktop ? 18 : 16),
 
           // Details
           Expanded(

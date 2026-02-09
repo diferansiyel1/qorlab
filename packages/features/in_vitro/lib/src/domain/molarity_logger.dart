@@ -8,7 +8,11 @@ abstract class MolarityLogger {
     required Decimal volumeMl,
     required Decimal molarity,
     required Decimal massG,
+    Decimal? purityPercent,
+    String? barcode,
+    String? source,
   });
 }
 
-final molarityLoggerProvider = Provider<MolarityLogger>((ref) => throw UnimplementedError());
+final molarityLoggerProvider =
+    Provider<MolarityLogger>((ref) => throw UnimplementedError());

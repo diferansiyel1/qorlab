@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:ui_kit/ui_kit.dart';
 import 'package:database/database.dart';
 import 'package:experiment_log/experiment_log.dart';
@@ -89,8 +90,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
+  void _openFilesTab() {
+    setState(() {
+      _currentIndex = 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final experiments =
         ref.watch(experimentsProvider).valueOrNull ?? const <Experiment>[];
     final activeExperimentId = ref.watch(activeExperimentIdProvider);
@@ -112,12 +120,19 @@ class _HomePageState extends ConsumerState<HomePage> {
       onFabLongPressed: () {
         context.push('/free-mode');
       },
+      homeTabLabel: l10n.homeTabHome,
+      filesTabLabel: l10n.homeTabFiles,
+      labTabLabel: l10n.homeTabLab,
+      settingsTabLabel: l10n.homeTabSettings,
+      fabTapHint: l10n.homeFabTapNewExperiment,
+      fabHoldHint: l10n.homeFabHoldQuickCalc,
       body: IndexedStack(
         index: _currentIndex,
         children: [
           DashboardPage(
             onOpenLabTools: _openLabToolsTab,
             onCreateProject: () => context.push('/project/new'),
+            onSearch: _openFilesTab,
           ),
           const FilesPage(),
           const LabToolsPage(),

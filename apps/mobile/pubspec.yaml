@@ -42,6 +42,8 @@ dependencies:
   intl: ^0.20.2
   localization:
     path: ../../packages/core/localization
+  premium_access:
+    path: ../../packages/core/premium_access
   ui_kit:
     path: ../../packages/features/ui_kit
   experiment_log:
@@ -64,12 +66,15 @@ dependencies:
   randomization_engine:
     path: ../../packages/core/randomization_engine
   package_info_plus: ^9.0.0
+  flutter_local_notifications: ^17.2.4
+  timezone: ^0.9.4
 
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  google_fonts: ^6.3.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -88,6 +93,18 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -11,7 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.3.6
+  riverpod_annotation: ^2.3.3
   intl: any
+  database:
+    path: ../../core/database
+  localization:
+    path: ../../core/localization
 
   ui_kit:
 
@@ -21,4 +26,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.3.9
   flutter_lints: ^2.0.0

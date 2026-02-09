@@ -138,6 +138,13 @@ class LabToolsPage extends ConsumerWidget {
                   onTap: () => context.push('/stat-wizard'),
                 ),
                 _ToolCard(
+                  icon: Icons.biotech_rounded,
+                  title: l10n.molecularMethodsToolTitle,
+                  subtitle: l10n.molecularMethodsToolSubtitle,
+                  color: const Color(0xFF0D8B6C),
+                  onTap: () => context.push('/molecular-methods'),
+                ),
+                _ToolCard(
                   icon: Icons.sync_rounded,
                   title: 'Centrifuge',
                   subtitle: 'RPM / RCF',

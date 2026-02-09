@@ -561,6 +561,152 @@ class AppLocalizationsEn extends AppLocalizations {
       'Inspect contingency table expected counts and report effect size (phi/Cramer\'s V or odds ratio).';
 
   @override
+  String get inventoryScanBarcode => 'Scan Barcode';
+
+  @override
+  String get inventoryBarcodeNoMatch =>
+      'No barcode match found. Please bind the bottle manually.';
+
+  @override
+  String get inventoryManualBindTitle => 'Manual Bottle Binding';
+
+  @override
+  String get inventoryManualCompoundName => 'Compound Name';
+
+  @override
+  String get inventoryManualFormula => 'Formula (optional)';
+
+  @override
+  String get inventoryManualMolecularWeight => 'Molecular Weight (g/mol)';
+
+  @override
+  String get inventoryManualPurity => 'Purity (%)';
+
+  @override
+  String get inventoryManualCas => 'CAS Number (optional)';
+
+  @override
+  String get inventoryManualBarcodeTitle => 'Enter Barcode';
+
+  @override
+  String get inventoryManualBarcodeLabel => 'Barcode Value';
+
+  @override
+  String get molecularMethodsToolTitle => 'Molecular Methods';
+
+  @override
+  String get molecularMethodsToolSubtitle => 'PCR and Western tools';
+
+  @override
+  String get molecularMethodsTitle => 'Molecular Methods';
+
+  @override
+  String get molecularMethodsPcrSection => 'PCR Master Mix';
+
+  @override
+  String get molecularMethodsPcrReactionCount => 'Reaction Count';
+
+  @override
+  String get molecularMethodsPcrVolume => 'Volume per Reaction (µL)';
+
+  @override
+  String get molecularMethodsPcrTotalVolume => 'Total Master Mix Volume';
+
+  @override
+  String get molecularMethodsPrimerSection => 'Primer Preparation';
+
+  @override
+  String get molecularMethodsPrimerSequence => 'Primer Sequence';
+
+  @override
+  String get molecularMethodsPrimerMass => 'Primer Mass (µg)';
+
+  @override
+  String get molecularMethodsPrimerTarget => 'Target Concentration (µM)';
+
+  @override
+  String get molecularMethodsPrimerMw => 'Estimated MW (g/mol)';
+
+  @override
+  String get molecularMethodsPrimerNmol => 'Amount (nmol)';
+
+  @override
+  String get molecularMethodsPrimerResuspension => 'Resuspension Volume (µL)';
+
+  @override
+  String get molecularMethodsWesternSection => 'Western Blot Dilutions';
+
+  @override
+  String get molecularMethodsWesternStock => 'Stock Buffer (x)';
+
+  @override
+  String get molecularMethodsWesternTarget => 'Target Buffer (x)';
+
+  @override
+  String get molecularMethodsWesternFinalVolume => 'Final Volume (mL)';
+
+  @override
+  String get molecularMethodsWesternPrimaryDilution =>
+      'Primary Antibody Dilution (1:x)';
+
+  @override
+  String get molecularMethodsWesternSecondaryDilution =>
+      'Secondary Antibody Dilution (1:x)';
+
+  @override
+  String get molecularMethodsWesternStockVolume => 'Stock Buffer Volume (mL)';
+
+  @override
+  String get molecularMethodsWesternDiluentVolume => 'Diluent Volume (mL)';
+
+  @override
+  String get molecularMethodsWesternPrimaryVolume =>
+      'Primary Antibody Volume (µL)';
+
+  @override
+  String get molecularMethodsWesternSecondaryVolume =>
+      'Secondary Antibody Volume (µL)';
+
+  @override
+  String get molecularMethodsLoadingSection => 'Sample Loading Helper';
+
+  @override
+  String get molecularMethodsLoadingSamples => 'Number of Samples';
+
+  @override
+  String get molecularMethodsLoadingTargetUg => 'Target Load per Lane (µg)';
+
+  @override
+  String get molecularMethodsLoadingConcentration =>
+      'Sample Concentration (µg/µL)';
+
+  @override
+  String get molecularMethodsLoadingPerLane => 'Volume per Lane (µL)';
+
+  @override
+  String get molecularMethodsLoadingTotalWithExcess => 'Total Volume +10% (µL)';
+
+  @override
+  String get timerStopwatch => 'STOPWATCH';
+
+  @override
+  String get timerTemplatePcr => 'PCR TEMPLATE';
+
+  @override
+  String get timerTemplateWestern => 'WESTERN TEMPLATE';
+
+  @override
+  String timerTemplateStarted(Object template) {
+    return '$template template started';
+  }
+
+  @override
+  String get timerTemplatePcrCyclesTitle => 'PCR Cycles';
+
+  @override
+  String get timerTemplatePcrCyclesLabel => 'Cycle Count';
+
+  @override
   String get logNewEvent => 'Log New Event';
 
   @override
@@ -903,6 +1049,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openLabTools => 'Open Lab Tools';
+
+  @override
+  String get dashboardTitle => 'Lab Notebook';
+
+  @override
+  String get dashboardOfflineReady => 'Offline Ready';
+
+  @override
+  String get dashboardSectionActiveExperiment => 'ACTIVE EXPERIMENT';
+
+  @override
+  String get dashboardStatusRunning => 'Running';
+
+  @override
+  String get dashboardStatusIdle => 'Idle';
+
+  @override
+  String get dashboardNoActiveExperimentTitle => 'No active experiment';
+
+  @override
+  String get dashboardNoActiveExperimentSubtitle =>
+      'Create a new experiment to start logging.';
+
+  @override
+  String get dashboardOpenLogbook => 'Open Logbook';
+
+  @override
+  String get dashboardCreateExperiment => 'Create Experiment';
+
+  @override
+  String get dashboardVoice => 'Voice';
+
+  @override
+  String get dashboardPhoto => 'Photo';
+
+  @override
+  String get dashboardNote => 'Note';
+
+  @override
+  String get dashboardGeneralLab => 'General Lab';
+
+  @override
+  String get dashboardStartedJustNow => 'started just now';
+
+  @override
+  String dashboardStartedMinutesAgo(Object minutes) {
+    return 'started $minutes min ago';
+  }
+
+  @override
+  String dashboardStartedHoursAgo(Object hours) {
+    return 'started $hours h ago';
+  }
+
+  @override
+  String dashboardStartedDaysAgo(Object days) {
+    return 'started $days d ago';
+  }
+
+  @override
+  String get dashboardWorkspaceTitle => 'Workspace';
+
+  @override
+  String get dashboardModeLabelLogbook => 'Logbook';
+
+  @override
+  String get dashboardModeLabelTools => 'Tools';
+
+  @override
+  String get dashboardModeLogbookTitle => 'Experiment Logbook';
+
+  @override
+  String get dashboardModeLogbookSubtitle =>
+      'Capture every step, note, photo, and calculation.';
+
+  @override
+  String get dashboardModeLogbookAction => 'Start New Experiment';
+
+  @override
+  String get dashboardBrowseExperiments => 'Browse Experiments';
+
+  @override
+  String get dashboardModeToolsTitle => 'Lab Tools';
+
+  @override
+  String get dashboardModeToolsSubtitle =>
+      'Quick calculations, conversions, and protocols.';
+
+  @override
+  String get dashboardRecentActivity => 'Recent Activity';
+
+  @override
+  String get dashboardViewAll => 'View all';
+
+  @override
+  String get dashboardNoRecentActivity => 'No recent activity yet';
+
+  @override
+  String get dashboardActivityCalculation => 'Calculation';
+
+  @override
+  String get dashboardActivityNote => 'Note';
+
+  @override
+  String get dashboardYesterday => 'Yesterday';
+
+  @override
+  String get homeTabHome => 'Home';
+
+  @override
+  String get homeTabFiles => 'Files';
+
+  @override
+  String get homeTabLab => 'Lab';
+
+  @override
+  String get homeTabSettings => 'Settings';
+
+  @override
+  String get homeFabTapNewExperiment => 'Tap: New Experiment';
+
+  @override
+  String get homeFabHoldQuickCalc => 'HOLD: QUICK CALC';
 
   @override
   String get newProject => 'New Project';

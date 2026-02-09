@@ -47,13 +47,18 @@ const ExperimentSchema = CollectionSchema(
       name: r'lastEventAt',
       type: IsarType.dateTime,
     ),
-    r'startedAt': PropertySchema(
+    r'projectName': PropertySchema(
       id: 6,
+      name: r'projectName',
+      type: IsarType.string,
+    ),
+    r'startedAt': PropertySchema(
+      id: 7,
       name: r'startedAt',
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'title',
       type: IsarType.string,
     )
@@ -85,6 +90,12 @@ int _experimentEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.projectName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -101,8 +112,9 @@ void _experimentSerialize(
   writer.writeDateTime(offsets[3], object.endedAt);
   writer.writeBool(offsets[4], object.isActive);
   writer.writeDateTime(offsets[5], object.lastEventAt);
-  writer.writeDateTime(offsets[6], object.startedAt);
-  writer.writeString(offsets[7], object.title);
+  writer.writeString(offsets[6], object.projectName);
+  writer.writeDateTime(offsets[7], object.startedAt);
+  writer.writeString(offsets[8], object.title);
 }
 
 Experiment _experimentDeserialize(
@@ -119,8 +131,9 @@ Experiment _experimentDeserialize(
   object.id = id;
   object.isActive = reader.readBool(offsets[4]);
   object.lastEventAt = reader.readDateTimeOrNull(offsets[5]);
-  object.startedAt = reader.readDateTimeOrNull(offsets[6]);
-  object.title = reader.readString(offsets[7]);
+  object.projectName = reader.readStringOrNull(offsets[6]);
+  object.startedAt = reader.readDateTimeOrNull(offsets[7]);
+  object.title = reader.readString(offsets[8]);
   return object;
 }
 
@@ -144,8 +157,10 @@ P _experimentDeserializeProp<P>(
     case 5:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 6:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -790,6 +805,160 @@ extension ExperimentQueryFilter
   }
 
   QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'projectName',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'projectName',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'projectName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'projectName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'projectName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'projectName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
+      projectNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'projectName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterFilterCondition>
       startedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1073,6 +1242,18 @@ extension ExperimentQuerySortBy
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByProjectName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'projectName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByProjectNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'projectName', Sort.desc);
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QAfterSortBy> sortByStartedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startedAt', Sort.asc);
@@ -1184,6 +1365,18 @@ extension ExperimentQuerySortThenBy
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByProjectName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'projectName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByProjectNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'projectName', Sort.desc);
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QAfterSortBy> thenByStartedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startedAt', Sort.asc);
@@ -1249,6 +1442,13 @@ extension ExperimentQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Experiment, Experiment, QDistinct> distinctByProjectName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'projectName', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Experiment, Experiment, QDistinct> distinctByStartedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'startedAt');
@@ -1304,6 +1504,12 @@ extension ExperimentQueryProperty
   QueryBuilder<Experiment, DateTime?, QQueryOperations> lastEventAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastEventAt');
+    });
+  }
+
+  QueryBuilder<Experiment, String?, QQueryOperations> projectNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'projectName');
     });
   }
 

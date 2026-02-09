@@ -12,12 +12,18 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.3.6
   decimal: ^2.3.3
+  ui_kit:
+    path: ../ui_kit
+  premium_access:
+    path: ../../core/premium_access
   math_engine:
     path: ../../core/math_engine
   localization:
     path: ../../core/localization
-  chemical_reference:
-    path: ../../core/chemical_reference
+  database:
+    path: ../../core/database
+  mobile_scanner: ^7.1.2
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   flutter_test:
@@ -27,4 +33,3 @@ dev_dependencies:
 flutter:
   assets:
     - assets/chemicals.json
-

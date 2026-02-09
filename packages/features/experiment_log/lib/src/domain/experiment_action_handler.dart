@@ -3,7 +3,6 @@ import 'package:decimal/decimal.dart';
 /// Interface for handling experiment-related actions from other feature packages.
 /// This allows standardizing how results are logged without hard dependencies.
 abstract class ExperimentActionHandler {
-  
   /// Logs a Molarity calculation result to the active experiment.
   Future<void> logMolarity({
     required String chemicalName,
@@ -11,6 +10,9 @@ abstract class ExperimentActionHandler {
     required Decimal volumeMl,
     required Decimal molarity,
     required Decimal massG,
+    Decimal? purityPercent,
+    String? barcode,
+    String? source,
   });
 
   /// Logs a Dose calculation result/event.
@@ -24,21 +26,25 @@ abstract class ExperimentActionHandler {
     required bool isSafe,
   });
 
-  /// Logs a Voice Note (transcribed text).
-  Future<void> logVoiceNote({
-    required String text,
+  /// Logs a generic scientific calculator output in structured format.
+  Future<void> logCalculation({
+    required String summary,
+    required String calculatorId,
+    required int algorithmVersion,
+    required Map<String, String> inputs,
+    required Map<String, String> outputs,
+    Map<String, String> units,
+    List<String> assumptions,
   });
 
+  /// Logs a Voice Note (transcribed text).
+  Future<void> logVoiceNote({required String text});
+
   /// Logs a generic Text Note (e.g. from Timer or manual entry).
-  Future<void> logNote({
-    required String text,
-  });
+  Future<void> logNote({required String text});
 
   /// Logs a photo attached to the active experiment.
   ///
   /// The file must already be persisted to an app-controlled directory.
-  Future<void> logPhoto({
-    required String filePath,
-    String? caption,
-  });
+  Future<void> logPhoto({required String filePath, String? caption});
 }

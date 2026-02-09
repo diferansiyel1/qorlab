@@ -1,11 +1,11 @@
+import 'package:database/database.dart';
+import 'package:experiment_log/experiment_log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:database/database.dart';
 import 'package:ui_kit/ui_kit.dart';
-import 'package:experiment_log/experiment_log.dart';
 
-/// New Experiment page - create a new experiment
+/// New Experiment page - create a new experiment under a project name.
 class NewExperimentPage extends ConsumerStatefulWidget {
   const NewExperimentPage({super.key});
 
@@ -14,19 +14,14 @@ class NewExperimentPage extends ConsumerStatefulWidget {
 }
 
 class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
+  final _projectController = TextEditingController(text: 'General Lab');
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  String _selectedProject = 'Alzheimer Study 2024';
   bool _isCreating = false;
-
-  final List<String> _projects = [
-    'Alzheimer Study 2024',
-    'CRISPR Cas-9 Editing',
-    'Longitudinal Sleep Study',
-  ];
 
   @override
   void dispose() {
+    _projectController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -34,31 +29,36 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final experiments =
+        ref.watch(experimentsProvider).valueOrNull ?? const <Experiment>[];
+    final projectSuggestions = _extractProjectSuggestions(experiments);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // App bar
             _buildAppBar(),
-
-            // Form
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Project dropdown
-                    Text(
-                      'PROJECT',
-                      style: AppTypography.labelUppercase,
-                    ),
+                    Text('PROJECT', style: AppTypography.labelUppercase),
                     const SizedBox(height: 8),
-                    _buildProjectDropdown(),
+                    _buildProjectField(),
+                    if (projectSuggestions.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _ProjectSuggestionChips(
+                        projects: projectSuggestions,
+                        onSelected: (name) {
+                          _projectController.text = name;
+                          setState(() {});
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 24),
-
-                    // Title field
                     Text(
                       'EXPERIMENT TITLE',
                       style: AppTypography.labelUppercase,
@@ -66,8 +66,6 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
                     const SizedBox(height: 8),
                     _buildTitleField(),
                     const SizedBox(height: 24),
-
-                    // Description field
                     Text(
                       'DESCRIPTION (OPTIONAL)',
                       style: AppTypography.labelUppercase,
@@ -75,15 +73,11 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
                     const SizedBox(height: 8),
                     _buildDescriptionField(),
                     const SizedBox(height: 32),
-
-                    // Experiment code preview
                     _buildCodePreview(),
                   ],
                 ),
               ),
             ),
-
-            // Create button
             _buildCreateButton(),
           ],
         ),
@@ -113,37 +107,25 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
             ),
           ),
           const SizedBox(width: 16),
-          Text(
-            'New Experiment',
-            style: AppTypography.headlineMedium,
-          ),
+          Text('New Experiment', style: AppTypography.headlineMedium),
         ],
       ),
     );
   }
 
-  Widget _buildProjectDropdown() {
+  Widget _buildProjectField() {
     return GlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedProject,
-          isExpanded: true,
-          dropdownColor: AppColors.surface,
-          icon: Icon(Icons.expand_more_rounded, color: AppColors.textMuted),
-          style: AppTypography.labelLarge,
-          items: _projects.map((project) {
-            return DropdownMenuItem(
-              value: project,
-              child: Text(project),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              setState(() => _selectedProject = value);
-            }
-          },
+      padding: EdgeInsets.zero,
+      child: TextField(
+        controller: _projectController,
+        style: AppTypography.labelLarge,
+        decoration: InputDecoration(
+          hintText: 'e.g., Alzheimer Study 2024',
+          hintStyle: AppTypography.labelMedium,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(16),
         ),
+        onChanged: (_) => setState(() {}),
       ),
     );
   }
@@ -160,7 +142,7 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),
-        onChanged: (value) => setState(() {}),
+        onChanged: (_) => setState(() {}),
       ),
     );
   }
@@ -208,16 +190,11 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'EXPERIMENT CODE',
-                  style: AppTypography.labelUppercase,
-                ),
+                Text('EXPERIMENT CODE', style: AppTypography.labelUppercase),
                 const SizedBox(height: 4),
                 Text(
                   code,
-                  style: AppTypography.experimentCode.copyWith(
-                    fontSize: 16,
-                  ),
+                  style: AppTypography.experimentCode.copyWith(fontSize: 16),
                 ),
               ],
             ),
@@ -228,15 +205,13 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
   }
 
   Widget _buildCreateButton() {
-    final isValid = _titleController.text.isNotEmpty;
+    final canCreate = !_isCreating;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.glassBorder),
-        ),
+        border: Border(top: BorderSide(color: AppColors.glassBorder)),
       ),
       child: SafeArea(
         top: false,
@@ -244,11 +219,12 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: isValid && !_isCreating ? _createExperiment : null,
+            onPressed: canCreate ? _createExperiment : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  isValid ? AppColors.primary : AppColors.textMuted,
-              disabledBackgroundColor: AppColors.textMuted.withValues(alpha: 0.3),
+              backgroundColor: AppColors.primary,
+              disabledBackgroundColor: AppColors.textMuted.withValues(
+                alpha: 0.3,
+              ),
             ),
             child: _isCreating
                 ? SizedBox(
@@ -272,24 +248,45 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
     );
   }
 
+  List<String> _extractProjectSuggestions(List<Experiment> experiments) {
+    final seen = <String>{};
+    final suggestions = <String>[];
+    for (final experiment in experiments) {
+      final name = experiment.projectName?.trim();
+      if (name == null || name.isEmpty) continue;
+      if (seen.add(name.toLowerCase())) {
+        suggestions.add(name);
+      }
+    }
+    return suggestions.take(8).toList();
+  }
+
+  String _normalizedProjectName() {
+    final value = _projectController.text.trim();
+    if (value.isEmpty) return 'General Lab';
+    return value;
+  }
+
   String _generateCode() {
     final now = DateTime.now();
-    final prefix = _getProjectPrefix();
-    final number = (now.millisecondsSinceEpoch % 1000).toString().padLeft(3, '0');
+    final prefix = _projectPrefix(_normalizedProjectName());
+    final number = (now.millisecondsSinceEpoch % 10000).toString().padLeft(
+      4,
+      '0',
+    );
     return '$prefix-$number';
   }
 
-  String _getProjectPrefix() {
-    switch (_selectedProject) {
-      case 'Alzheimer Study 2024':
-        return 'ALZ';
-      case 'CRISPR Cas-9 Editing':
-        return 'CRS';
-      case 'Longitudinal Sleep Study':
-        return 'SLP';
-      default:
-        return 'EXP';
-    }
+  String _projectPrefix(String project) {
+    final words = project
+        .split(RegExp(r'[^a-zA-Z0-9]+'))
+        .where((word) => word.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return 'EXP';
+
+    final initials = words.take(3).map((word) => word[0].toUpperCase()).join();
+    if (initials.length >= 3) return initials.substring(0, 3);
+    return initials.padRight(3, 'X');
   }
 
   Future<void> _createExperiment() async {
@@ -299,11 +296,15 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
       final repository = ref.read(experimentRepositoryProvider);
       final code = _generateCode();
       final now = DateTime.now();
+      final normalizedTitle = _titleController.text.trim();
 
       final experiment = Experiment()
-        ..title = _titleController.text
+        ..title = normalizedTitle.isEmpty ? code : normalizedTitle
         ..code = code
-        ..description = _descriptionController.text
+        ..projectName = _normalizedProjectName()
+        ..description = _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim()
         ..createdAt = now
         ..startedAt = now
         ..isActive = true;
@@ -312,14 +313,13 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
 
       if (mounted) {
         ref.read(activeExperimentIdProvider.notifier).set(experiment.id);
-        // Navigate to the new experiment's timeline
         context.go('/experiment/${experiment.id}');
       }
-    } catch (e) {
+    } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating experiment: $e'),
+            content: Text('Error creating experiment: $error'),
             backgroundColor: AppColors.alert,
           ),
         );
@@ -329,5 +329,31 @@ class _NewExperimentPageState extends ConsumerState<NewExperimentPage> {
         setState(() => _isCreating = false);
       }
     }
+  }
+}
+
+class _ProjectSuggestionChips extends StatelessWidget {
+  const _ProjectSuggestionChips({
+    required this.projects,
+    required this.onSelected,
+  });
+
+  final List<String> projects;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: projects
+          .map(
+            (project) => ActionChip(
+              label: Text(project),
+              onPressed: () => onSelected(project),
+            ),
+          )
+          .toList(),
+    );
   }
 }
