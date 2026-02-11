@@ -17,3 +17,8 @@ export 'src/data/measurement_repository.dart'
 
 export 'src/experiment_timeline_page.dart';
 export 'src/presentation/archive_page.dart';
+
+export 'src/application/speech_to_text_coordinator.dart';
+export 'src/application/wake_word_service.dart';
+export 'src/application/wake_word_enabled_provider.dart';
+export 'src/presentation/wake_word_overlay.dart';

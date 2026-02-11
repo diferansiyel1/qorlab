@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'voice_recorder_controller.dart';
+import '../application/wake_word_service.dart';
 
 class VoiceRecorderDialog extends ConsumerStatefulWidget {
   const VoiceRecorderDialog({super.key});
@@ -11,6 +12,20 @@ class VoiceRecorderDialog extends ConsumerStatefulWidget {
 }
 
 class _VoiceRecorderDialogState extends ConsumerState<VoiceRecorderDialog> {
+  @override
+  void initState() {
+    super.initState();
+    // Pause wake-word listening while the manual recorder is open.
+    ref.read(wakeWordServiceProvider).pause();
+  }
+
+  @override
+  void dispose() {
+    // Resume wake-word listening when the manual recorder closes.
+    ref.read(wakeWordServiceProvider).resume();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(voiceRecorderProvider);

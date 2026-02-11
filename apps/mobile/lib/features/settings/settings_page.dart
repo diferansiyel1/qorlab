@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localization/localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:ui_kit/ui_kit.dart';
+import 'package:experiment_log/experiment_log.dart';
 
 /// Settings page with app preferences
 class SettingsPage extends ConsumerStatefulWidget {
@@ -21,6 +22,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final wakeWordEnabled = ref.watch(wakeWordEnabledProvider);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Padding(
@@ -83,6 +85,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 options: const ['°C', '°F'],
                 selected: _tempUnit,
                 onChanged: (val) => setState(() => _tempUnit = val),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Voice section
+            Text('VOICE', style: AppTypography.labelUppercase),
+            const SizedBox(height: 12),
+            _SettingsTile(
+              icon: Icons.record_voice_over_rounded,
+              title: l10n.wakeWordTitle,
+              subtitle: l10n.wakeWordListening,
+              trailing: Switch.adaptive(
+                value: wakeWordEnabled,
+                activeColor: AppColors.primary,
+                onChanged: (val) {
+                  ref
+                      .read(wakeWordEnabledProvider.notifier)
+                      .state = val;
+                },
               ),
             ),
 

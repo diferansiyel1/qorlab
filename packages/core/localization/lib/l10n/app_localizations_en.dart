@@ -1241,4 +1241,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String deleteFailed(Object error) {
     return 'Delete failed: $error';
   }
+
+  @override
+  String get wakeWordTitle => 'Hey Qorlab';
+
+  @override
+  String get wakeWordListening => 'Listening for \"Hey Qorlab\"...';
+
+  @override
+  String get wakeWordActivated => 'Recording Note...';
+
+  @override
+  String get wakeWordSaved => 'Saving...';
+
+  @override
+  String get wakeWordCancelled => 'Note cancelled';
+
+  @override
+  String get wakeWordNoExperiment =>
+      'No active experiment — open one to log voice notes.';
+
+  @override
+  String get wakeWordSaySave => 'Say \"kaydet\" to save or \"iptal\" to cancel';
 }

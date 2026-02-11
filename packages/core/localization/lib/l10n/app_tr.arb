@@ -383,5 +383,13 @@
     "deleteEntry": "Kaydı Sil",
     "deleteEntryMessage": "Bu zaman çizelgesi kaydı silinsin mi?",
     "entryDeleted": "Kayıt silindi.",
-    "deleteFailed": "Silme işlemi başarısız: {error}"
+    "deleteFailed": "Silme işlemi başarısız: {error}",
+
+    "wakeWordTitle": "Hey Qorlab",
+    "wakeWordListening": "\"Hey Qorlab\" dinleniyor...",
+    "wakeWordActivated": "Not Kaydediliyor...",
+    "wakeWordSaved": "Kaydediliyor...",
+    "wakeWordCancelled": "Not iptal edildi",
+    "wakeWordNoExperiment": "Aktif deney yok — sesli not kaydetmek için bir deney açın.",
+    "wakeWordSaySave": "Kaydetmek için \"kaydet\", iptal için \"iptal\" deyin"
 }

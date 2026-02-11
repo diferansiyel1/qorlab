@@ -2343,6 +2343,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete failed: {error}'**
   String deleteFailed(Object error);
+
+  /// No description provided for @wakeWordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey Qorlab'**
+  String get wakeWordTitle;
+
+  /// No description provided for @wakeWordListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for \"Hey Qorlab\"...'**
+  String get wakeWordListening;
+
+  /// No description provided for @wakeWordActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording Note...'**
+  String get wakeWordActivated;
+
+  /// No description provided for @wakeWordSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get wakeWordSaved;
+
+  /// No description provided for @wakeWordCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Note cancelled'**
+  String get wakeWordCancelled;
+
+  /// No description provided for @wakeWordNoExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'No active experiment — open one to log voice notes.'**
+  String get wakeWordNoExperiment;
+
+  /// No description provided for @wakeWordSaySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"kaydet\" to save or \"iptal\" to cancel'**
+  String get wakeWordSaySave;
 }
 
 class _AppLocalizationsDelegate

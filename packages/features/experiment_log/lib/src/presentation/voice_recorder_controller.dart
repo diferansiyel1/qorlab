@@ -1,9 +1,10 @@
 import 'dart:io' as io;
-import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:developer' as developer;
+
+import '../application/speech_to_text_coordinator.dart';
 
 class VoiceRecorderState {
   static const Object _noChange = Object();
@@ -45,39 +46,44 @@ class VoiceRecorderState {
   }
 }
 
+/// Controller for the manual voice-recorder dialog.
+///
+/// Uses the shared [SpeechToTextCoordinator] instead of creating
+/// its own [SpeechToText] instance, so that the wake-word service
+/// and manual recorder never conflict.
 class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
-  late stt.SpeechToText _speech;
+  final SpeechToTextCoordinator _coordinator;
 
-  VoiceRecorderController() : super(const VoiceRecorderState()) {
-    _speech = stt.SpeechToText();
-    // Skip speech initialization on macOS due to TCC privacy enforcement issues
+  VoiceRecorderController(this._coordinator)
+      : super(const VoiceRecorderState()) {
     if (!io.Platform.isMacOS) {
       _initSpeech();
     } else {
-      // On macOS, mark as unavailable
       state = state.copyWith(
         isAvailable: false,
         text:
-            'Voice recording is not available on macOS due to platform limitations.',
+            'Voice recording is not available on macOS '
+            'due to platform limitations.',
       );
     }
   }
 
   Future<void> _initSpeech() async {
     developer.log(
-      'Initializing speech...',
+      'Initializing speech via coordinator...',
       name: 'experiment_log.voice_recorder',
     );
-    // Check permission - Skip on macOS as permission_handler has registration issues in this environment
-    // and entitlements already handle it.
+
     if (!io.Platform.isMacOS) {
       developer.log(
         'Requesting microphone permission...',
         name: 'experiment_log.voice_recorder',
       );
-      final microphoneStatus = await Permission.microphone.request();
+      final microphoneStatus =
+          await Permission.microphone.request();
       if (microphoneStatus != PermissionStatus.granted) {
-        if (microphoneStatus == PermissionStatus.permanentlyDenied ||
+        if (microphoneStatus ==
+                PermissionStatus.permanentlyDenied ||
             microphoneStatus == PermissionStatus.restricted) {
           await openAppSettings();
         }
@@ -98,7 +104,8 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
       );
       final speechStatus = await Permission.speech.request();
       if (speechStatus != PermissionStatus.granted) {
-        if (speechStatus == PermissionStatus.permanentlyDenied ||
+        if (speechStatus ==
+                PermissionStatus.permanentlyDenied ||
             speechStatus == PermissionStatus.restricted) {
           await openAppSettings();
         }
@@ -116,10 +123,10 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
 
     try {
       developer.log(
-        'Calling _speech.initialize...',
+        'Initializing coordinator...',
         name: 'experiment_log.voice_recorder',
       );
-      bool available = await _speech.initialize(
+      final available = await _coordinator.initialize(
         onStatus: (val) {
           developer.log(
             'Speech status: $val',
@@ -144,20 +151,23 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
         },
       );
 
-      final localeId = await _resolveLocaleId();
+      final localeId = await _coordinator.resolveLocaleId();
       developer.log(
         'Speech available: $available, localeId: $localeId',
         name: 'experiment_log.voice_recorder',
       );
-      state = state.copyWith(isAvailable: available, localeId: localeId);
+      state = state.copyWith(
+        isAvailable: available,
+        localeId: localeId,
+      );
 
       if (!available) {
         state = state.copyWith(
           errorMessage: 'Speech recognition not available',
-          text: 'Speech recognition not available on this device.',
+          text:
+              'Speech recognition not available on this device.',
         );
       }
-      // Do NOT auto-start listening - let user manually trigger it to avoid TCC crash
     } catch (e, s) {
       developer.log(
         'Initialization error',
@@ -173,7 +183,8 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
     }
   }
 
-  void startListening() async {
+  /// Acquire the mic and start listening.
+  Future<void> startListening() async {
     if (!state.isAvailable || state.isListening) return;
 
     state = state.copyWith(
@@ -182,7 +193,9 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
       errorMessage: null,
     );
 
-    _speech.listen(
+    await _coordinator.acquire(SpeechOwner.manualRecorder);
+    _coordinator.listen(
+      owner: SpeechOwner.manualRecorder,
       localeId: state.localeId,
       listenMode: stt.ListenMode.dictation,
       partialResults: true,
@@ -190,62 +203,23 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
       onResult: (val) {
         state = state.copyWith(
           text: val.recognizedWords,
-          confidence: val.hasConfidenceRating ? val.confidence : 0.0,
+          confidence: val.hasConfidenceRating
+              ? val.confidence
+              : 0.0,
         );
       },
     );
   }
 
-  Future<String?> _resolveLocaleId() async {
-    try {
-      final locales = await _speech.locales();
-      if (locales.isEmpty) return null;
-
-      final preferredCodes = <String>[
-        for (final locale in ui.PlatformDispatcher.instance.locales)
-          locale.languageCode.toLowerCase(),
-      ];
-      if (preferredCodes.isEmpty) {
-        preferredCodes.add('en');
-      }
-      if (!preferredCodes.contains('en')) {
-        preferredCodes.add('en');
-      }
-      if (!preferredCodes.contains('tr')) {
-        preferredCodes.add('tr');
-      }
-
-      for (final code in preferredCodes) {
-        final exact = locales.where((locale) {
-          final id = locale.localeId.toLowerCase();
-          return id == code ||
-              id.startsWith('$code-') ||
-              id.startsWith('$code_');
-        });
-        if (exact.isNotEmpty) {
-          return exact.first.localeId;
-        }
-      }
-
-      return locales.first.localeId;
-    } catch (e, s) {
-      developer.log(
-        'Locale resolution failed',
-        name: 'experiment_log.voice_recorder',
-        error: e,
-        stackTrace: s,
-      );
-      return null;
-    }
-  }
-
+  /// Stop listening and release the mic.
   void stopListening() {
     if (state.isListening) {
-      _speech.stop();
+      _coordinator.stop();
       state = state.copyWith(isListening: false);
     }
   }
 
+  /// Toggle between listening and stopped.
   void toggleListening() {
     if (state.isListening) {
       stopListening();
@@ -256,13 +230,16 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
 
   @override
   void dispose() {
-    _speech.cancel();
+    _coordinator.cancel();
+    _coordinator.release(SpeechOwner.manualRecorder);
     super.dispose();
   }
 }
 
-final voiceRecorderProvider =
-    StateNotifierProvider.autoDispose<
-      VoiceRecorderController,
-      VoiceRecorderState
-    >((ref) => VoiceRecorderController());
+/// Provider that injects the shared [SpeechToTextCoordinator].
+final voiceRecorderProvider = StateNotifierProvider.autoDispose<
+    VoiceRecorderController, VoiceRecorderState>((ref) {
+  final coordinator =
+      ref.watch(speechToTextCoordinatorProvider);
+  return VoiceRecorderController(coordinator);
+});

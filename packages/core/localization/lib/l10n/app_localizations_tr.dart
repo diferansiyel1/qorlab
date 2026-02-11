@@ -1239,4 +1239,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String deleteFailed(Object error) {
     return 'Silme işlemi başarısız: $error';
   }
+
+  @override
+  String get wakeWordTitle => 'Hey Qorlab';
+
+  @override
+  String get wakeWordListening => '\"Hey Qorlab\" dinleniyor...';
+
+  @override
+  String get wakeWordActivated => 'Not Kaydediliyor...';
+
+  @override
+  String get wakeWordSaved => 'Kaydediliyor...';
+
+  @override
+  String get wakeWordCancelled => 'Not iptal edildi';
+
+  @override
+  String get wakeWordNoExperiment =>
+      'Aktif deney yok — sesli not kaydetmek için bir deney açın.';
+
+  @override
+  String get wakeWordSaySave =>
+      'Kaydetmek için \"kaydet\", iptal için \"iptal\" deyin';
 }

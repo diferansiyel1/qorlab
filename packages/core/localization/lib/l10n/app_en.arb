@@ -384,5 +384,13 @@
     "deleteEntry": "Delete Entry",
     "deleteEntryMessage": "Delete this timeline entry?",
     "entryDeleted": "Entry deleted.",
-    "deleteFailed": "Delete failed: {error}"
+    "deleteFailed": "Delete failed: {error}",
+
+    "wakeWordTitle": "Hey Qorlab",
+    "wakeWordListening": "Listening for \"Hey Qorlab\"...",
+    "wakeWordActivated": "Recording Note...",
+    "wakeWordSaved": "Saving...",
+    "wakeWordCancelled": "Note cancelled",
+    "wakeWordNoExperiment": "No active experiment — open one to log voice notes.",
+    "wakeWordSaySave": "Say \"kaydet\" to save or \"iptal\" to cancel"
 }
