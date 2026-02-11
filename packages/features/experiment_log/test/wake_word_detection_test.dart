@@ -39,8 +39,8 @@ void main() {
       expect(containsWakeWord('hey korlab'), isTrue);
     });
 
-    test('detects "qorlab" without prefix', () {
-      expect(containsWakeWord('qorlab'), isTrue);
+    test('does not detect "qorlab" without prefix', () {
+      expect(containsWakeWord('qorlab'), isFalse);
     });
 
     test('detects punctuation variant', () {

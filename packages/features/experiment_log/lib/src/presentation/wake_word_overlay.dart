@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ui_kit/ui_kit.dart';
@@ -78,7 +79,7 @@ class _WakeWordOverlayState extends ConsumerState<WakeWordOverlay>
   Widget _buildIdlePill(WakeWordState wakeState) {
     final topInset = MediaQuery.of(context).viewPadding.top + 6;
     final lastHeard = wakeState.lastHeardText.trim();
-    final showHeard = lastHeard.isNotEmpty;
+    final showHeard = kDebugMode && lastHeard.isNotEmpty;
     final isHearing = wakeState.soundLevelDb > -45;
     final micColor = wakeState.isListening ? Colors.cyanAccent : Colors.orange;
     return Positioned(

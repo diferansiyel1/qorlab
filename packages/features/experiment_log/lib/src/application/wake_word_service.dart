@@ -84,7 +84,7 @@ class WakeWordState {
 
 /// Regex that matches common mis-transcriptions of "Hey Qorlab".
 final RegExp _wakeWordPattern = RegExp(
-  r'(?:^|\b)(?:hey|hay|heyy)?[\s,!.?\-]*'
+  r'(?:^|\b)(?:hey|hay|heyy)[\s,!.?\-]*'
   r'(?:qorlab|qor\s*lab|qorlap|kor\s*lab|korlab|korlap|'
   r'corlab|cor\s*lab|corlap|gorlab|gor\s*lab|gorlap)(?:\b|$)',
   caseSensitive: false,
@@ -173,6 +173,8 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
   String? _localeId;
   bool _isEnabling = false;
   bool _idleListenStarting = false;
+  bool _activatedSessionStarted = false;
+  bool _activatedFinalizing = false;
 
   // Idle-loop tuning knobs
   static const _idleListenFor = Duration(seconds: 20);
@@ -180,6 +182,8 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
   static const _idleRestartDelay = Duration(milliseconds: 350);
   static const _idleHealthCheckDelay = Duration(seconds: 1);
   static const _activatedTimeout = Duration(seconds: 60);
+  static const _activatedListenFor = Duration(seconds: 45);
+  static const _activatedPauseFor = Duration(seconds: 2);
   static const _errorRetryDelay = Duration(seconds: 2);
 
   // ─── Public API ──────────────────────────────────────────
@@ -359,6 +363,8 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
 
   void _transitionToActivated({String initialText = ''}) {
     _cancelAllTimers();
+    _activatedSessionStarted = false;
+    _activatedFinalizing = false;
     _state = _state.copyWith(
       phase: WakeWordPhase.activated,
       noteText: initialText,
@@ -369,6 +375,8 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
       _acquireAndListen(
         mode: stt.ListenMode.dictation,
         onResult: _onActivatedResult,
+        listenFor: _activatedListenFor,
+        pauseFor: _activatedPauseFor,
       ),
     );
 
@@ -389,24 +397,14 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
       notifyListeners();
     }
     developer.log('Activated heard: "$raw"', name: 'experiment_log.wake_word');
-    final (:command, :cleanText) = detectVoiceCommand(raw);
-
-    switch (command) {
-      case VoiceCommand.save:
-        _state = _state.copyWith(noteText: cleanText);
-        notifyListeners();
-        _saveNote();
-      case VoiceCommand.cancel:
-        _cancelNote();
-      case VoiceCommand.none:
-        _state = _state.copyWith(noteText: raw);
-        notifyListeners();
-    }
+    _state = _state.copyWith(noteText: raw);
+    notifyListeners();
   }
 
   // ─── Save / Cancel ───────────────────────────────────────
 
   Future<void> _saveNote() async {
+    _activatedFinalizing = true;
     HapticFeedback.heavyImpact();
     _cancelAllTimers();
     await _coordinator.stop();
@@ -451,6 +449,7 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _cancelNote() {
+    _activatedFinalizing = true;
     HapticFeedback.selectionClick();
     _cancelAllTimers();
     _coordinator.stop();
@@ -472,6 +471,25 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
     if (_state.isListening != isListening) {
       _state = _state.copyWith(isListening: isListening);
       notifyListeners();
+    }
+
+    if (_state.phase == WakeWordPhase.activated) {
+      if (status == 'listening') {
+        _activatedSessionStarted = true;
+        return;
+      }
+      if ((status == 'done' || status == 'notListening') &&
+          _activatedSessionStarted &&
+          !_activatedFinalizing) {
+        _activatedFinalizing = true;
+        final text = _state.noteText.trim();
+        if (text.isEmpty) {
+          _cancelNote();
+        } else {
+          unawaited(_saveNote());
+        }
+        return;
+      }
     }
 
     if (status == 'done' || status == 'notListening') {
@@ -572,6 +590,10 @@ class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _transitionTo(WakeWordPhase phase, {String? errorMessage}) {
+    if (phase != WakeWordPhase.activated) {
+      _activatedSessionStarted = false;
+      _activatedFinalizing = false;
+    }
     final shouldResetListening =
         phase == WakeWordPhase.disabled ||
         phase == WakeWordPhase.idle ||
