@@ -8,24 +8,23 @@ void main() {
       expect(state.phase, WakeWordPhase.disabled);
       expect(state.noteText, '');
       expect(state.errorMessage, isNull);
+      expect(state.isListening, isFalse);
     });
 
     test('copyWith updates phase', () {
       const state = WakeWordState();
       final updated = state.copyWith(
         phase: WakeWordPhase.idle,
+        isListening: true,
       );
       expect(updated.phase, WakeWordPhase.idle);
       expect(updated.noteText, '');
+      expect(updated.isListening, isTrue);
     });
 
     test('copyWith updates noteText', () {
-      const state = WakeWordState(
-        phase: WakeWordPhase.activated,
-      );
-      final updated = state.copyWith(
-        noteText: 'sıcaklık 37',
-      );
+      const state = WakeWordState(phase: WakeWordPhase.activated);
+      final updated = state.copyWith(noteText: 'sıcaklık 37');
       expect(updated.noteText, 'sıcaklık 37');
       expect(updated.phase, WakeWordPhase.activated);
     });
@@ -36,9 +35,7 @@ void main() {
         noteText: 'test',
         errorMessage: 'err',
       );
-      final updated = state.copyWith(
-        phase: WakeWordPhase.processing,
-      );
+      final updated = state.copyWith(phase: WakeWordPhase.processing);
       expect(updated.phase, WakeWordPhase.processing);
       expect(updated.noteText, 'test');
       // errorMessage should be null because copyWith uses

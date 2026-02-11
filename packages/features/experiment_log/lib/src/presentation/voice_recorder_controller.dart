@@ -55,7 +55,7 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
   final SpeechToTextCoordinator _coordinator;
 
   VoiceRecorderController(this._coordinator)
-      : super(const VoiceRecorderState()) {
+    : super(const VoiceRecorderState()) {
     if (!io.Platform.isMacOS) {
       _initSpeech();
     } else {
@@ -79,11 +79,9 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
         'Requesting microphone permission...',
         name: 'experiment_log.voice_recorder',
       );
-      final microphoneStatus =
-          await Permission.microphone.request();
+      final microphoneStatus = await Permission.microphone.request();
       if (microphoneStatus != PermissionStatus.granted) {
-        if (microphoneStatus ==
-                PermissionStatus.permanentlyDenied ||
+        if (microphoneStatus == PermissionStatus.permanentlyDenied ||
             microphoneStatus == PermissionStatus.restricted) {
           await openAppSettings();
         }
@@ -104,8 +102,7 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
       );
       final speechStatus = await Permission.speech.request();
       if (speechStatus != PermissionStatus.granted) {
-        if (speechStatus ==
-                PermissionStatus.permanentlyDenied ||
+        if (speechStatus == PermissionStatus.permanentlyDenied ||
             speechStatus == PermissionStatus.restricted) {
           await openAppSettings();
         }
@@ -127,6 +124,7 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
         name: 'experiment_log.voice_recorder',
       );
       final available = await _coordinator.initialize(
+        owner: SpeechOwner.manualRecorder,
         onStatus: (val) {
           developer.log(
             'Speech status: $val',
@@ -156,16 +154,12 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
         'Speech available: $available, localeId: $localeId',
         name: 'experiment_log.voice_recorder',
       );
-      state = state.copyWith(
-        isAvailable: available,
-        localeId: localeId,
-      );
+      state = state.copyWith(isAvailable: available, localeId: localeId);
 
       if (!available) {
         state = state.copyWith(
           errorMessage: 'Speech recognition not available',
-          text:
-              'Speech recognition not available on this device.',
+          text: 'Speech recognition not available on this device.',
         );
       }
     } catch (e, s) {
@@ -194,7 +188,7 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
     );
 
     await _coordinator.acquire(SpeechOwner.manualRecorder);
-    _coordinator.listen(
+    final started = await _coordinator.listen(
       owner: SpeechOwner.manualRecorder,
       localeId: state.localeId,
       listenMode: stt.ListenMode.dictation,
@@ -203,12 +197,16 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
       onResult: (val) {
         state = state.copyWith(
           text: val.recognizedWords,
-          confidence: val.hasConfidenceRating
-              ? val.confidence
-              : 0.0,
+          confidence: val.hasConfidenceRating ? val.confidence : 0.0,
         );
       },
     );
+    if (!started) {
+      state = state.copyWith(
+        isListening: false,
+        errorMessage: 'Could not start speech recognition.',
+      );
+    }
   }
 
   /// Stop listening and release the mic.
@@ -231,15 +229,18 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
   @override
   void dispose() {
     _coordinator.cancel();
+    _coordinator.clearCallbacks(SpeechOwner.manualRecorder);
     _coordinator.release(SpeechOwner.manualRecorder);
     super.dispose();
   }
 }
 
 /// Provider that injects the shared [SpeechToTextCoordinator].
-final voiceRecorderProvider = StateNotifierProvider.autoDispose<
-    VoiceRecorderController, VoiceRecorderState>((ref) {
-  final coordinator =
-      ref.watch(speechToTextCoordinatorProvider);
-  return VoiceRecorderController(coordinator);
-});
+final voiceRecorderProvider =
+    StateNotifierProvider.autoDispose<
+      VoiceRecorderController,
+      VoiceRecorderState
+    >((ref) {
+      final coordinator = ref.watch(speechToTextCoordinatorProvider);
+      return VoiceRecorderController(coordinator);
+    });

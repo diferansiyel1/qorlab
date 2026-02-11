@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -40,6 +41,10 @@ class _ExperimentTimelinePageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(activeExperimentIdProvider.notifier).set(widget.experimentId);
+      final wakeWordEnabled = ref.read(wakeWordEnabledProvider);
+      if (wakeWordEnabled) {
+        unawaited(ref.read(wakeWordServiceProvider).enable());
+      }
     });
   }
 
@@ -327,6 +332,7 @@ class _ExperimentTimelinePageState
               ],
             ),
           ),
+          const WakeWordOverlay(),
         ],
       ),
       floatingActionButton: FloatingActionButton(

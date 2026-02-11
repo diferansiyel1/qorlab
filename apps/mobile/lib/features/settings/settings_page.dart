@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -99,11 +101,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               subtitle: l10n.wakeWordListening,
               trailing: Switch.adaptive(
                 value: wakeWordEnabled,
-                activeColor: AppColors.primary,
+                activeTrackColor: AppColors.primary,
                 onChanged: (val) {
-                  ref
-                      .read(wakeWordEnabledProvider.notifier)
-                      .state = val;
+                  final wakeWordService = ref.read(wakeWordServiceProvider);
+                  ref.read(wakeWordEnabledProvider.notifier).state = val;
+                  if (val) {
+                    unawaited(wakeWordService.enable());
+                  } else {
+                    wakeWordService.disable();
+                  }
                 },
               ),
             ),

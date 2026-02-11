@@ -39,22 +39,25 @@ void main() {
       expect(containsWakeWord('hey korlab'), isTrue);
     });
 
+    test('detects "qorlab" without prefix', () {
+      expect(containsWakeWord('qorlab'), isTrue);
+    });
+
+    test('detects punctuation variant', () {
+      expect(containsWakeWord('hey, qorlab'), isTrue);
+    });
+
     test('does not detect random text', () {
       expect(containsWakeWord('hello world'), isFalse);
     });
 
     test('does not detect partial match', () {
       expect(containsWakeWord('hey'), isFalse);
-      expect(containsWakeWord('qorlab'), isFalse);
+      expect(containsWakeWord('qor'), isFalse);
     });
 
     test('detects wake word in longer sentence', () {
-      expect(
-        containsWakeWord(
-          'can you hey qorlab help me',
-        ),
-        isTrue,
-      );
+      expect(containsWakeWord('can you hey qorlab help me'), isTrue);
     });
   });
 
@@ -70,15 +73,16 @@ void main() {
       expect(extractPostWakeWord('hey qorlab'), equals(''));
     });
 
+    test('returns trailing text for punctuation variant', () {
+      expect(extractPostWakeWord('hey, qorlab note text'), equals('note text'));
+    });
+
     test('returns null when no wake word', () {
       expect(extractPostWakeWord('just some text'), isNull);
     });
 
     test('handles variant "hey kor lab"', () {
-      expect(
-        extractPostWakeWord('hey kor lab note text'),
-        equals('note text'),
-      );
+      expect(extractPostWakeWord('hey kor lab note text'), equals('note text'));
     });
   });
 }

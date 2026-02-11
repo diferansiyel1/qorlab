@@ -21,12 +21,10 @@ class WakeWordOverlay extends ConsumerStatefulWidget {
   const WakeWordOverlay({super.key});
 
   @override
-  ConsumerState<WakeWordOverlay> createState() =>
-      _WakeWordOverlayState();
+  ConsumerState<WakeWordOverlay> createState() => _WakeWordOverlayState();
 }
 
-class _WakeWordOverlayState
-    extends ConsumerState<WakeWordOverlay>
+class _WakeWordOverlayState extends ConsumerState<WakeWordOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
 
@@ -55,8 +53,7 @@ class _WakeWordOverlayState
     ref.listen<bool>(wakeWordEnabledProvider, (prev, next) {
       if (next && service.state.phase == WakeWordPhase.disabled) {
         service.enable();
-      } else if (!next &&
-          service.state.phase != WakeWordPhase.disabled) {
+      } else if (!next && service.state.phase != WakeWordPhase.disabled) {
         service.disable();
       }
     });
@@ -69,7 +66,7 @@ class _WakeWordOverlayState
     }
 
     return switch (wakeState.phase) {
-      WakeWordPhase.idle => _buildIdlePill(),
+      WakeWordPhase.idle => _buildIdlePill(wakeState),
       WakeWordPhase.activated => _buildActivatedCard(wakeState),
       WakeWordPhase.processing => _buildProcessingIndicator(),
       _ => const SizedBox.shrink(),
@@ -78,61 +75,72 @@ class _WakeWordOverlayState
 
   // ─── Idle: pulsing mic pill ──────────────────────────────
 
-  Widget _buildIdlePill() {
+  Widget _buildIdlePill(WakeWordState wakeState) {
+    final topInset = MediaQuery.of(context).viewPadding.top + 6;
+    final lastHeard = wakeState.lastHeardText.trim();
+    final showHeard = lastHeard.isNotEmpty;
+    final isHearing = wakeState.soundLevelDb > -45;
+    final micColor = wakeState.isListening ? Colors.cyanAccent : Colors.orange;
     return Positioned(
-      top: 12,
+      top: topInset,
       right: 16,
       child: AnimatedBuilder(
         animation: _pulseController,
         builder: (context, child) {
-          final scale =
-              1.0 + (_pulseController.value * 0.08);
-          final glowAlpha =
-              (0.25 + _pulseController.value * 0.35);
+          final scale = 1.0 + (_pulseController.value * 0.08);
+          final glowAlpha = (0.25 + _pulseController.value * 0.35);
           return Transform.scale(
             scale: scale,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.cyanAccent.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
+                border: Border.all(color: micColor.withValues(alpha: 0.5)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.cyanAccent.withValues(
-                      alpha: glowAlpha,
+                    color: micColor.withValues(
+                      alpha: isHearing ? glowAlpha + 0.15 : glowAlpha,
                     ),
                     blurRadius: 12,
                     spreadRadius: 1,
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.mic_rounded,
-                    color: Colors.cyanAccent,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Hey Qorlab',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: Colors.cyanAccent.withValues(
-                        alpha: 0.9,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.mic_rounded, color: micColor, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Hey Qorlab',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: micColor.withValues(alpha: 0.9),
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                      fontSize: 10,
-                      letterSpacing: 0.5,
-                    ),
+                    ],
                   ),
+                  if (showHeard) ...[
+                    const SizedBox(height: 2),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 180),
+                      child: Text(
+                        lastHeard,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -145,9 +153,10 @@ class _WakeWordOverlayState
   // ─── Activated: glassmorphism card ───────────────────────
 
   Widget _buildActivatedCard(WakeWordState wakeState) {
+    final topInset = MediaQuery.of(context).viewPadding.top + 6;
     final l10n = AppLocalizations.of(context);
     return Positioned(
-      top: 12,
+      top: topInset,
       left: 16,
       right: 16,
       child: ClipRRect(
@@ -162,15 +171,11 @@ class _WakeWordOverlayState
               color: Colors.black.withValues(alpha: 0.65),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.cyanAccent.withValues(
-                  alpha: 0.4,
-                ),
+                color: Colors.cyanAccent.withValues(alpha: 0.4),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.cyanAccent.withValues(
-                    alpha: 0.15,
-                  ),
+                  color: Colors.cyanAccent.withValues(alpha: 0.15),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -186,20 +191,14 @@ class _WakeWordOverlayState
                     _PulsingDot(),
                     const SizedBox(width: 8),
                     Text(
-                      l10n?.wakeWordActivated ??
-                          'Recording...',
-                      style:
-                          AppTypography.labelMedium.copyWith(
+                      l10n?.wakeWordActivated ?? 'Recording...',
+                      style: AppTypography.labelMedium.copyWith(
                         color: Colors.cyanAccent,
                         letterSpacing: 1.0,
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      Icons.mic_rounded,
-                      color: Colors.redAccent,
-                      size: 20,
-                    ),
+                    Icon(Icons.mic_rounded, color: Colors.redAccent, size: 20),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -213,21 +212,15 @@ class _WakeWordOverlayState
                   ),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(
-                      alpha: 0.4,
-                    ),
+                    color: Colors.black.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Colors.redAccent.withValues(
-                        alpha: 0.5,
-                      ),
+                      color: Colors.redAccent.withValues(alpha: 0.5),
                     ),
                   ),
                   child: SingleChildScrollView(
                     child: Text(
-                      wakeState.noteText.isEmpty
-                          ? '...'
-                          : wakeState.noteText,
+                      wakeState.noteText.isEmpty ? '...' : wakeState.noteText,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -243,9 +236,7 @@ class _WakeWordOverlayState
                   l10n?.wakeWordSaySave ??
                       'Say "kaydet" to save or "iptal" to cancel',
                   style: AppTypography.bodySmall.copyWith(
-                    color: Colors.white.withValues(
-                      alpha: 0.5,
-                    ),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 11,
                   ),
                 ),
@@ -253,32 +244,23 @@ class _WakeWordOverlayState
 
                 // Fallback buttons
                 Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     _OverlayButton(
                       label: l10n?.cancel ?? 'Cancel',
                       color: Colors.grey,
                       onTap: () {
-                        ref
-                            .read(
-                              wakeWordServiceProvider,
-                            )
-                            .cancelFromButton();
+                        ref.read(wakeWordServiceProvider).cancelFromButton();
                       },
                     ),
                     const SizedBox(width: 8),
                     _OverlayButton(
                       label: l10n?.save ?? 'Save',
                       color: Colors.greenAccent,
-                      onTap: wakeState.noteText
-                              .trim()
-                              .isNotEmpty
+                      onTap: wakeState.noteText.trim().isNotEmpty
                           ? () {
                               ref
-                                  .read(
-                                    wakeWordServiceProvider,
-                                  )
+                                  .read(wakeWordServiceProvider)
                                   .saveFromButton();
                             }
                           : null,
@@ -296,23 +278,17 @@ class _WakeWordOverlayState
   // ─── Processing: saving indicator ────────────────────────
 
   Widget _buildProcessingIndicator() {
+    final topInset = MediaQuery.of(context).viewPadding.top + 6;
     final l10n = AppLocalizations.of(context);
     return Positioned(
-      top: 12,
+      top: topInset,
       right: 16,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.greenAccent.withValues(
-              alpha: 0.5,
-            ),
-          ),
+          border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -322,9 +298,7 @@ class _WakeWordOverlayState
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.greenAccent,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.greenAccent),
               ),
             ),
             const SizedBox(width: 8),
@@ -405,11 +379,7 @@ class _OverlayButton extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  const _OverlayButton({
-    required this.label,
-    required this.color,
-    this.onTap,
-  });
+  const _OverlayButton({required this.label, required this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -417,10 +387,7 @@ class _OverlayButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 7,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: isDisabled
               ? Colors.grey.withValues(alpha: 0.1)

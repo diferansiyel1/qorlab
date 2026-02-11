@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -31,6 +32,10 @@ class SpeechToTextCoordinator {
   final stt.SpeechToText _speech = stt.SpeechToText();
   SpeechOwner _currentOwner = SpeechOwner.none;
   bool _initialized = false;
+  final Map<SpeechOwner, void Function(String)> _statusCallbacks =
+      <SpeechOwner, void Function(String)>{};
+  final Map<SpeechOwner, void Function(SpeechRecognitionError)>
+  _errorCallbacks = <SpeechOwner, void Function(SpeechRecognitionError)>{};
 
   /// The feature that currently owns the microphone.
   SpeechOwner get currentOwner => _currentOwner;
@@ -45,21 +50,31 @@ class SpeechToTextCoordinator {
   /// no-ops.
   ///
   /// [onStatus] and [onError] are forwarded to the engine and
-  /// should be supplied by the first caller (typically the
-  /// wake-word service).
+  /// registered for the [owner]. Callers can call initialize
+  /// multiple times to refresh callbacks.
   Future<bool> initialize({
+    required SpeechOwner owner,
     void Function(String status)? onStatus,
     void Function(SpeechRecognitionError error)? onError,
   }) async {
+    if (onStatus != null) {
+      _statusCallbacks[owner] = onStatus;
+    }
+    if (onError != null) {
+      _errorCallbacks[owner] = onError;
+    }
+
     if (_initialized) return true;
     try {
       _initialized = await _speech.initialize(
+        debugLogging: kDebugMode,
         onStatus: (val) {
           developer.log(
             'Speech status: $val',
             name: 'experiment_log.coordinator',
           );
-          onStatus?.call(val);
+          final callback = _statusCallbacks[_currentOwner];
+          callback?.call(val);
         },
         onError: (val) {
           developer.log(
@@ -67,7 +82,8 @@ class SpeechToTextCoordinator {
             name: 'experiment_log.coordinator',
             level: 1000,
           );
-          onError?.call(val);
+          final callback = _errorCallbacks[_currentOwner];
+          callback?.call(val);
         },
       );
       return _initialized;
@@ -112,31 +128,53 @@ class SpeechToTextCoordinator {
   }
 
   /// Start listening. Only the current owner may call this.
-  void listen({
+  Future<bool> listen({
     required SpeechOwner owner,
     required void Function(SpeechRecognitionResult) onResult,
     String? localeId,
     stt.ListenMode listenMode = stt.ListenMode.dictation,
     bool partialResults = true,
     bool cancelOnError = true,
-  }) {
+    Duration? listenFor,
+    Duration? pauseFor,
+    void Function(double level)? onSoundLevelChange,
+  }) async {
     if (_currentOwner != owner) {
       developer.log(
         'listen() rejected — $owner is not current owner '
         '($_currentOwner)',
         name: 'experiment_log.coordinator',
       );
-      return;
+      return false;
     }
-    _speech.listen(
+
+    // iOS rejects a new listen request while one is already active.
+    // Stop first to avoid silent no-op transitions between modes.
+    if (_speech.isListening) {
+      await _speech.stop();
+    }
+
+    await _speech.listen(
       localeId: localeId,
-      listenMode: listenMode,
+      listenFor: listenFor,
+      pauseFor: pauseFor,
+      onSoundLevelChange: onSoundLevelChange,
       listenOptions: stt.SpeechListenOptions(
+        listenMode: listenMode,
         partialResults: partialResults,
         cancelOnError: cancelOnError,
       ),
       onResult: onResult,
     );
+    final started = _speech.isListening;
+    if (!started) {
+      developer.log(
+        'listen() completed but engine is not listening',
+        name: 'experiment_log.coordinator',
+        level: 900,
+      );
+    }
+    return started;
   }
 
   /// Stop a running listen session without releasing ownership.
@@ -155,6 +193,12 @@ class SpeechToTextCoordinator {
 
   /// Returns the list of available locales from the engine.
   Future<List<stt.LocaleName>> locales() => _speech.locales();
+
+  /// Remove callbacks registered for [owner].
+  void clearCallbacks(SpeechOwner owner) {
+    _statusCallbacks.remove(owner);
+    _errorCallbacks.remove(owner);
+  }
 
   /// Resolve the best locale ID that matches device language
   /// preferences, with fallback to `en` and `tr`.
@@ -194,7 +238,8 @@ class SpeechToTextCoordinator {
 }
 
 /// Global, keep-alive provider for the shared coordinator.
-final speechToTextCoordinatorProvider =
-    Provider<SpeechToTextCoordinator>((ref) {
+final speechToTextCoordinatorProvider = Provider<SpeechToTextCoordinator>((
+  ref,
+) {
   return SpeechToTextCoordinator();
 });

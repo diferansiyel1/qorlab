@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -44,22 +46,34 @@ class WakeWordState {
   final WakeWordPhase phase;
   final String noteText;
   final String? errorMessage;
+  final String lastHeardText;
+  final double soundLevelDb;
+  final bool isListening;
 
   const WakeWordState({
     this.phase = WakeWordPhase.disabled,
     this.noteText = '',
     this.errorMessage,
+    this.lastHeardText = '',
+    this.soundLevelDb = -120,
+    this.isListening = false,
   });
 
   WakeWordState copyWith({
     WakeWordPhase? phase,
     String? noteText,
     String? errorMessage,
+    String? lastHeardText,
+    double? soundLevelDb,
+    bool? isListening,
   }) {
     return WakeWordState(
       phase: phase ?? this.phase,
       noteText: noteText ?? this.noteText,
       errorMessage: errorMessage,
+      lastHeardText: lastHeardText ?? this.lastHeardText,
+      soundLevelDb: soundLevelDb ?? this.soundLevelDb,
+      isListening: isListening ?? this.isListening,
     );
   }
 }
@@ -70,7 +84,9 @@ class WakeWordState {
 
 /// Regex that matches common mis-transcriptions of "Hey Qorlab".
 final RegExp _wakeWordPattern = RegExp(
-  r'hey\s*(?:qorlab|qor\s*lab|kor\s*lab|corlab|cor\s*lab|gorlab|gor\s*lab|korlab)',
+  r'(?:^|\b)(?:hey|hay|heyy)?[\s,!.?\-]*'
+  r'(?:qorlab|qor\s*lab|qorlap|kor\s*lab|korlab|korlap|'
+  r'corlab|cor\s*lab|corlap|gorlab|gor\s*lab|gorlap)(?:\b|$)',
   caseSensitive: false,
 );
 
@@ -83,8 +99,7 @@ String? extractPostWakeWord(String text) {
 }
 
 /// Whether [text] contains the wake word.
-bool containsWakeWord(String text) =>
-    _wakeWordPattern.hasMatch(text);
+bool containsWakeWord(String text) => _wakeWordPattern.hasMatch(text);
 
 // ─── Voice commands ─────────────────────────────────────────
 
@@ -107,9 +122,7 @@ enum VoiceCommand { none, save, cancel }
 /// Checks whether [text] ends with a save or cancel command.
 /// Returns a record of the detected command and, if found, the
 /// text with the command word stripped.
-({VoiceCommand command, String cleanText}) detectVoiceCommand(
-  String text,
-) {
+({VoiceCommand command, String cleanText}) detectVoiceCommand(String text) {
   final saveMatch = _saveCommandPattern.firstMatch(text);
   if (saveMatch != null) {
     final cmdStart = saveMatch.start;
@@ -138,13 +151,12 @@ enum VoiceCommand { none, save, cancel }
 /// The service is a [ChangeNotifier] so that the overlay widget can
 /// rebuild whenever the state changes.  It also observes the app
 /// lifecycle to auto-pause/resume when the app is backgrounded.
-class WakeWordService extends ChangeNotifier
-    with WidgetsBindingObserver {
+class WakeWordService extends ChangeNotifier with WidgetsBindingObserver {
   WakeWordService({
     required SpeechToTextCoordinator coordinator,
     required Ref ref,
-  })  : _coordinator = coordinator,
-        _ref = ref {
+  }) : _coordinator = coordinator,
+       _ref = ref {
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -155,13 +167,18 @@ class WakeWordService extends ChangeNotifier
   WakeWordState get state => _state;
 
   Timer? _idleLoopTimer;
+  Timer? _idleHealthTimer;
   Timer? _activatedTimeoutTimer;
   Timer? _errorRetryTimer;
   String? _localeId;
+  bool _isEnabling = false;
+  bool _idleListenStarting = false;
 
   // Idle-loop tuning knobs
-  static const _idleListenDuration = Duration(seconds: 5);
-  static const _idlePauseDuration = Duration(milliseconds: 500);
+  static const _idleListenFor = Duration(seconds: 20);
+  static const _idlePauseFor = Duration(seconds: 2);
+  static const _idleRestartDelay = Duration(milliseconds: 350);
+  static const _idleHealthCheckDelay = Duration(seconds: 1);
   static const _activatedTimeout = Duration(seconds: 60);
   static const _errorRetryDelay = Duration(seconds: 2);
 
@@ -169,23 +186,49 @@ class WakeWordService extends ChangeNotifier
 
   /// Enable the wake word listener (called when user toggles on).
   Future<void> enable() async {
-    if (_state.phase != WakeWordPhase.disabled) return;
-    developer.log(
-      'Enabling wake word',
-      name: 'experiment_log.wake_word',
-    );
-    await _coordinator.initialize(
-      onStatus: _onSpeechStatus,
-      onError: _onSpeechError,
-    );
-    _localeId = await _coordinator.resolveLocaleId();
-    _transitionTo(WakeWordPhase.idle);
-    _startIdleLoop();
+    if (_isEnabling) return;
+    if (_state.phase != WakeWordPhase.disabled &&
+        _state.phase != WakeWordPhase.error) {
+      return;
+    }
+    _isEnabling = true;
+    developer.log('Enabling wake word', name: 'experiment_log.wake_word');
+    try {
+      final hasPermissions = await _ensureSpeechPermissions();
+      if (!hasPermissions) {
+        _transitionTo(
+          WakeWordPhase.error,
+          errorMessage:
+              'Microphone and speech recognition permissions are required.',
+        );
+        return;
+      }
+
+      final available = await _coordinator.initialize(
+        owner: SpeechOwner.wakeWord,
+        onStatus: _onSpeechStatus,
+        onError: _onSpeechError,
+      );
+      if (!available) {
+        _transitionTo(
+          WakeWordPhase.error,
+          errorMessage: 'Speech recognition is not available on this device.',
+        );
+        return;
+      }
+
+      _localeId = await _coordinator.resolveLocaleId();
+      _transitionTo(WakeWordPhase.idle);
+      _startIdleLoop();
+    } finally {
+      _isEnabling = false;
+    }
   }
 
   /// Disable the wake word listener (called when user toggles off).
   void disable() {
     _cancelAllTimers();
+    _coordinator.clearCallbacks(SpeechOwner.wakeWord);
     _coordinator.release(SpeechOwner.wakeWord);
     _transitionTo(WakeWordPhase.disabled);
   }
@@ -232,25 +275,79 @@ class WakeWordService extends ChangeNotifier
 
   void _startIdleLoop() {
     _cancelAllTimers();
-    _acquireAndListen(
-      mode: stt.ListenMode.search,
-      onResult: _onIdleResult,
-    );
-    _idleLoopTimer = Timer(_idleListenDuration, () {
-      _coordinator.stop().then((_) {
-        if (_state.phase != WakeWordPhase.idle) return;
-        // Brief pause to conserve battery, then restart.
-        _idleLoopTimer = Timer(_idlePauseDuration, () {
+    if (_state.phase != WakeWordPhase.idle || _idleListenStarting) return;
+    _idleListenStarting = true;
+    _state = _state.copyWith(isListening: false);
+    notifyListeners();
+
+    unawaited(_startIdleLoopAsync());
+  }
+
+  Future<void> _startIdleLoopAsync() async {
+    try {
+      final started = await _acquireAndListen(
+        mode: stt.ListenMode.search,
+        onResult: _onIdleResult,
+        listenFor: _idleListenFor,
+        pauseFor: _idlePauseFor,
+      );
+      if (_state.phase != WakeWordPhase.idle) return;
+
+      // Guard against silent no-op starts from the platform plugin.
+      _idleHealthTimer = Timer(_idleHealthCheckDelay, () {
+        if (_state.phase == WakeWordPhase.idle && !_coordinator.isListening) {
+          developer.log(
+            'Idle listen is not active after start attempt; retrying',
+            name: 'experiment_log.wake_word',
+            level: 900,
+          );
+          _idleLoopTimer = Timer(_idleRestartDelay, () {
+            if (_state.phase == WakeWordPhase.idle) {
+              _startIdleLoop();
+            }
+          });
+        }
+      });
+
+      if (!started) {
+        _idleLoopTimer = Timer(_idleRestartDelay, () {
           if (_state.phase == WakeWordPhase.idle) {
             _startIdleLoop();
           }
         });
-      });
-    });
+      }
+    } catch (e, s) {
+      developer.log(
+        'Idle listen start failed',
+        name: 'experiment_log.wake_word',
+        error: e,
+        stackTrace: s,
+        level: 1000,
+      );
+      if (_state.phase == WakeWordPhase.idle) {
+        _transitionTo(
+          WakeWordPhase.error,
+          errorMessage: 'Could not start background listening.',
+        );
+        _errorRetryTimer = Timer(_errorRetryDelay, () {
+          if (_state.phase == WakeWordPhase.error) {
+            _transitionTo(WakeWordPhase.idle);
+            _startIdleLoop();
+          }
+        });
+      }
+    } finally {
+      _idleListenStarting = false;
+    }
   }
 
   void _onIdleResult(SpeechRecognitionResult result) {
-    final text = result.recognizedWords;
+    final text = result.recognizedWords.trim();
+    if (text.isNotEmpty && text != _state.lastHeardText) {
+      _state = _state.copyWith(lastHeardText: text);
+      notifyListeners();
+    }
+    developer.log('Idle heard: "$text"', name: 'experiment_log.wake_word');
     if (containsWakeWord(text)) {
       HapticFeedback.mediumImpact();
       final trailing = extractPostWakeWord(text) ?? '';
@@ -268,9 +365,11 @@ class WakeWordService extends ChangeNotifier
     );
     notifyListeners();
 
-    _acquireAndListen(
-      mode: stt.ListenMode.dictation,
-      onResult: _onActivatedResult,
+    unawaited(
+      _acquireAndListen(
+        mode: stt.ListenMode.dictation,
+        onResult: _onActivatedResult,
+      ),
     );
 
     _activatedTimeoutTimer = Timer(_activatedTimeout, () {
@@ -284,7 +383,12 @@ class WakeWordService extends ChangeNotifier
   }
 
   void _onActivatedResult(SpeechRecognitionResult result) {
-    final raw = result.recognizedWords;
+    final raw = result.recognizedWords.trim();
+    if (raw.isNotEmpty && raw != _state.lastHeardText) {
+      _state = _state.copyWith(lastHeardText: raw);
+      notifyListeners();
+    }
+    developer.log('Activated heard: "$raw"', name: 'experiment_log.wake_word');
     final (:command, :cleanText) = detectVoiceCommand(raw);
 
     switch (command) {
@@ -350,10 +454,7 @@ class WakeWordService extends ChangeNotifier
     HapticFeedback.selectionClick();
     _cancelAllTimers();
     _coordinator.stop();
-    _state = _state.copyWith(
-      phase: WakeWordPhase.idle,
-      noteText: '',
-    );
+    _state = _state.copyWith(phase: WakeWordPhase.idle, noteText: '');
     notifyListeners();
     _startIdleLoop();
   }
@@ -367,11 +468,17 @@ class WakeWordService extends ChangeNotifier
   // ─── Speech callbacks ────────────────────────────────────
 
   void _onSpeechStatus(String status) {
+    final isListening = status == 'listening';
+    if (_state.isListening != isListening) {
+      _state = _state.copyWith(isListening: isListening);
+      notifyListeners();
+    }
+
     if (status == 'done' || status == 'notListening') {
       // Engine stopped by itself — restart if still idle.
       if (_state.phase == WakeWordPhase.idle) {
         _idleLoopTimer?.cancel();
-        _idleLoopTimer = Timer(_idlePauseDuration, () {
+        _idleLoopTimer = Timer(_idleRestartDelay, () {
           if (_state.phase == WakeWordPhase.idle) {
             _startIdleLoop();
           }
@@ -393,8 +500,9 @@ class WakeWordService extends ChangeNotifier
         return;
       }
     }
-    _transitionTo(WakeWordPhase.error,
-        errorMessage: error.errorMsg);
+    _state = _state.copyWith(isListening: false);
+    notifyListeners();
+    _transitionTo(WakeWordPhase.error, errorMessage: error.errorMsg);
     _errorRetryTimer = Timer(_errorRetryDelay, () {
       if (_state.phase == WakeWordPhase.error) {
         _transitionTo(WakeWordPhase.idle);
@@ -405,33 +513,82 @@ class WakeWordService extends ChangeNotifier
 
   // ─── Helpers ─────────────────────────────────────────────
 
-  void _acquireAndListen({
+  Future<bool> _ensureSpeechPermissions() async {
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.android &&
+            defaultTargetPlatform != TargetPlatform.iOS)) {
+      return true;
+    }
+
+    final microphoneStatus = await Permission.microphone.request();
+    if (microphoneStatus != PermissionStatus.granted) {
+      if (microphoneStatus == PermissionStatus.permanentlyDenied ||
+          microphoneStatus == PermissionStatus.restricted) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    final speechStatus = await Permission.speech.request();
+    if (speechStatus != PermissionStatus.granted) {
+      if (speechStatus == PermissionStatus.permanentlyDenied ||
+          speechStatus == PermissionStatus.restricted) {
+        await openAppSettings();
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> _acquireAndListen({
     required stt.ListenMode mode,
     required void Function(SpeechRecognitionResult) onResult,
-  }) {
-    _coordinator.acquire(SpeechOwner.wakeWord).then((_) {
-      _coordinator.listen(
-        owner: SpeechOwner.wakeWord,
-        onResult: onResult,
-        localeId: _localeId,
-        listenMode: mode,
-        partialResults: true,
-        cancelOnError: false,
-      );
-    });
+    Duration? listenFor,
+    Duration? pauseFor,
+  }) async {
+    await _coordinator.acquire(SpeechOwner.wakeWord);
+    return _coordinator.listen(
+      owner: SpeechOwner.wakeWord,
+      onResult: onResult,
+      localeId: _localeId,
+      listenMode: mode,
+      partialResults: true,
+      cancelOnError: false,
+      listenFor: listenFor,
+      pauseFor: pauseFor,
+      onSoundLevelChange: _onSoundLevelChange,
+    );
+  }
+
+  void _onSoundLevelChange(double level) {
+    if ((level - _state.soundLevelDb).abs() < 1.5) return;
+    if (_state.phase == WakeWordPhase.disabled ||
+        _state.phase == WakeWordPhase.paused) {
+      return;
+    }
+    _state = _state.copyWith(soundLevelDb: level);
+    notifyListeners();
   }
 
   void _transitionTo(WakeWordPhase phase, {String? errorMessage}) {
+    final shouldResetListening =
+        phase == WakeWordPhase.disabled ||
+        phase == WakeWordPhase.idle ||
+        phase == WakeWordPhase.paused ||
+        phase == WakeWordPhase.error;
     _state = _state.copyWith(
       phase: phase,
       noteText: phase == WakeWordPhase.idle ? '' : _state.noteText,
       errorMessage: errorMessage,
+      isListening: shouldResetListening ? false : _state.isListening,
     );
     notifyListeners();
   }
 
   void _cancelAllTimers() {
     _idleLoopTimer?.cancel();
+    _idleHealthTimer?.cancel();
     _activatedTimeoutTimer?.cancel();
     _errorRetryTimer?.cancel();
   }
@@ -440,6 +597,7 @@ class WakeWordService extends ChangeNotifier
   void dispose() {
     _cancelAllTimers();
     WidgetsBinding.instance.removeObserver(this);
+    _coordinator.clearCallbacks(SpeechOwner.wakeWord);
     _coordinator.release(SpeechOwner.wakeWord);
     super.dispose();
   }
@@ -449,8 +607,7 @@ class WakeWordService extends ChangeNotifier
 ///
 /// The service is created once and kept alive so that it can listen
 /// in the background across page navigations.
-final wakeWordServiceProvider =
-    ChangeNotifierProvider<WakeWordService>((ref) {
+final wakeWordServiceProvider = ChangeNotifierProvider<WakeWordService>((ref) {
   final coordinator = ref.watch(speechToTextCoordinatorProvider);
   return WakeWordService(coordinator: coordinator, ref: ref);
 });
