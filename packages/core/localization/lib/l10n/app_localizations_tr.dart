@@ -716,6 +716,42 @@ class AppLocalizationsTr extends AppLocalizations {
   String get voiceNoteSaved => 'Sesli not kaydedildi';
 
   @override
+  String get voiceRecorderHint => 'Kayda başlamak için REC\'e basın';
+
+  @override
+  String get voiceRecorderListening => 'Dinleniyor...';
+
+  @override
+  String get wakeWordTitle => 'Hey Qorlab';
+
+  @override
+  String get wakeWordSubtitle => 'Eller serbest sesli kayıt';
+
+  @override
+  String get wakeWordListening => '\"Hey Qorlab\" dinleniyor...';
+
+  @override
+  String get wakeWordActivated =>
+      'Kaydediliyor... Bitince \"kaydet\" veya \"iptal\" deyin.';
+
+  @override
+  String get wakeWordSaving => 'Not kaydediliyor...';
+
+  @override
+  String get wakeWordSaved => 'Sesli not Hey Qorlab ile kaydedildi';
+
+  @override
+  String get wakeWordCancelled => 'Not silindi';
+
+  @override
+  String get wakeWordNoExperiment =>
+      'Aktif deney yok. Hey Qorlab kullanmak için bir deney açın.';
+
+  @override
+  String get wakeWordSaySave =>
+      'Saklamak için \"kaydet\", silmek için \"iptal\" deyin';
+
+  @override
   String get doseCalc => 'Doz Hesabı';
 
   @override

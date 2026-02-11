@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:localization/localization.dart';
 import 'voice_recorder_controller.dart';
+import '../application/wake_word_service.dart';
 
 class VoiceRecorderDialog extends ConsumerStatefulWidget {
   const VoiceRecorderDialog({super.key});
@@ -11,6 +13,22 @@ class VoiceRecorderDialog extends ConsumerStatefulWidget {
 }
 
 class _VoiceRecorderDialogState extends ConsumerState<VoiceRecorderDialog> {
+  @override
+  void initState() {
+    super.initState();
+    // Pause wake word listener to avoid speech_to_text conflict.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(wakeWordServiceProvider.notifier).pause();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Resume wake word listener when dialog closes.
+    ref.read(wakeWordServiceProvider.notifier).resume();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(voiceRecorderProvider);
@@ -34,15 +52,67 @@ class _VoiceRecorderDialogState extends ConsumerState<VoiceRecorderDialog> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(color: primaryColor.withValues(alpha: 0.3), width: 1)),
-          title: Text(
-            'LOG ENTRY',
-            style: TextStyle(
-              color: primaryColor,
-              fontFamily: 'Courier', // Monospace for Sci-Fi feel
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2.0,
-            ), 
-            textAlign: TextAlign.center,
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'LOG ENTRY',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontFamily: 'Courier',
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (state.availableLocales.length > 1)
+                GestureDetector(
+                  onTap: () {
+                    // Cycle to the next available locale.
+                    final locales = state.availableLocales;
+                    final currentIdx = locales.indexWhere(
+                      (l) => l.localeId == state.localeId,
+                    );
+                    final nextIdx = (currentIdx + 1) % locales.length;
+                    controller.switchLocale(locales[nextIdx].localeId);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.language,
+                          color: primaryColor,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          state.localeLabel,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontFamily: 'Courier',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -70,11 +140,20 @@ class _VoiceRecorderDialogState extends ConsumerState<VoiceRecorderDialog> {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    state.text,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    state.text.isNotEmpty
+                        ? state.text
+                        : state.isListening
+                            ? AppLocalizations.of(context)!.voiceRecorderListening
+                            : AppLocalizations.of(context)!.voiceRecorderHint,
+                    style: TextStyle(
+                      color: state.text.isNotEmpty
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
                       fontSize: 18,
                       height: 1.4,
+                      fontStyle: state.text.isEmpty
+                          ? FontStyle.italic
+                          : FontStyle.normal,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -131,7 +210,7 @@ class _VoiceRecorderDialogState extends ConsumerState<VoiceRecorderDialog> {
 
                   // Save Button
                   _LargeButton(
-                    onTap: state.text.isNotEmpty && state.text != 'Press the button to start recording'
+                    onTap: state.text.isNotEmpty && !state.isListening
                         ? () {
                             controller.stopListening();
                             Navigator.of(context).pop(state.text);

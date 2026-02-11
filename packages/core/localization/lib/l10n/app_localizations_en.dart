@@ -716,6 +716,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceNoteSaved => 'Voice note saved';
 
   @override
+  String get voiceRecorderHint => 'Tap REC to start recording';
+
+  @override
+  String get voiceRecorderListening => 'Listening...';
+
+  @override
+  String get wakeWordTitle => 'Hey Qorlab';
+
+  @override
+  String get wakeWordSubtitle => 'Hands-free voice logging';
+
+  @override
+  String get wakeWordListening => 'Listening for \"Hey Qorlab\"...';
+
+  @override
+  String get wakeWordActivated =>
+      'Recording... Say \"save\" or \"cancel\" when done.';
+
+  @override
+  String get wakeWordSaving => 'Saving note...';
+
+  @override
+  String get wakeWordSaved => 'Voice note saved via Hey Qorlab';
+
+  @override
+  String get wakeWordCancelled => 'Note discarded';
+
+  @override
+  String get wakeWordNoExperiment =>
+      'No active experiment. Open one to use Hey Qorlab.';
+
+  @override
+  String get wakeWordSaySave => 'Say \"save\" to keep or \"cancel\" to discard';
+
+  @override
   String get doseCalc => 'Dose Calc';
 
   @override

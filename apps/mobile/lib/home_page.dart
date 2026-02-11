@@ -126,17 +126,22 @@ class _HomePageState extends ConsumerState<HomePage> {
       settingsTabLabel: l10n.homeTabSettings,
       fabTapHint: l10n.homeFabTapNewExperiment,
       fabHoldHint: l10n.homeFabHoldQuickCalc,
-      body: IndexedStack(
-        index: _currentIndex,
+      body: Stack(
         children: [
-          DashboardPage(
-            onOpenLabTools: _openLabToolsTab,
-            onCreateProject: () => context.push('/project/new'),
-            onSearch: _openFilesTab,
+          IndexedStack(
+            index: _currentIndex,
+            children: [
+              DashboardPage(
+                onOpenLabTools: _openLabToolsTab,
+                onCreateProject: () => context.push('/project/new'),
+                onSearch: _openFilesTab,
+              ),
+              const FilesPage(),
+              const LabToolsPage(),
+              const SettingsPage(),
+            ],
           ),
-          const FilesPage(),
-          const LabToolsPage(),
-          const SettingsPage(),
+          const WakeWordOverlay(),
         ],
       ),
     );

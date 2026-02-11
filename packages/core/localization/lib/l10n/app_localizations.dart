@@ -1380,6 +1380,72 @@ abstract class AppLocalizations {
   /// **'Voice note saved'**
   String get voiceNoteSaved;
 
+  /// No description provided for @voiceRecorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap REC to start recording'**
+  String get voiceRecorderHint;
+
+  /// No description provided for @voiceRecorderListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening...'**
+  String get voiceRecorderListening;
+
+  /// No description provided for @wakeWordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey Qorlab'**
+  String get wakeWordTitle;
+
+  /// No description provided for @wakeWordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-free voice logging'**
+  String get wakeWordSubtitle;
+
+  /// No description provided for @wakeWordListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for \"Hey Qorlab\"...'**
+  String get wakeWordListening;
+
+  /// No description provided for @wakeWordActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording... Say \"save\" or \"cancel\" when done.'**
+  String get wakeWordActivated;
+
+  /// No description provided for @wakeWordSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving note...'**
+  String get wakeWordSaving;
+
+  /// No description provided for @wakeWordSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note saved via Hey Qorlab'**
+  String get wakeWordSaved;
+
+  /// No description provided for @wakeWordCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Note discarded'**
+  String get wakeWordCancelled;
+
+  /// No description provided for @wakeWordNoExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'No active experiment. Open one to use Hey Qorlab.'**
+  String get wakeWordNoExperiment;
+
+  /// No description provided for @wakeWordSaySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"save\" to keep or \"cancel\" to discard'**
+  String get wakeWordSaySave;
+
   /// No description provided for @doseCalc.
   ///
   /// In en, this message translates to:

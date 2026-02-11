@@ -1,9 +1,11 @@
 import 'dart:io' as io;
-import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'dart:developer' as developer;
+
+import '../application/speech_to_text_coordinator.dart';
 
 class VoiceRecorderState {
   static const Object _noChange = Object();
@@ -14,15 +16,24 @@ class VoiceRecorderState {
   final bool isAvailable;
   final String? errorMessage;
   final String? localeId;
+  final List<stt.LocaleName> availableLocales;
 
   const VoiceRecorderState({
     this.isListening = false,
-    this.text = 'Press the button to start recording',
+    this.text = '',
     this.confidence = 0.0,
     this.isAvailable = false,
     this.errorMessage,
     this.localeId,
+    this.availableLocales = const [],
   });
+
+  /// Display label for the currently selected locale (e.g. "TR", "EN").
+  String get localeLabel {
+    if (localeId == null) return '??';
+    final code = localeId!.split(RegExp(r'[_-]')).first.toUpperCase();
+    return code;
+  }
 
   VoiceRecorderState copyWith({
     bool? isListening,
@@ -31,6 +42,7 @@ class VoiceRecorderState {
     bool? isAvailable,
     Object? errorMessage = _noChange,
     String? localeId,
+    List<stt.LocaleName>? availableLocales,
   }) {
     return VoiceRecorderState(
       isListening: isListening ?? this.isListening,
@@ -41,85 +53,34 @@ class VoiceRecorderState {
           ? this.errorMessage
           : errorMessage as String?,
       localeId: localeId ?? this.localeId,
+      availableLocales: availableLocales ?? this.availableLocales,
     );
   }
 }
 
 class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
-  late stt.SpeechToText _speech;
+  final SpeechToTextCoordinator _coordinator;
 
-  VoiceRecorderController() : super(const VoiceRecorderState()) {
-    _speech = stt.SpeechToText();
-    // Skip speech initialization on macOS due to TCC privacy enforcement issues
+  VoiceRecorderController(this._coordinator)
+      : super(const VoiceRecorderState()) {
     if (!io.Platform.isMacOS) {
       _initSpeech();
     } else {
-      // On macOS, mark as unavailable
       state = state.copyWith(
         isAvailable: false,
-        text:
-            'Voice recording is not available on macOS due to platform limitations.',
+        errorMessage: 'Voice recording is not available on macOS.',
       );
     }
   }
 
   Future<void> _initSpeech() async {
     developer.log(
-      'Initializing speech...',
+      'Initializing speech via coordinator...',
       name: 'experiment_log.voice_recorder',
     );
-    // Check permission - Skip on macOS as permission_handler has registration issues in this environment
-    // and entitlements already handle it.
-    if (!io.Platform.isMacOS) {
-      developer.log(
-        'Requesting microphone permission...',
-        name: 'experiment_log.voice_recorder',
-      );
-      final microphoneStatus = await Permission.microphone.request();
-      if (microphoneStatus != PermissionStatus.granted) {
-        if (microphoneStatus == PermissionStatus.permanentlyDenied ||
-            microphoneStatus == PermissionStatus.restricted) {
-          await openAppSettings();
-        }
-        developer.log(
-          'Microphone permission denied',
-          name: 'experiment_log.voice_recorder',
-        );
-        state = state.copyWith(
-          errorMessage: 'Microphone permission denied',
-          text: 'Microphone permission is required.',
-        );
-        return;
-      }
-
-      developer.log(
-        'Requesting speech permission...',
-        name: 'experiment_log.voice_recorder',
-      );
-      final speechStatus = await Permission.speech.request();
-      if (speechStatus != PermissionStatus.granted) {
-        if (speechStatus == PermissionStatus.permanentlyDenied ||
-            speechStatus == PermissionStatus.restricted) {
-          await openAppSettings();
-        }
-        developer.log(
-          'Speech permission denied',
-          name: 'experiment_log.voice_recorder',
-        );
-        state = state.copyWith(
-          errorMessage: 'Speech recognition permission denied',
-          text: 'Speech recognition permission is required.',
-        );
-        return;
-      }
-    }
 
     try {
-      developer.log(
-        'Calling _speech.initialize...',
-        name: 'experiment_log.voice_recorder',
-      );
-      bool available = await _speech.initialize(
+      final available = await _coordinator.initialize(
         onStatus: (val) {
           developer.log(
             'Speech status: $val',
@@ -131,33 +92,35 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
             }
           }
         },
-        onError: (val) {
+        onError: (SpeechRecognitionError err) {
           developer.log(
-            'Speech error: ${val.errorMsg}',
+            'Speech error: ${err.errorMsg}',
             name: 'experiment_log.voice_recorder',
             level: 1000,
           );
           state = state.copyWith(
             isListening: false,
-            errorMessage: 'Error: ${val.errorMsg}',
+            errorMessage: 'Error: ${err.errorMsg}',
           );
         },
       );
 
-      final localeId = await _resolveLocaleId();
       developer.log(
-        'Speech available: $available, localeId: $localeId',
+        'Speech available: $available, locale: ${_coordinator.resolvedLocaleId}',
         name: 'experiment_log.voice_recorder',
       );
-      state = state.copyWith(isAvailable: available, localeId: localeId);
+
+      state = state.copyWith(
+        isAvailable: available,
+        localeId: _coordinator.resolvedLocaleId,
+        availableLocales: _coordinator.availableLocales,
+      );
 
       if (!available) {
         state = state.copyWith(
-          errorMessage: 'Speech recognition not available',
-          text: 'Speech recognition not available on this device.',
+          errorMessage: 'Speech recognition not available on this device.',
         );
       }
-      // Do NOT auto-start listening - let user manually trigger it to avoid TCC crash
     } catch (e, s) {
       developer.log(
         'Initialization error',
@@ -176,18 +139,26 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
   void startListening() async {
     if (!state.isAvailable || state.isListening) return;
 
+    final acquired = await _coordinator.acquire(SpeechOwner.manualRecorder);
+    if (!acquired) {
+      state = state.copyWith(
+        errorMessage: 'Could not acquire speech engine.',
+      );
+      return;
+    }
+
     state = state.copyWith(
       isListening: true,
-      text: 'Listening...',
+      text: '',
       errorMessage: null,
     );
 
-    _speech.listen(
+    _coordinator.listen(
       localeId: state.localeId,
       listenMode: stt.ListenMode.dictation,
       partialResults: true,
       cancelOnError: true,
-      onResult: (val) {
+      onResult: (SpeechRecognitionResult val) {
         state = state.copyWith(
           text: val.recognizedWords,
           confidence: val.hasConfidenceRating ? val.confidence : 0.0,
@@ -196,52 +167,32 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
     );
   }
 
-  Future<String?> _resolveLocaleId() async {
-    try {
-      final locales = await _speech.locales();
-      if (locales.isEmpty) return null;
-
-      final preferredCodes = <String>[
-        for (final locale in ui.PlatformDispatcher.instance.locales)
-          locale.languageCode.toLowerCase(),
-      ];
-      if (preferredCodes.isEmpty) {
-        preferredCodes.add('en');
-      }
-      if (!preferredCodes.contains('en')) {
-        preferredCodes.add('en');
-      }
-      if (!preferredCodes.contains('tr')) {
-        preferredCodes.add('tr');
-      }
-
-      for (final code in preferredCodes) {
-        final exact = locales.where((locale) {
-          final id = locale.localeId.toLowerCase();
-          return id == code ||
-              id.startsWith('$code-') ||
-              id.startsWith('$code_');
-        });
-        if (exact.isNotEmpty) {
-          return exact.first.localeId;
-        }
-      }
-
-      return locales.first.localeId;
-    } catch (e, s) {
-      developer.log(
-        'Locale resolution failed',
-        name: 'experiment_log.voice_recorder',
-        error: e,
-        stackTrace: s,
-      );
-      return null;
+  /// Switch speech recognition to a different locale.
+  /// If currently listening, stops and restarts with the new locale.
+  void switchLocale(String newLocaleId) {
+    final wasListening = state.isListening;
+    if (wasListening) {
+      _coordinator.stop();
+    }
+    state = state.copyWith(
+      localeId: newLocaleId,
+      isListening: false,
+      text: '',
+      confidence: 0.0,
+      errorMessage: null,
+    );
+    developer.log(
+      'Switched locale to: $newLocaleId',
+      name: 'experiment_log.voice_recorder',
+    );
+    if (wasListening) {
+      startListening();
     }
   }
 
   void stopListening() {
     if (state.isListening) {
-      _speech.stop();
+      _coordinator.stop();
       state = state.copyWith(isListening: false);
     }
   }
@@ -256,13 +207,16 @@ class VoiceRecorderController extends StateNotifier<VoiceRecorderState> {
 
   @override
   void dispose() {
-    _speech.cancel();
+    _coordinator.release(SpeechOwner.manualRecorder);
     super.dispose();
   }
 }
 
 final voiceRecorderProvider =
-    StateNotifierProvider.autoDispose<
-      VoiceRecorderController,
-      VoiceRecorderState
-    >((ref) => VoiceRecorderController());
+    StateNotifierProvider.autoDispose<VoiceRecorderController,
+        VoiceRecorderState>(
+  (ref) {
+    final coordinator = ref.read(speechToTextCoordinatorProvider);
+    return VoiceRecorderController(coordinator);
+  },
+);

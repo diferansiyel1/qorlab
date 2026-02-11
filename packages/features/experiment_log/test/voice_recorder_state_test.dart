@@ -6,7 +6,7 @@ void main() {
     test('initial state is correct', () {
       const state = VoiceRecorderState();
       expect(state.isListening, false);
-      expect(state.text, 'Press the button to start recording');
+      expect(state.text, '');
       expect(state.confidence, 0.0);
       expect(state.isAvailable, false);
       expect(state.errorMessage, null);
